@@ -2,7 +2,9 @@
 
 import React, { useState } from "react";
 import "./AuthPage.css";
-import Image from "next/image"; // 1. Import Image từ Next.js
+import api from "@/app/lib/api";
+import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 
 import {
   FaUser,
@@ -15,12 +17,14 @@ import {
 import { FcGoogle } from "react-icons/fc";
 
 const AuthForm: React.FC = () => {
+  const router = useRouter();
   // --- State cho Form ---
   const [isRegisterActive, setIsRegisterActive] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   // State cho dữ liệu input
-  const [name, setName] = useState("");
+  // const [name, setName] = useState(""); // <-- Chúng ta chưa dùng 'name' ở backend
+  const [username, setUsername] = useState(""); // <-- SỬA: Thêm state cho username
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -38,7 +42,8 @@ const AuthForm: React.FC = () => {
   const toggleForm = (isRegister: boolean) => {
     setIsRegisterActive(isRegister);
     setErrors({});
-    setName("");
+    // setName("");
+    setUsername(""); // <-- Reset username
     setEmail("");
     setPassword("");
     setConfirmPassword("");
@@ -50,7 +55,10 @@ const AuthForm: React.FC = () => {
     const newErrors: { [key: string]: string } = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // Bỏ qua validate 'name'
+    if (isRegisterForm) {
+      if (!username) newErrors.username = "Vui lòng nhập tên đăng nhập"; // <-- Thêm validate username
+    }
+
     if (!email) {
       newErrors.email = "Vui lòng nhập email";
     } else if (!emailRegex.test(email)) {
@@ -71,30 +79,67 @@ const AuthForm: React.FC = () => {
     return newErrors;
   };
 
-  // Hàm Submit (Chung)
-  const handleSubmit = (e: React.FormEvent, isRegisterForm: boolean) => {
+  // 2. SỬA LẠI HÀM HANDLESUBMIT
+  const handleSubmit = async (e: React.FormEvent, isRegisterForm: boolean) => {
     e.preventDefault();
     const validationErrors = validate(isRegisterForm);
 
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
+      toast.error("Vui lòng kiểm tra lại thông tin đã nhập");
       return;
     }
 
     setErrors({});
     setIsLoading(true);
 
-    // --- Giả lập gọi API ---
-    console.log("Đang gửi dữ liệu:", { name, email, password });
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      let response;
       if (isRegisterForm) {
-        console.log("Đăng ký thành công!");
+        // --- GỌI API ĐĂNG KÝ ---
+        response = await api.post("/auth/register", {
+          username, // <-- Gửi username
+          email,
+          password,
+        });
+        console.log("Đăng ký thành công:", response.data);
+        toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
+        toggleForm(false); // Chuyển sang form đăng nhập sau khi đăng ký
       } else {
-        console.log("Đăng nhập thành công!");
+        // --- GỌI API ĐĂNG NHẬP ---
+        response = await api.post("/auth/login", {
+          email,
+          password,
+        });
+        toast.success("Đăng nhập thành công!");
+
+        // 3. LƯU TOKENS
+        // Đây là bước quan trọng nhất sau khi đăng nhập
+        localStorage.setItem("accessToken", response.data.accessToken);
+        localStorage.setItem("refreshToken", response.data.refreshToken);
+
+        router.push("/");
       }
-      toggleForm(isRegisterForm);
-    }, 2000);
+    } catch (error: any) {
+      console.error("Lỗi xác thực:", error);
+      // Xử lý lỗi từ backend
+      if (error.response && error.response.data) {
+        const serverError = error.response.data.message;
+        if (typeof serverError === "string") {
+          // Lỗi chung (ví dụ: 'Email already exists' hoặc 'Invalid credentials')
+          setErrors({ api: serverError });
+        } else if (Array.isArray(serverError)) {
+          // Lỗi validation từ class-validator
+          setErrors({ api: serverError.join(", ") });
+        } else {
+          setErrors({ api: "Đã xảy ra lỗi không xác định." });
+        }
+      } else {
+        setErrors({ api: "Không thể kết nối tới máy chủ." });
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -109,12 +154,27 @@ const AuthForm: React.FC = () => {
           <form onSubmit={(e) => handleSubmit(e, true)}>
             <h1>Create Account</h1>
 
+            {/* 4. THÊM Ô INPUT USERNAME */}
+            <div className="input-group">
+              <FaUser />
+              <input
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                disabled={isLoading}
+              />
+            </div>
+            {errors.username && (
+              <div className="error-message">{errors.username}</div>
+            )}
+
             {/* Input Email */}
             <div className="input-group">
               <FaEnvelope />
               <input
                 type="email"
-                placeholder="Email or username"
+                placeholder="Email" // Đổi từ 'Email or username'
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
@@ -166,6 +226,11 @@ const AuthForm: React.FC = () => {
               <div className="error-message">{errors.confirmPassword}</div>
             )}
 
+            {/* 5. HIỂN THỊ LỖI API CHUNG */}
+            {errors.api && (
+              <div className="error-message api-error">{errors.api}</div>
+            )}
+
             {/* Social (để sau input cho hợp lý) */}
             <div className="social-container">
               <a href="#" className="social-icon facebook-hover">
@@ -175,7 +240,7 @@ const AuthForm: React.FC = () => {
                 <FcGoogle />
               </a>
             </div>
-            <span>or use your account for registration</span>
+            <span>or use your email for registration</span>
 
             {/* Nút Submit */}
             <button type="submit" className="auth-button" disabled={isLoading}>
@@ -211,7 +276,6 @@ const AuthForm: React.FC = () => {
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 value={password}
-                /* --- SỬA LỖI Ở ĐÂY --- */
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
               />
@@ -224,6 +288,11 @@ const AuthForm: React.FC = () => {
             </div>
             {errors.password && (
               <div className="error-message">{errors.password}</div>
+            )}
+
+            {/* 5. HIỂN THỊ LỖI API CHUNG */}
+            {errors.api && (
+              <div className="error-message api-error">{errors.api}</div>
             )}
 
             {/* Social */}
@@ -253,7 +322,7 @@ const AuthForm: React.FC = () => {
             <div className="overlay-panel overlay-left">
               <h1>Welcome!</h1>
               <p>
-                To keep connected with us please login with your personal info
+                To keep connected with us please sign in with your personal info
               </p>
               <button
                 className="ghost-button"
@@ -263,8 +332,8 @@ const AuthForm: React.FC = () => {
               </button>
             </div>
             <div className="overlay-panel overlay-right">
-              <h1>Hello</h1>
-              <p>Enter your personal details and start journey with us</p>
+              <h1>Hello!</h1>
+              <p>Sign in to discover new experiences</p>
               <button className="ghost-button" onClick={() => toggleForm(true)}>
                 Sign Up
               </button>
