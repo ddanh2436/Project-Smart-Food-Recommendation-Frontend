@@ -1,11 +1,10 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react"; // 1. Import thêm useState, useEffect
 import "./Header.css"; // Import file CSS để tạo kiểu
 import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast"; // 2. Import toast để thông báo
 
-// Một component Icon đơn giản cho dễ hình dung
-// Trong dự án thực tế, bạn nên dùng thư viện icon (ví dụ: react-icons)
-// hoặc file SVG
+// --- Component UserIcon (Giữ nguyên) ---
 const UserIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -23,8 +22,9 @@ const UserIcon = () => (
   </svg>
 );
 
-// Icon mũi tên dropdown
+// --- Component DropdownArrow (Giữ nguyên) ---
 const DropdownArrow = () => (
+  // ... (code svg của bạn)
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="12"
@@ -40,15 +40,14 @@ const DropdownArrow = () => (
   </svg>
 );
 
-// Định nghĩa kiểu (type) cho một mục điều hướng
+// --- Dữ liệu (Giữ nguyên) ---
 interface NavItem {
   label: string;
   href: string;
   hasDropdown?: boolean;
 }
-
-// Dữ liệu cho các mục điều hướng
 const navItems: NavItem[] = [
+  // ... (danh sách navItems của bạn)
   { label: "Best Food 2025", href: "/best-food-2025" },
   { label: "Near Me", href: "/near-me" },
   { label: "Destinations", href: "/destinations", hasDropdown: true },
@@ -59,26 +58,55 @@ const navItems: NavItem[] = [
   { label: "Quiz", href: "/quiz" },
 ];
 
-// Component Header
+// --- Component Header (Đã cập nhật) ---
 const Header: React.FC = () => {
   const router = useRouter();
+
+  // 3. Thêm state để theo dõi trạng thái đăng nhập
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // 4. Dùng useEffect để kiểm tra localStorage (chỉ chạy ở client)
+  useEffect(() => {
+    // Phải kiểm tra trong useEffect để tránh lỗi Hydration của Next.js
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      setIsLoggedIn(true);
+    }
+  }, []); // Mảng rỗng [] đảm bảo nó chỉ chạy 1 lần khi component mount
+
+  // 5. Hàm xử lý Đăng nhập (Giữ nguyên)
   const handleLoginClick = () => {
-    router.push("/auth"); // 4. Điều hướng đến trang /auth
+    router.push("/auth");
+  };
+
+  // 6. Hàm xử lý Đăng xuất (MỚI)
+  const handleLogoutClick = () => {
+    // Xóa token khỏi localStorage
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+
+    // Cập nhật state để UI thay đổi
+    setIsLoggedIn(false);
+
+    // Thông báo cho người dùng
+    toast.success("Đăng xuất thành công!");
+
+    // Tải lại trang để reset hoàn toàn (cách đơn giản nhất)
+    // Hoặc điều hướng về trang chủ: router.push('/');
+    window.location.reload();
   };
 
   return (
     <header className="header-container">
-      {/* Phần Logo (Bên trái) */}
+      {/* Phần Logo (Giữ nguyên) */}
       <div className="header-logo">
         <a href="/">
-          {/* Logo trong ảnh là sự kết hợp của icon và text
-              Ở đây chúng ta mô phỏng bằng text */}
           <span className="logo-icon">taste</span>
           <span className="logo-text">atlas</span>
         </a>
       </div>
 
-      {/* Phần điều hướng (Giữa) */}
+      {/* Phần điều hướng (Giữ nguyên) */}
       <nav className="header-nav">
         <ul>
           {navItems.map((item) => (
@@ -92,11 +120,19 @@ const Header: React.FC = () => {
         </ul>
       </nav>
 
-      {/* Phần Đăng nhập (Bên phải) */}
+      {/* 7. Phần Đăng nhập (Đã cập nhật logic) */}
       <div className="header-login">
-        <span onClick={handleLoginClick} className="login-link">
-          <UserIcon />
-        </span>
+        {isLoggedIn ? (
+          // Nếu ĐÃ đăng nhập -> Hiển thị nút Đăng xuất
+          <button onClick={handleLogoutClick} className="header-auth-button">
+            Logout
+          </button>
+        ) : (
+          // Nếu CHƯA đăng nhập -> Hiển thị nút "Login / Sign Up"
+          <button onClick={handleLoginClick} className="header-auth-button">
+            Login / Sign Up
+          </button>
+        )}
       </div>
     </header>
   );

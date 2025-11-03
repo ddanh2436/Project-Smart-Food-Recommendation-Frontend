@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./AuthPage.css";
 import api from "@/app/lib/api";
 import { useRouter } from "next/navigation";
@@ -36,13 +36,22 @@ const AuthForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  useEffect(() => {
+    // Tự động kiểm tra khi trang tải
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      // Nếu đã có token, đẩy về trang chủ
+      toast.success("Bạn đã đăng nhập!");
+      router.push("/");
+    }
+  }, [router]);
+
   // --- Hàm xử lý ---
 
   // Hàm chuyển đổi form (Login/Register)
   const toggleForm = (isRegister: boolean) => {
     setIsRegisterActive(isRegister);
     setErrors({});
-    // setName("");
     setUsername(""); // <-- Reset username
     setEmail("");
     setPassword("");
@@ -236,7 +245,10 @@ const AuthForm: React.FC = () => {
               <a href="#" className="social-icon facebook-hover">
                 <FaFacebookF />
               </a>
-              <a href="#" className="social-icon google-hover">
+              <a
+                href="http://localhost:3001/auth/google"
+                className="social-icon google-hover"
+              >
                 <FcGoogle />
               </a>
             </div>
@@ -300,7 +312,10 @@ const AuthForm: React.FC = () => {
               <a href="#" className="social-icon facebook-hover">
                 <FaFacebookF />
               </a>
-              <a href="#" className="social-icon google-hover">
+              <a
+                href="http://localhost:3001/auth/google"
+                className="social-icon google-hover"
+              >
                 <FcGoogle />
               </a>
             </div>

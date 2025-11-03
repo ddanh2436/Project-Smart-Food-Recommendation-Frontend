@@ -104,3 +104,28 @@ body {
     opacity: 0.8;
   }
 }
+
+.header-login .header-auth-button {
+  background-color: #f57c00; /* Màu cam giống trang auth */
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-family: "Nunito", sans-serif; /* Đồng bộ font */
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.header-login .header-auth-button:hover {
+  background-color: #ff9800; /* Màu cam nhạt hơn khi hover */
+}
+
+/* CSS cho icon đăng nhập (span) */
+.header-login .login-link {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: #333; /* Màu icon */
+}
