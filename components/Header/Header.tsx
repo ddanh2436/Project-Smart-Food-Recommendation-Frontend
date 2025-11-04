@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { useAuth } from "@/app/contexts/AuthContext"; // Import hook
 import Image from "next/image";
+import Link from 'next/link';
 
 // (Component DropdownArrow và NavItem interface/data giữ nguyên...)
 const DropdownArrow = () => (
@@ -79,36 +80,44 @@ const Header: React.FC = () => {
       {/* Phần Đăng nhập/Profile (Đã cập nhật) */}
       <div className="header-login">
         {isLoading ? (
-          <div className="loading-skeleton"></div> // CSS cho trạng thái chờ
+          <div className="loading-skeleton"></div>
         ) : user ? (
-          // Đã đăng nhập
+          // Nếu ĐÃ đăng nhập (có user)
           <div className="user-profile-container">
-            {user.picture ? (
-              <Image
-                src={user.picture}
-                alt={user.username}
-                width={32}
-                height={32}
-                className="user-avatar"
-              />
-            ) : (
-              <div className="user-avatar-placeholder">
-                {user.username.charAt(0).toUpperCase()}
-              </div>
-            )}
-            <span className="user-name">
-              {user.username
-                .split(" ") // Tách chuỗi thành ["duy", "anhdao"]
-                .map((name) => name.charAt(0).toUpperCase() + name.slice(1)) // Chuyển thành ["Duy", "Anhdao"]
-                .join(" ")}{" "}
-              {/* Nối lại thành "Duy Anhdao" */}
-            </span>
+            
+            {/* 2. BỌC AVATAR VÀ TÊN BẰNG LINK */}
+            <Link href="/profile" className="profile-nav-link">
+              {/* Avatar */}
+              {user.picture ? (
+                <Image
+                  src={user.picture}
+                  alt={user.username}
+                  width={32}
+                  height={32}
+                  className="user-avatar"
+                />
+              ) : (
+                <div className="user-avatar-placeholder">
+                  {user.username.charAt(0).toUpperCase()}
+                </div>
+              )}
+              
+              {/* Tên */}
+              <span className="user-name">
+                {user.username
+                  .split(' ')
+                  .map(name => name.charAt(0).toUpperCase() + name.slice(1))
+                  .join(' ')}
+              </span>
+            </Link>
+            
+            {/* Nút Logout (Để NGUYÊN bên ngoài Link) */}
             <button onClick={handleLogoutClick} className="header-auth-button">
               Logout
             </button>
           </div>
         ) : (
-          // Chưa đăng nhập
+          // Nếu CHƯA đăng nhập (user là null)
           <button onClick={handleLoginClick} className="header-auth-button">
             Login / Sign Up
           </button>

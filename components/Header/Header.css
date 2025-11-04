@@ -197,3 +197,19 @@ body {
 .header-logo a:hover {
   opacity: 0.7;
 }
+
+.profile-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Giữ khoảng cách giữa avatar và tên */
+  text-decoration: none; /* Tắt gạch chân của link */
+  color: inherit; /* Kế thừa màu chữ (để tên vẫn có màu #333) */
+  border-radius: 20px; /* Bo góc */
+  padding: 4px; /* Thêm tí đệm */
+  transition: background-color 0.2s ease;
+}
+
+/* Thêm hiệu ứng hover cho cả cụm avatar/tên */
+.profile-nav-link:hover {
+  background-color: #f0f0f0; /* Thêm nền xám nhạt khi hover */
+}
