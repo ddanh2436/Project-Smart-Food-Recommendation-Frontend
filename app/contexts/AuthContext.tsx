@@ -10,6 +10,12 @@ interface User {
   username: string;
   email: string;
   picture?: string; // Avatar URL
+  firstName?: string; 
+  lastName?: string;
+  phone?: string;     // <-- THÊM
+  company?: string;   // <-- THÊM
+  designation?: string; // <-- THÊM
+  bio?: string;
 }
 
 interface AuthContextType {
