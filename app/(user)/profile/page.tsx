@@ -144,7 +144,6 @@ export default function ProfilePage() {
           <ul className="profile-nav-menu">
             {/* (Menu tabs giữ nguyên...) */}
             <li className={activeTab === 'account' ? 'active' : ''} onClick={() => setActiveTab('account')}>Account</li>
-            <li className={activeTab === 'password' ? 'active' : ''} onClick={() => setActiveTab('password')}>Password</li>
           </ul>
         </div>
 
