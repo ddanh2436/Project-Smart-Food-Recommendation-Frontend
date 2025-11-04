@@ -41,6 +41,14 @@ body {
   text-underline-offset: 2px;
 }
 
+logo-image {
+  height: 45px; 
+  width: auto;  /* RẤT QUAN TRỌNG: Để chiều rộng tự động tính toán
+     để giữ đúng tỉ lệ khung hình của ảnh, không bị méo. */
+  max-width: 100%; /* Đảm bảo ảnh không bị tràn ra ngoài nếu nó quá lớn */
+  display: block; /* Loại bỏ khoảng trắng dưới ảnh */
+}
+
 /* 2. Phần Điều hướng (Giữa) - ĐÃ CẢI TIẾN */
 .header-nav ul {
   list-style: none;
@@ -68,7 +76,7 @@ body {
 }
 
 .header-nav a:hover {
-  color: #000;
+  color: #d4af37;
   
   /* CẢI TIẾN: Thêm hiệu ứng nhấc lên */
   transform: translateY(-2px);

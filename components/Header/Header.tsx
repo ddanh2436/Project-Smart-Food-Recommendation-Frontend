@@ -29,14 +29,10 @@ interface NavItem {
   hasDropdown?: boolean;
 }
 const navItems: NavItem[] = [
-  { label: "Best Food 2025", href: "/best-food-2025" },
+  { label: "Restaurants", href: "/restaurants", hasDropdown: true },
   { label: "Near Me", href: "/near-me" },
-  { label: "Destinations", href: "/destinations", hasDropdown: true },
-  { label: "Foods", href: "/foods", hasDropdown: true },
-  { label: "Recipes", href: "/recipes" },
-  { label: "Map", href: "/map" },
-  { label: "Quality Labels", href: "/quality-labels" },
-  { label: "Quiz", href: "/quiz" },
+  { label: "Foods and Drinks", href: "/foods-and-drinks"  },
+  { label: "About us", href: "/about-us" },
 ];
 
 const Header: React.FC = () => {
@@ -57,12 +53,17 @@ const Header: React.FC = () => {
 
   return (
     <header className="header-container">
-      <div className="header-logo">
-        <a href="/">
-          <span className="logo-icon">Viet</span>
-          <span className="logo-text">NomNom</span>
-        </a>
-      </div>
+    <div className="header-logo">
+      <a href="/">
+        <Image 
+          src="/assets/image/logo.png"  // 1. Thêm / ở đầu
+          alt="Logo" 
+          className="logo-image"
+          width={131}           // 2. Định dạng lại (xóa space)
+          height={46}          // 2. Định dạng lại (xóa space)
+        />
+      </a>
+    </div>
 
       <nav className="header-nav">
         <ul>
