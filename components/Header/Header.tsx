@@ -1,32 +1,15 @@
 "use client";
-import React, { useState, useEffect } from "react"; // 1. Import thêm useState, useEffect
-import "./Header.css"; // Import file CSS để tạo kiểu
+import React from "react";
+import "./Header.css"; // Giả sử bạn có file CSS này
 import { useRouter } from "next/navigation";
-import { toast } from "react-hot-toast"; // 2. Import toast để thông báo
+import { toast } from "react-hot-toast";
+import { useAuth } from "@/app/contexts/AuthContext"; // Import hook
+import Image from "next/image";
 
-// --- Component UserIcon (Giữ nguyên) ---
-const UserIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-    <circle cx="12" cy="7" r="4"></circle>
-  </svg>
-);
-
-// --- Component DropdownArrow (Giữ nguyên) ---
+// (Component DropdownArrow và NavItem interface/data giữ nguyên...)
 const DropdownArrow = () => (
-  // ... (code svg của bạn)
   <svg
-    xmlns="http://www.w3.org/2000/svg"
+    xmlns="http://www.w.org/2000/svg"
     width="12"
     height="12"
     viewBox="0 0 24 24"
@@ -39,15 +22,12 @@ const DropdownArrow = () => (
     <polyline points="6 9 12 15 18 9"></polyline>
   </svg>
 );
-
-// --- Dữ liệu (Giữ nguyên) ---
 interface NavItem {
   label: string;
   href: string;
   hasDropdown?: boolean;
 }
 const navItems: NavItem[] = [
-  // ... (danh sách navItems của bạn)
   { label: "Best Food 2025", href: "/best-food-2025" },
   { label: "Near Me", href: "/near-me" },
   { label: "Destinations", href: "/destinations", hasDropdown: true },
@@ -58,55 +38,31 @@ const navItems: NavItem[] = [
   { label: "Quiz", href: "/quiz" },
 ];
 
-// --- Component Header (Đã cập nhật) ---
 const Header: React.FC = () => {
   const router = useRouter();
+  const { user, setUser, isLoading } = useAuth(); // Lấy user từ Context
 
-  // 3. Thêm state để theo dõi trạng thái đăng nhập
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const handleLogoutClick = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    setUser(null); // Cập nhật Global State
+    toast.success("Đăng xuất thành công!");
+    router.push("/");
+  };
 
-  // 4. Dùng useEffect để kiểm tra localStorage (chỉ chạy ở client)
-  useEffect(() => {
-    // Phải kiểm tra trong useEffect để tránh lỗi Hydration của Next.js
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      setIsLoggedIn(true);
-    }
-  }, []); // Mảng rỗng [] đảm bảo nó chỉ chạy 1 lần khi component mount
-
-  // 5. Hàm xử lý Đăng nhập (Giữ nguyên)
   const handleLoginClick = () => {
     router.push("/auth");
   };
 
-  // 6. Hàm xử lý Đăng xuất (MỚI)
-  const handleLogoutClick = () => {
-    // Xóa token khỏi localStorage
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-
-    // Cập nhật state để UI thay đổi
-    setIsLoggedIn(false);
-
-    // Thông báo cho người dùng
-    toast.success("Đăng xuất thành công!");
-
-    // Tải lại trang để reset hoàn toàn (cách đơn giản nhất)
-    // Hoặc điều hướng về trang chủ: router.push('/');
-    window.location.reload();
-  };
-
   return (
     <header className="header-container">
-      {/* Phần Logo (Giữ nguyên) */}
       <div className="header-logo">
         <a href="/">
-          <span className="logo-icon">taste</span>
-          <span className="logo-text">atlas</span>
+          <span className="logo-icon">Viet</span>
+          <span className="logo-text">NomNom</span>
         </a>
       </div>
 
-      {/* Phần điều hướng (Giữ nguyên) */}
       <nav className="header-nav">
         <ul>
           {navItems.map((item) => (
@@ -120,15 +76,39 @@ const Header: React.FC = () => {
         </ul>
       </nav>
 
-      {/* 7. Phần Đăng nhập (Đã cập nhật logic) */}
+      {/* Phần Đăng nhập/Profile (Đã cập nhật) */}
       <div className="header-login">
-        {isLoggedIn ? (
-          // Nếu ĐÃ đăng nhập -> Hiển thị nút Đăng xuất
-          <button onClick={handleLogoutClick} className="header-auth-button">
-            Logout
-          </button>
+        {isLoading ? (
+          <div className="loading-skeleton"></div> // CSS cho trạng thái chờ
+        ) : user ? (
+          // Đã đăng nhập
+          <div className="user-profile-container">
+            {user.picture ? (
+              <Image
+                src={user.picture}
+                alt={user.username}
+                width={32}
+                height={32}
+                className="user-avatar"
+              />
+            ) : (
+              <div className="user-avatar-placeholder">
+                {user.username.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <span className="user-name">
+              {user.username
+                .split(" ") // Tách chuỗi thành ["duy", "anhdao"]
+                .map((name) => name.charAt(0).toUpperCase() + name.slice(1)) // Chuyển thành ["Duy", "Anhdao"]
+                .join(" ")}{" "}
+              {/* Nối lại thành "Duy Anhdao" */}
+            </span>
+            <button onClick={handleLogoutClick} className="header-auth-button">
+              Logout
+            </button>
+          </div>
         ) : (
-          // Nếu CHƯA đăng nhập -> Hiển thị nút "Login / Sign Up"
+          // Chưa đăng nhập
           <button onClick={handleLoginClick} className="header-auth-button">
             Login / Sign Up
           </button>

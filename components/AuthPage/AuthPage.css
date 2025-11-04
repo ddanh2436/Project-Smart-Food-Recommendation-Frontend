@@ -11,7 +11,7 @@
   position: relative;
 }
 
-/* --- YÊU CẦU 1: THÊM LỚP PHỦ ĐEN MỜ --- */
+/* --- CẢI TIẾN 1: THÊM HIỆU ỨNG BLUR VÀ LÀM TỐI NỀN --- */
 .auth-page-container::before {
   content: "";
   position: absolute;
@@ -20,21 +20,19 @@
   width: 100%;
   height: 100%;
 
-  /* Lớp 1: Lớp phủ đen mờ dần (từ đen 40% -> đen 20%) */
-  /* Lớp 2: Ảnh nền (từ file /public/assets/image/ của bạn) */
-  background-image: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.4),
-      rgba(0, 0, 0, 0.2)
-    ),
-    url("/assets/image/login-background.png"); /* <-- Đường dẫn ảnh nền của bạn */
-
+  /* Đảm bảo đường dẫn này đúng (trỏ vào /public/...) */
+  background-image: url("/assets/image/login-background.png");
   background-size: cover;
   background-position: center;
   z-index: -1;
-  /* Bỏ opacity: 0.5 cũ để gradient kiểm soát độ mờ */
+
+  /* Thêm bộ lọc: làm mờ 8px và giảm độ sáng còn 70% */
+  filter: blur(8px) brightness(0.7);
+
+  /* Fix lỗi hở viền trên một số trình duyệt */
+  transform: scale(1.05);
 }
-/* --- KẾT THÚC PHẦN NỀN --- */
+/* --- KẾT THÚC CẢI TIẾN 1 --- */
 
 /* Container chính của form */
 .auth-container {
@@ -82,7 +80,9 @@
   justify-content: center;
   padding: 0 50px;
   height: 100%;
+  width: 100%; /* Đảm bảo form chiếm đủ chiều rộng */
   text-align: center;
+  box-sizing: border-box; /* Quan trọng */
 }
 
 .form-container h1 {
@@ -102,7 +102,7 @@
 .social-container {
   display: flex;
   gap: 10px;
-  margin: 15px 0 25px;
+  margin: 15px 0; /* Xóa margin-bottom */
 }
 
 .social-icon {
@@ -112,7 +112,7 @@
   margin: 0 5px;
   height: 40px;
   width: 40px;
-  border: 1px solid #ddd;
+  border: 1px solid #eee; /* CẢI TIẾN: Làm viền mờ hơn */
   border-radius: 50%;
   color: #333;
   text-decoration: none;
@@ -150,11 +150,15 @@
   color: #333;
 }
 
+/* CẢI TIẾN 2: Căn lề phải cho Forgot Password */
 .forgot-password {
   color: #111;
   font-size: 14px;
   text-decoration: none;
-  margin: 15px 0 20px;
+  margin: 0 0 20px 0; /* Bỏ margin-top, giữ margin-bottom */
+  align-self: flex-end; /* Căn lề phải */
+  width: 100%;
+  text-align: right;
 }
 
 .forgot-password:hover {
@@ -164,7 +168,7 @@
 /* Nút màu cam */
 .auth-button {
   border-radius: 20px;
-  border: 1px solid #f57c00;
+  border: 1px solid #b4610f;
   background-color: #f57c00;
   color: #ffffff;
   font-size: 12px;
@@ -175,6 +179,7 @@
   transition: transform 80ms ease-in;
   cursor: pointer;
   margin-top: 10px;
+  width: 100%; /* Làm nút chiếm hết chiều rộng */
 }
 
 .auth-button:active {
@@ -194,9 +199,9 @@
 /* Đây là nút trên panel màu cam */
 .ghost-button {
   border-radius: 20px;
-  border: 1px solid #ffffff; /* Viền trắng */
-  background-color: transparent; /* Nền trong suốt */
-  color: #ffffff; /* Chữ trắng */
+  border: 1px solid #ffffff;
+  background-color: transparent;
+  color: #ffffff;
   font-size: 12px;
   font-weight: bold;
   padding: 12px 45px;
@@ -216,7 +221,7 @@
 }
 
 .ghost-button:hover {
-  background-color: rgba(255, 255, 255, 0.2); /* Hiệu ứng hover nhẹ */
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 /* --- Phần Overlay --- */
@@ -235,7 +240,7 @@
 
 /* Panel màu cam */
 .overlay {
-  background: #f57c00;
+  background: #a55300;
   background: linear-gradient(to right, #ffa726, #f57c00);
   background-repeat: no-repeat;
   background-size: cover;
@@ -265,17 +270,16 @@
   transition: transform 0.6s ease-in-out;
 }
 
-/* --- YÊU CẦU 2: PHÓNG TO CHỮ --- */
 .overlay-panel h1 {
   font-weight: 800;
   margin: 0;
   margin-bottom: 10px;
-  font-size: 44px; /* Tăng từ 36px */
+  font-size: 44px; /* Đã tăng kích thước */
   line-height: 1.2;
 }
 
 .overlay-panel p {
-  font-size: 14px;
+  font-size: 16px; /* CẢI TIẾN 3: Tăng font-size cho dễ đọc */
   font-weight: 100;
   line-height: 20px;
   letter-spacing: 0.5px;
@@ -350,17 +354,16 @@
 
 /* --- CSS BỔ SUNG ĐỂ XỬ LÝ FORM --- */
 .error-message {
-  color: #e60023; /* Màu đỏ */
+  color: #e60023;
   font-size: 12px;
   font-weight: 600;
-  text-align: left; /* Căn trái cho rõ ràng */
+  text-align: left;
   width: 100%;
-  margin-top: -10px; /* Nằm sát input */
+  margin-top: -10px;
   margin-bottom: 10px;
   padding-left: 5px;
 }
 
-/* (Thêm lớp .api-error để căn giữa lỗi chung) */
 .error-message.api-error {
   text-align: center;
   width: 100%;
@@ -373,7 +376,7 @@
   position: absolute;
   right: 15px;
   top: 50%;
-  transform: translateY(-140%); /* Đã sửa lại -50% */
+  transform: translateY(-130%);
   cursor: pointer;
   color: #111;
   font-size: 16px;
@@ -403,11 +406,32 @@
 }
 
 .auth-logo {
-  margin-bottom: 15px; /* Tạo khoảng cách với chữ "Sign In" */
+  margin-bottom: 15px;
 }
 
-/* Tùy chỉnh kích thước ảnh bên trong (nếu cần) */
 .auth-logo img {
-  max-width: 150px; /* Giới hạn chiều rộng tối đa */
-  height: auto; /* Giữ tỷ lệ */
+  max-width: 150px;
+  height: auto;
+}
+
+/* CẢI TIẾN 2: Dải phân cách "or" */
+.form-separator {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: #aaa;
+  width: 100%;
+  margin: 20px 0;
+}
+.form-separator::before,
+.form-separator::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid #eee;
+}
+.form-separator span {
+  padding: 0 10px;
+  font-size: 12px;
+  color: #aaa;
+  margin: 0; /* Ghi đè margin mặc định */
 }

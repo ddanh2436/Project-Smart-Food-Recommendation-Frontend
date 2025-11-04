@@ -41,7 +41,7 @@ body {
   text-underline-offset: 2px;
 }
 
-/* 2. Phần Điều hướng (Giữa) */
+/* 2. Phần Điều hướng (Giữa) - ĐÃ CẢI TIẾN */
 .header-nav ul {
   list-style: none;
   margin: 0;
@@ -62,11 +62,16 @@ body {
   display: flex;
   align-items: center;
   gap: 0.25rem; /* Khoảng cách giữa text và mũi tên */
-  transition: color 0.2s ease;
+  
+  /* CẢI TIẾN: Thêm 'transform' vào transition */
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .header-nav a:hover {
   color: #000;
+  
+  /* CẢI TIẾN: Thêm hiệu ứng nhấc lên */
+  transform: translateY(-2px);
 }
 
 /* Tùy chỉnh icon mũi tên */
@@ -76,56 +81,119 @@ body {
   stroke: #777;
 }
 
-/* 3. Phần Đăng nhập (Bên phải) */
-.header-login a {
+/* 3. Phần Đăng nhập (Bên phải) - ĐÃ CẢI TIẾN */
+.header-login {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  text-decoration: none;
-  color: #333;
-  font-size: 0.95rem;
-  font-weight: 500;
-  transition: color 0.2s ease;
+  cursor: default;
 }
 
-.header-login a:hover {
-  color: #000;
-}
-
-.header-login svg {
-  width: 20px;
-  height: 20px;
-  stroke: #555;
-}
-
-.header-login {
-  cursor: pointer;
-  &:hover {
-    opacity: 0.8;
-  }
-}
-
-.header-login .header-auth-button {
-  background-color: #f57c00; /* Màu cam giống trang auth */
+/* Style cho nút Login/Logout */
+.header-auth-button {
+  background-color: #f57c00;
   color: white;
   border: none;
   padding: 8px 16px;
   border-radius: 20px;
-  font-family: "Nunito", sans-serif; /* Đồng bộ font */
+  font-family: "Nunito", sans-serif;
   font-weight: bold;
   cursor: pointer;
   font-size: 14px;
-  transition: background-color 0.3s ease;
+  
+  /* CẢI TIẾN: Thêm 'transform' và 'box-shadow' vào transition */
+  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.header-login .header-auth-button:hover {
-  background-color: #ff9800; /* Màu cam nhạt hơn khi hover */
+.header-auth-button:hover {
+  background-color: #ff9800; /* Làm sáng màu */
+  
+  /* CẢI TIẾN: Nhấc nút lên và thêm đổ bóng */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* CSS cho icon đăng nhập (span) */
-.header-login .login-link {
-  cursor: pointer;
+/* Container cho profile (khi đã đăng nhập) */
+.user-profile-container {
   display: flex;
   align-items: center;
-  color: #333; /* Màu icon */
+  gap: 12px;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  
+  /* CẢI TIẾN: Thêm transition và cursor */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer; /* Làm cho nó có vẻ bấm được (cho menu tương lai) */
+}
+
+.user-avatar-placeholder {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #f57c00;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 1;
+  
+  /* CẢI TIẾN: Thêm transition và cursor */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+/* CẢI TIẾN: Thêm hiệu ứng hover cho avatar */
+.user-avatar:hover,
+.user-avatar-placeholder:hover {
+  transform: scale(1.1); /* Phóng to avatar */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: default;
+}
+
+/* Đảm bảo tên không bị dính hiệu ứng hover */
+.user-profile-container .user-name:hover {
+  background-color: transparent !important;
+  color: #333 !important;
+  cursor: default !important;
+}
+
+/* CSS cho trạng thái loading (giữ nguyên) */
+.loading-skeleton {
+  width: 120px;
+  height: 32px;
+  background-color: #f0f0f0;
+  border-radius: 20px;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
+/* CẢI TIẾN: Thêm hiệu ứng hover cho cả Logo */
+.header-logo a {
+  /* ... (các style logo cũ của bạn) ... */
+  transition: opacity 0.2s ease;
+}
+
+.header-logo a:hover {
+  opacity: 0.7;
 }

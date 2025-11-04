@@ -1,42 +1,42 @@
-// app/(user)/auth/callback/page.tsx
-'use client'; // Bắt buộc phải là Client Component
+'use client';
 
 import { useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { useAuth } from '@/app/contexts/AuthContext';
+import api from '@/app/lib/api';
 
-// Trang này chỉ là một "cầu nối"
-// Nó bắt token từ URL, lưu vào localStorage, rồi chuyển hướng về trang chủ
 export default function AuthCallback() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { setUser } = useAuth(); // Lấy hàm setUser
 
   useEffect(() => {
-    // Lấy token từ thanh URL
     const accessToken = searchParams.get('accessToken');
     const refreshToken = searchParams.get('refreshToken');
 
     if (accessToken && refreshToken) {
-      // 1. Lưu token vào localStorage
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
       
-      // 2. Chuyển hướng về trang chủ (hoặc /dashboard)
-      router.push('/');
+      // Lấy profile ngay lập tức
+      const fetchProfile = async () => {
+        try {
+          const profileResponse = await api.get('/auth/profile');
+          setUser(profileResponse.data); // Cập nhật Global State
+          router.push('/'); // Chuyển về trang chủ
+        } catch (e) {
+          router.push('/auth');
+        }
+      };
+      fetchProfile();
+      
     } else {
-      // Nếu không có token (lỗi), chuyển về trang đăng nhập
-      router.push('/auth');
+      router.push('/auth'); // Lỗi thì về trang auth
     }
-  }, [searchParams, router]);
+  }, [searchParams, router, setUser]);
 
-  // Hiển thị loading... trong khi chờ chuyển hướng
   return (
-    <div style={{ 
-      display: 'flex', 
-      justifyContent: 'center', 
-      alignItems: 'center', 
-      height: '100vh', 
-      fontFamily: 'Arial, sans-serif' 
-    }}>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
       <h1>Đang đăng nhập, vui lòng chờ...</h1>
     </div>
   );

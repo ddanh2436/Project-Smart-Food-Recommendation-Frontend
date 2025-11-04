@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import "./AuthPage.css";
+import "./AuthPage.css"; // [cite: AuthPage.css]
 import api from "@/app/lib/api";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
+import Image from "next/image";
+import { useAuth } from "@/app/contexts/AuthContext"; // 1. IMPORT USEAUTH
 
 import {
   FaUser,
@@ -18,13 +20,14 @@ import { FcGoogle } from "react-icons/fc";
 
 const AuthForm: React.FC = () => {
   const router = useRouter();
+  const { setUser } = useAuth(); // 2. LẤY HÀM SETUSER TỪ CONTEXT
+
   // --- State cho Form ---
   const [isRegisterActive, setIsRegisterActive] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   // State cho dữ liệu input
-  // const [name, setName] = useState(""); // <-- Chúng ta chưa dùng 'name' ở backend
-  const [username, setUsername] = useState(""); // <-- SỬA: Thêm state cho username
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -40,8 +43,8 @@ const AuthForm: React.FC = () => {
     // Tự động kiểm tra khi trang tải
     const token = localStorage.getItem("accessToken");
     if (token) {
-      // Nếu đã có token, đẩy về trang chủ
-      toast.success("Bạn đã đăng nhập!");
+      // Bỏ toast ở đây để tránh thông báo liên tục khi vô tình vào /auth
+      // toast.success("Bạn đã đăng nhập!"); 
       router.push("/");
     }
   }, [router]);
@@ -52,7 +55,7 @@ const AuthForm: React.FC = () => {
   const toggleForm = (isRegister: boolean) => {
     setIsRegisterActive(isRegister);
     setErrors({});
-    setUsername(""); // <-- Reset username
+    setUsername("");
     setEmail("");
     setPassword("");
     setConfirmPassword("");
@@ -61,13 +64,12 @@ const AuthForm: React.FC = () => {
 
   // Hàm kiểm tra lỗi (Validation)
   const validate = (isRegisterForm: boolean) => {
+    // ... (Code validate của bạn đã đúng, giữ nguyên)
     const newErrors: { [key: string]: string } = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
     if (isRegisterForm) {
-      if (!username) newErrors.username = "Vui lòng nhập tên đăng nhập"; // <-- Thêm validate username
+      if (!username) newErrors.username = "Vui lòng nhập tên đăng nhập";
     }
-
     if (!email) {
       newErrors.email = "Vui lòng nhập email";
     } else if (!emailRegex.test(email)) {
@@ -88,7 +90,7 @@ const AuthForm: React.FC = () => {
     return newErrors;
   };
 
-  // 2. SỬA LẠI HÀM HANDLESUBMIT
+  // Hàm Submit (Chung)
   const handleSubmit = async (e: React.FormEvent, isRegisterForm: boolean) => {
     e.preventDefault();
     const validationErrors = validate(isRegisterForm);
@@ -103,55 +105,62 @@ const AuthForm: React.FC = () => {
     setIsLoading(true);
 
     try {
-      let response;
       if (isRegisterForm) {
         // --- GỌI API ĐĂNG KÝ ---
-        response = await api.post("/auth/register", {
-          username, // <-- Gửi username
+        const response = await api.post("/auth/register", {
+          username,
           email,
           password,
         });
-        console.log("Đăng ký thành công:", response.data);
         toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
-        toggleForm(false); // Chuyển sang form đăng nhập sau khi đăng ký
+        toggleForm(false); // Chuyển sang form đăng nhập
       } else {
-        // --- GỌI API ĐĂNG NHẬP ---
-        response = await api.post("/auth/login", {
+        // --- GỌI API ĐĂNG NHẬP (ĐÃ SỬA) ---
+        const loginResponse = await api.post("/auth/login", {
           email,
           password,
         });
+        
         toast.success("Đăng nhập thành công!");
 
-        // 3. LƯU TOKENS
-        // Đây là bước quan trọng nhất sau khi đăng nhập
-        localStorage.setItem("accessToken", response.data.accessToken);
-        localStorage.setItem("refreshToken", response.data.refreshToken);
+        // 3. LƯU TOKEN
+        localStorage.setItem("accessToken", loginResponse.data.accessToken);
+        localStorage.setItem("refreshToken", loginResponse.data.refreshToken);
 
+        // 4. LẤY PROFILE NGAY LẬP TỨC
+        // api.ts sẽ tự động đính kèm token bạn vừa lưu
+        const profileResponse = await api.get("/auth/profile");
+        
+        // 5. CẬP NHẬT GLOBAL STATE
+        setUser(profileResponse.data);
+
+        // 6. ĐIỀU HƯỚNG
         router.push("/");
       }
     } catch (error: any) {
+      // ... (Code xử lý lỗi của bạn đã đúng, giữ nguyên)
       console.error("Lỗi xác thực:", error);
-      // Xử lý lỗi từ backend
+      let errorMessage = "Đã xảy ra lỗi không xác định.";
       if (error.response && error.response.data) {
         const serverError = error.response.data.message;
         if (typeof serverError === "string") {
-          // Lỗi chung (ví dụ: 'Email already exists' hoặc 'Invalid credentials')
-          setErrors({ api: serverError });
+          errorMessage = serverError;
         } else if (Array.isArray(serverError)) {
-          // Lỗi validation từ class-validator
-          setErrors({ api: serverError.join(", ") });
-        } else {
-          setErrors({ api: "Đã xảy ra lỗi không xác định." });
+          errorMessage = serverError.join(", ");
         }
       } else {
-        setErrors({ api: "Không thể kết nối tới máy chủ." });
+        errorMessage = "Không thể kết nối tới máy chủ.";
       }
+      toast.error(errorMessage);
+      setErrors({ api: errorMessage });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
+    // ... (TOÀN BỘ PHẦN JSX CỦA BẠN GIỮ NGUYÊN) ...
+    // ... (Vì code JSX bạn gửi đã đúng) ...
     <div className="auth-page-container">
       <div
         className={`auth-container ${
@@ -162,8 +171,6 @@ const AuthForm: React.FC = () => {
         <div className="form-container sign-up-container">
           <form onSubmit={(e) => handleSubmit(e, true)}>
             <h1>Create Account</h1>
-
-            {/* 4. THÊM Ô INPUT USERNAME */}
             <div className="input-group">
               <FaUser />
               <input
@@ -177,13 +184,11 @@ const AuthForm: React.FC = () => {
             {errors.username && (
               <div className="error-message">{errors.username}</div>
             )}
-
-            {/* Input Email */}
             <div className="input-group">
               <FaEnvelope />
               <input
                 type="email"
-                placeholder="Email" // Đổi từ 'Email or username'
+                placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
@@ -192,8 +197,6 @@ const AuthForm: React.FC = () => {
             {errors.email && (
               <div className="error-message">{errors.email}</div>
             )}
-
-            {/* Input Mật khẩu */}
             <div className="input-group">
               <FaLock />
               <input
@@ -213,8 +216,6 @@ const AuthForm: React.FC = () => {
             {errors.password && (
               <div className="error-message">{errors.password}</div>
             )}
-
-            {/* Ô CONFIRM PASSWORD */}
             <div className="input-group">
               <FaLock />
               <input
@@ -234,13 +235,15 @@ const AuthForm: React.FC = () => {
             {errors.confirmPassword && (
               <div className="error-message">{errors.confirmPassword}</div>
             )}
-
-            {/* 5. HIỂN THỊ LỖI API CHUNG */}
             {errors.api && (
               <div className="error-message api-error">{errors.api}</div>
             )}
-
-            {/* Social (để sau input cho hợp lý) */}
+            <button type="submit" className="auth-button" disabled={isLoading}>
+              {isLoading ? "Signing Up..." : "Sign Up"}
+            </button>
+            <div className="form-separator">
+              <span>or register with</span>
+            </div>
             <div className="social-container">
               <a href="#" className="social-icon facebook-hover">
                 <FaFacebookF />
@@ -252,12 +255,6 @@ const AuthForm: React.FC = () => {
                 <FcGoogle />
               </a>
             </div>
-            <span>or use your email for registration</span>
-
-            {/* Nút Submit */}
-            <button type="submit" className="auth-button" disabled={isLoading}>
-              {isLoading ? "Signing Up..." : "Sign Up"}
-            </button>
           </form>
         </div>
 
@@ -265,8 +262,6 @@ const AuthForm: React.FC = () => {
         <div className="form-container sign-in-container">
           <form onSubmit={(e) => handleSubmit(e, false)}>
             <h1>Sign in</h1>
-
-            {/* Input Email */}
             <div className="input-group">
               <FaEnvelope />
               <input
@@ -280,8 +275,6 @@ const AuthForm: React.FC = () => {
             {errors.email && (
               <div className="error-message">{errors.email}</div>
             )}
-
-            {/* Input Mật khẩu */}
             <div className="input-group">
               <FaLock />
               <input
@@ -301,13 +294,18 @@ const AuthForm: React.FC = () => {
             {errors.password && (
               <div className="error-message">{errors.password}</div>
             )}
-
-            {/* 5. HIỂN THỊ LỖI API CHUNG */}
+            <a href="#" className="forgot-password">
+              Forgot your password?
+            </a>
             {errors.api && (
               <div className="error-message api-error">{errors.api}</div>
             )}
-
-            {/* Social */}
+            <button type="submit" className="auth-button" disabled={isLoading}>
+              {isLoading ? "Signing In..." : "Sign In"}
+            </button>
+            <div className="form-separator">
+              <span>or sign in with</span>
+            </div>
             <div className="social-container">
               <a href="#" className="social-icon facebook-hover">
                 <FaFacebookF />
@@ -319,19 +317,10 @@ const AuthForm: React.FC = () => {
                 <FcGoogle />
               </a>
             </div>
-
-            <a href="#" className="forgot-password">
-              Forgot your password?
-            </a>
-
-            {/* Nút Submit */}
-            <button type="submit" className="auth-button" disabled={isLoading}>
-              {isLoading ? "Signing In..." : "Sign In"}
-            </button>
           </form>
         </div>
 
-        {/* PHẦN OVERLAY (đã cập nhật onClick) */}
+        {/* PHẦN OVERLAY */}
         <div className="overlay-container">
           <div className="overlay">
             <div className="overlay-panel overlay-left">
@@ -361,3 +350,4 @@ const AuthForm: React.FC = () => {
 };
 
 export default AuthForm;
+
