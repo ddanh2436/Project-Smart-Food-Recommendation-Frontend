@@ -44,12 +44,20 @@ const HeroSection: React.FC = () => {
 
   return (
     <section className="hero-section">
+      {/* CẢI TIẾN 1: Lớp nền cho hiệu ứng Ken Burns */}
+      <div className="hero-bg-ken-burns"></div>
+
+      {/* Lớp nội dung (phải nằm trên lớp nền) */}
       <div className="hero-content">
         
-        {/* 1. Văn bản với hiệu ứng */}
+        {/* CẢI TIẾN 2: Văn bản với hiệu ứng Slide-up-mask */}
         <h1 className="hero-title">
-          <span className="hero-line-1">Open your journey with</span>
-          <span className="hero-line-2">charming cuisine</span>
+          <div className="hero-title-mask">
+            <span className="hero-line-1">Open your journey with</span>
+          </div>
+          <div className="hero-title-mask">
+            <span className="hero-line-2">VietNamese cuisine</span>
+          </div>
         </h1>
 
         {/* 2. Thanh tìm kiếm */}

@@ -1,9 +1,9 @@
 "use client";
-import React from "react";
-import "./Header.css"; // Giả sử bạn có file CSS này
+import React, { useState, useEffect } from "react"; // Import thêm useState, useEffect
+import "./Header.css";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
-import { useAuth } from "@/app/contexts/AuthContext"; // Import hook
+import { useAuth } from "@/app/contexts/AuthContext";
 import Image from "next/image";
 import Link from 'next/link';
 
@@ -35,14 +35,41 @@ const navItems: NavItem[] = [
   { label: "About us", href: "/about-us" },
 ];
 
+
 const Header: React.FC = () => {
   const router = useRouter();
-  const { user, setUser, isLoading } = useAuth(); // Lấy user từ Context
+  const { user, setUser, isLoading } = useAuth();
+  
+  // === THÊM MỚI: State để theo dõi trạng thái cuộn ===
+  const [isScrolled, setIsScrolled] = useState(false);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      // Nếu cuộn xuống hơn 10px, đặt isScrolled = true
+      if (window.scrollY > 10) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    // Thêm event listener khi component mount
+    window.addEventListener("scroll", handleScroll);
+
+    // Xử lý trạng thái ban đầu khi tải trang
+    handleScroll();
+
+    // Cleanup: Gỡ bỏ event listener khi component unmount
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []); // Mảng rỗng đảm bảo useEffect chỉ chạy một lần
+
+  // (Các hàm handleLogoutClick và handleLoginClick giữ nguyên...)
   const handleLogoutClick = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
-    setUser(null); // Cập nhật Global State
+    setUser(null);
     toast.success("Đăng xuất thành công!");
     router.push("/");
   };
@@ -51,8 +78,12 @@ const Header: React.FC = () => {
     router.push("/auth");
   };
 
+
   return (
-    <header className="header-container">
+    // === THAY ĐỔI: Thêm class động dựa trên state 'isScrolled' ===
+    <header 
+      className={`header-container ${isScrolled ? "header-scrolled" : ""}`}
+    >
       {/* 1. Logo (Giữ nguyên) */}
       <div className="header-logo">
         <a href="/">
@@ -66,10 +97,9 @@ const Header: React.FC = () => {
         </a>
       </div>
 
-      {/* === THAY ĐỔI CHÍNH: TẠO KHỐI BAO MỚI === */}
+      {/* 2. Khối bên phải (Giữ nguyên) */}
       <div className="header-right-side">
-
-        {/* 2. Điều hướng (Giờ nằm bên trong khối phải) */}
+        {/* 2a. Điều hướng (Giữ nguyên) */}
         <nav className="header-nav">
           <ul>
             {navItems.map((item) => (
@@ -83,16 +113,13 @@ const Header: React.FC = () => {
           </ul>
         </nav>
 
-        {/* 3. Đăng nhập/Profile (Giờ nằm bên trong khối phải) */}
+        {/* 2b. Đăng nhập/Profile (Giữ nguyên) */}
         <div className="header-login">
           {isLoading ? (
             <div className="loading-skeleton"></div>
           ) : user ? (
-            // Nếu ĐÃ đăng nhập (có user)
             <div className="user-profile-container">
-              
               <Link href="/profile" className="profile-nav-link">
-                {/* Avatar */}
                 {user.picture ? (
                   <Image
                     src={user.picture}
@@ -106,8 +133,6 @@ const Header: React.FC = () => {
                     {user.username.charAt(0).toUpperCase()}
                   </div>
                 )}
-                
-                {/* Tên */}
                 <span className="user-name">
                   {user.username
                     .split(' ')
@@ -115,22 +140,17 @@ const Header: React.FC = () => {
                     .join(' ')}
                 </span>
               </Link>
-              
-              {/* Nút Logout */}
               <button onClick={handleLogoutClick} className="header-auth-button">
                 Logout
               </button>
             </div>
           ) : (
-            // Nếu CHƯA đăng nhập (user là null)
             <button onClick={handleLoginClick} className="header-auth-button">
               Login / Sign Up
             </button>
           )}
         </div>
-      
-      </div> {/* === KẾT THÚC KHỐI BAO MỚI === */}
-
+      </div>
     </header>
   );
 };

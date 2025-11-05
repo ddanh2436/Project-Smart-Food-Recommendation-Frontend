@@ -3,21 +3,43 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
     Arial, sans-serif;
   margin: 0;
+  /* Thêm padding-top để nội dung không bị header che khuất */
+  /* Điều chỉnh 81px này cho phù hợp với chiều cao header của bạn */
+  padding-top: 81px;
 }
 
 /* Container chính của Header */
 .header-container {
   display: flex;
-  justify-content: space-between; /* Đẩy Logo sang trái và khối-phải sang phải */
+  justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  border-bottom: 1px solid #e0e0e0;
-  background-color: #ffffff;
   width: 100%;
   box-sizing: border-box;
+
+  /* === THAY ĐỔI: Hiệu ứng Toggle === */
+  position: fixed; /* Cố định header */
+  top: 0;
+  left: 0;
+  z-index: 1000; /* Đảm bảo header luôn ở trên cùng */
+
+  /* Trạng thái mặc định (ở đầu trang) */
+  background-color: transparent;
+  border-bottom: 1px solid transparent; /* Viền trong suốt */
+
+  /* Hiệu ứng chuyển động mượt */
+  transition: background-color 0.3s ease, border-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
-/* 1. Phần Logo (Bên trái) */
+/* === THÊM MỚI: Trạng thái khi cuộn xuống === */
+.header-container.header-scrolled {
+  background-color: #ffffff; /* Nền trắng */
+  border-bottom-color: #e0e0e0; /* Viền xám */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* Thêm bóng mờ */
+}
+
+/* 1. Phần Logo (Không đổi nhiều) */
 .header-logo a {
   text-decoration: none;
   color: #333;
@@ -25,50 +47,31 @@ body {
   font-weight: 700;
   display: flex;
   align-items: center;
-  /* Cải tiến hover logo */
   transition: opacity 0.2s ease;
 }
-
-.header-logo a:hover {
-  opacity: 0.7;
-}
-
-/* (Các style logo-icon, logo-text, logo-image giữ nguyên...) */
-.header-logo .logo-icon {
-  color: #d9001b; /* Màu đỏ đặc trưng */
-  margin-right: 4px;
-}
-.header-logo .logo-text {
-  text-decoration: underline;
-  text-decoration-thickness: 3px;
-  text-underline-offset: 2px;
-}
-.logo-image { /* Sửa lại selector từ 'logo-image' thành '.logo-image' */
-  height: 45px; 
+/* (Các style logo khác giữ nguyên) */
+.logo-image {
+  height: 45px;
   width: auto;
   max-width: 100%;
   display: block;
 }
 
-
-/* === THÊM MỚI: Khối chứa Nav và Login === */
+/* 2. Khối chứa Nav và Login */
 .header-right-side {
   display: flex;
   align-items: center;
-  gap: 2rem; /* Tạo khoảng cách giữa Nav và Login */
+  gap: 2rem;
 }
 
-
-/* 2. Phần Điều hướng (Giờ là một phần của khối-phải) */
+/* 3. Phần Điều hướng */
 .header-nav ul {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
-  gap: 1.75rem; /* Khoảng cách giữa các mục */
+  gap: 1.75rem;
 }
-
-/* (Phần còn lại của file CSS giữ nguyên) */
 
 .header-nav li {
   display: inline-block;
@@ -76,16 +79,25 @@ body {
 
 .header-nav a {
   text-decoration: none;
-  color: #4a4a4a;
   font-size: 0.95rem;
   font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 0.25rem; /* Khoảng cách giữa text và mũi tên */
-  transition: color 0.2s ease, transform 0.2s ease;
+  gap: 0.25rem;
+
+  /* === THAY ĐỔI: Màu chữ mặc định (để nổi lên) === */
+  color: #ffffff; /* Màu trắng cho nền trong suốt */
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+/* === THÊM MỚI: Đổi màu chữ khi cuộn === */
+.header-container.header-scrolled .header-nav a {
+  color: #4a4a4a; /* Trở lại màu gốc khi nền trắng */
 }
 
 .header-nav a:hover {
+  /* Giữ nguyên hiệu ứng hover, nhưng màu sắc sẽ được
+     quản lý bởi .header-scrolled */
   color: #d4af37;
   transform: translateY(-2px);
 }
@@ -93,17 +105,24 @@ body {
 .header-nav svg {
   width: 14px;
   height: 14px;
-  stroke: #777;
+  /* === THAY ĐỔI: Màu mũi tên mặc định === */
+  stroke: #ffffff; /* Màu trắng cho nền trong suốt */
+  transition: stroke 0.3s ease;
 }
 
-/* 3. Phần Đăng nhập (Giờ là một phần của khối-phải) */
+/* === THÊM MỚI: Đổi màu mũi tên khi cuộn === */
+.header-container.header-scrolled .header-nav svg {
+  stroke: #777; /* Trở lại màu gốc khi nền trắng */
+}
+
+/* 4. Phần Đăng nhập */
 .header-login {
   display: flex;
   align-items: center;
   cursor: default;
 }
 
-/* (Tất cả các style còn lại từ .header-auth-button trở xuống giữ nguyên) */
+/* Nút Login/Signup không cần đổi vì đã có nền riêng */
 .header-auth-button {
   background-color: #f57c00;
   color: white;
@@ -114,21 +133,36 @@ body {
   font-weight: bold;
   cursor: pointer;
   font-size: 14px;
-  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
-
 .header-auth-button:hover {
-  background-color: #ff9800; /* Làm sáng màu */
+  background-color: #ff9800;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+/* (Phần profile) */
 .user-profile-container {
   display: flex;
   align-items: center;
   gap: 12px;
 }
+.profile-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 20px;
+  padding: 4px;
+  transition: background-color 0.2s ease;
+}
+.profile-nav-link:hover {
+  background-color: #f0f0f0;
+}
 
+/* Avatar không cần đổi */
 .user-avatar {
   width: 32px;
   height: 32px;
@@ -137,7 +171,6 @@ body {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
 }
-
 .user-avatar-placeholder {
   width: 32px;
   height: 32px;
@@ -153,7 +186,6 @@ body {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
 }
-
 .user-avatar:hover,
 .user-avatar-placeholder:hover {
   transform: scale(1.1);
@@ -163,18 +195,37 @@ body {
 .user-name {
   font-weight: 600;
   font-size: 14px;
-  color: #333;
   max-width: 100px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   cursor: default;
+
+  /* === THAY ĐỔI: Màu chữ mặc định (để nổi lên) === */
+  color: #ffffff; /* Màu trắng cho nền trong suốt */
+  transition: color 0.3s ease;
 }
 
+/* === THÊM MỚI: Đổi màu tên khi cuộn === */
+.header-container.header-scrolled .user-name {
+  color: #333; /* Trở lại màu gốc khi nền trắng */
+}
+
+/* (Style loading và hover giữ nguyên) */
 .user-profile-container .user-name:hover {
   background-color: transparent !important;
   color: #333 !important;
   cursor: default !important;
+}
+/* Cần cập nhật lại hover cho user-name ở trạng thái cuộn */
+.header-container.header-scrolled .user-profile-container .user-name:hover {
+  color: #333 !important;
+}
+/* Và trạng thái không cuộn */
+.header-container:not(.header-scrolled)
+  .user-profile-container
+  .user-name:hover {
+  color: #ffffff !important;
 }
 
 .loading-skeleton {
@@ -184,24 +235,29 @@ body {
   border-radius: 20px;
   animation: pulse 1.5s infinite ease-in-out;
 }
-
 @keyframes pulse {
-  0% { opacity: 0.5; }
-  50% { opacity: 1; }
-  100% { opacity: 0.5; }
+  0% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.5;
+  }
 }
-
-.profile-nav-link {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  text-decoration: none;
-  color: inherit;
-  border-radius: 20px;
-  padding: 4px;
-  transition: background-color 0.2s ease;
-}
-
-.profile-nav-link:hover {
-  background-color: #f0f0f0;
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header-container {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem;
+  }
+  .header-right-side {
+    gap: 1rem;
+    margin-top: 0.5rem;
+  }
+  .header-nav ul {
+    gap: 1rem;
+  }
 }
