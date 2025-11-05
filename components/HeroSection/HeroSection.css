@@ -1,0 +1,173 @@
+/* --- TÙY CHỈNH HIỆU ỨNG --- */
+:root {
+  /* Đây là nơi bạn điều chỉnh thời gian kéo dài hiệu ứng (Constraint 3) */
+  --hero-anim-duration: 0.8s;
+}
+
+/* --- Keyframe cho hiệu ứng "Merge" (Fade & Rise Up) --- */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(25px); /* Bắt đầu từ vị trí thấp hơn 25px */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0); /* Di chuyển về vị trí 0 */
+  }
+}
+
+/* --- Container chính của Hero Section --- */
+.hero-section {
+  /* Thay đổi '/path/to/your/pho-image.jpg' thành đường dẫn ảnh của bạn */
+  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+    url("/assets/image/pho.png");
+  background-size: cover;
+  background-position: center center;
+  
+  /* Chiều cao (lấy 100% chiều cao màn hình trừ đi chiều cao Header của bạn) */
+  /* Giả sử Header cao 70px */
+  height: calc(100vh - 70px); 
+  
+  display: flex;
+  align-items: center; /* Căn giữa nội dung theo chiều dọc */
+  padding: 0 4rem; /* Đệm trái/phải */
+  color: white;
+  overflow: hidden; /* Đảm bảo hiệu ứng không làm vỡ layout */
+}
+
+.hero-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* Khoảng cách giữa các phần tử */
+  max-width: 550px; /* Giới hạn chiều rộng của khối nội dung */
+}
+
+/* --- 1. Văn bản tiêu đề --- */
+.hero-title {
+  font-size: 3.5rem; /* Cỡ chữ lớn */
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.hero-title .hero-line-1 {
+  font-weight: 400; /* Dòng 1 mỏng hơn */
+  font-size: 2.8rem;
+  display: block; /* Cho 2 dòng tách biệt */
+}
+
+.hero-title .hero-line-2 {
+  font-weight: 800; /* Dòng 2 đậm hơn */
+}
+
+/* --- 2. Thanh tìm kiếm --- */
+.search-bar-wrapper {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  color: #333;
+}
+
+.search-icon {
+  margin-right: 0.75rem;
+  color: #555; /* Màu icon */
+  display: flex; /* Giúp icon căn giữa */
+  align-items: center;
+}
+
+.search-input {
+  /* Đây là mấu chốt cho Constraint 4 */
+  border: none;
+  outline: none;
+  background-color: transparent;
+  
+  width: 100%;
+  font-size: 1rem;
+  color: #111;
+}
+
+.search-input::placeholder {
+  color: #999;
+}
+
+.clear-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #777;
+  padding: 0;
+  margin-left: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+
+/* --- 3. Chữ "Or" --- */
+.hero-or {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #f0f0f0;
+  margin-left: 0.5rem;
+}
+
+/* --- 4. Nút bấm --- */
+.hero-discover-btn {
+  background-color: rgba(255, 255, 255, 0.1); /* Nền hơi trong suốt */
+  border: 1.5px solid #d4af37; /* Viền màu vàng giống trong ảnh */
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  align-self: flex-start; /* Chỉ cho nút co lại vừa với nội dung */
+}
+
+.hero-discover-btn:hover {
+  background-color: #d4af37;
+  color: #000;
+}
+
+
+/* --- ÁP DỤNG HIỆU ỨNG (Constraint 2) --- */
+/* * Chúng ta sẽ áp dụng hiệu ứng cho từng phần tử.
+ * Tất cả đều phải có 'animation-fill-mode: forwards' 
+ * để giữ lại trạng thái cuối cùng (không bị mờ đi sau khi chạy xong).
+*/
+
+/* 1. Dòng chữ 1 */
+.hero-line-1 {
+  opacity: 0; /* Ẩn đi lúc đầu */
+  animation: fadeInUp var(--hero-anim-duration) ease-out forwards;
+  animation-delay: 0.2s; /* Xuất hiện sau 0.2s */
+}
+
+/* 2. Dòng chữ 2 */
+.hero-line-2 {
+  opacity: 0;
+  animation: fadeInUp var(--hero-anim-duration) ease-out forwards;
+  animation-delay: 0.4s; /* Xuất hiện sau dòng 1 */
+}
+
+/* 3. Thanh tìm kiếm */
+.search-bar-wrapper {
+  opacity: 0;
+  animation: fadeInUp var(--hero-anim-duration) ease-out forwards;
+  animation-delay: 0.6s; /* ... */
+}
+
+/* 4. Chữ "Or" */
+.hero-or {
+  opacity: 0;
+  animation: fadeInUp var(--hero-anim-duration) ease-out forwards;
+  animation-delay: 0.8s; /* ... */
+}
+
+/* 5. Nút bấm */
+.hero-discover-btn {
+  opacity: 0;
+  animation: fadeInUp var(--hero-anim-duration) ease-out forwards;
+  animation-delay: 1.0s; /* ... */
+}

@@ -8,48 +8,58 @@ body {
 /* Container chính của Header */
 .header-container {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* Đẩy Logo sang trái và khối-phải sang phải */
   align-items: center;
-  padding: 1rem 2rem; /* Tăng padding cho rộng rãi */
-  border-bottom: 1px solid #e0e0e0; /* Viền mỏng bên dưới */
+  padding: 1rem 2rem;
+  border-bottom: 1px solid #e0e0e0;
   background-color: #ffffff;
   width: 100%;
-  box-sizing: border-box; /* Đảm bảo padding không làm vỡ layout */
+  box-sizing: border-box;
 }
 
 /* 1. Phần Logo (Bên trái) */
 .header-logo a {
   text-decoration: none;
   color: #333;
-  font-size: 1.8rem; /* Tăng kích thước logo */
+  font-size: 1.8rem;
   font-weight: 700;
   display: flex;
   align-items: center;
+  /* Cải tiến hover logo */
+  transition: opacity 0.2s ease;
 }
 
-/* Mô phỏng phần icon grid màu đỏ */
+.header-logo a:hover {
+  opacity: 0.7;
+}
+
+/* (Các style logo-icon, logo-text, logo-image giữ nguyên...) */
 .header-logo .logo-icon {
   color: #d9001b; /* Màu đỏ đặc trưng */
   margin-right: 4px;
-  /* Trong thực tế, đây sẽ là một thẻ <img> hoặc <svg> */
 }
-
-/* Phần text 'atlas' có gạch chân */
 .header-logo .logo-text {
   text-decoration: underline;
   text-decoration-thickness: 3px;
   text-underline-offset: 2px;
 }
-
-logo-image {
+.logo-image { /* Sửa lại selector từ 'logo-image' thành '.logo-image' */
   height: 45px; 
-  width: auto;  /* RẤT QUAN TRỌNG: Để chiều rộng tự động tính toán
-     để giữ đúng tỉ lệ khung hình của ảnh, không bị méo. */
-  max-width: 100%; /* Đảm bảo ảnh không bị tràn ra ngoài nếu nó quá lớn */
-  display: block; /* Loại bỏ khoảng trắng dưới ảnh */
+  width: auto;
+  max-width: 100%;
+  display: block;
 }
 
-/* 2. Phần Điều hướng (Giữa) - ĐÃ CẢI TIẾN */
+
+/* === THÊM MỚI: Khối chứa Nav và Login === */
+.header-right-side {
+  display: flex;
+  align-items: center;
+  gap: 2rem; /* Tạo khoảng cách giữa Nav và Login */
+}
+
+
+/* 2. Phần Điều hướng (Giờ là một phần của khối-phải) */
 .header-nav ul {
   list-style: none;
   margin: 0;
@@ -57,6 +67,8 @@ logo-image {
   display: flex;
   gap: 1.75rem; /* Khoảng cách giữa các mục */
 }
+
+/* (Phần còn lại của file CSS giữ nguyên) */
 
 .header-nav li {
   display: inline-block;
@@ -70,33 +82,28 @@ logo-image {
   display: flex;
   align-items: center;
   gap: 0.25rem; /* Khoảng cách giữa text và mũi tên */
-  
-  /* CẢI TIẾN: Thêm 'transform' vào transition */
   transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .header-nav a:hover {
   color: #d4af37;
-  
-  /* CẢI TIẾN: Thêm hiệu ứng nhấc lên */
   transform: translateY(-2px);
 }
 
-/* Tùy chỉnh icon mũi tên */
 .header-nav svg {
   width: 14px;
   height: 14px;
   stroke: #777;
 }
 
-/* 3. Phần Đăng nhập (Bên phải) - ĐÃ CẢI TIẾN */
+/* 3. Phần Đăng nhập (Giờ là một phần của khối-phải) */
 .header-login {
   display: flex;
   align-items: center;
   cursor: default;
 }
 
-/* Style cho nút Login/Logout */
+/* (Tất cả các style còn lại từ .header-auth-button trở xuống giữ nguyên) */
 .header-auth-button {
   background-color: #f57c00;
   color: white;
@@ -107,20 +114,15 @@ logo-image {
   font-weight: bold;
   cursor: pointer;
   font-size: 14px;
-  
-  /* CẢI TIẾN: Thêm 'transform' và 'box-shadow' vào transition */
   transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .header-auth-button:hover {
   background-color: #ff9800; /* Làm sáng màu */
-  
-  /* CẢI TIẾN: Nhấc nút lên và thêm đổ bóng */
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Container cho profile (khi đã đăng nhập) */
 .user-profile-container {
   display: flex;
   align-items: center;
@@ -132,10 +134,8 @@ logo-image {
   height: 32px;
   border-radius: 50%;
   object-fit: cover;
-  
-  /* CẢI TIẾN: Thêm transition và cursor */
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  cursor: pointer; /* Làm cho nó có vẻ bấm được (cho menu tương lai) */
+  cursor: pointer;
 }
 
 .user-avatar-placeholder {
@@ -150,16 +150,13 @@ logo-image {
   font-weight: bold;
   font-size: 16px;
   line-height: 1;
-  
-  /* CẢI TIẾN: Thêm transition và cursor */
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
 }
 
-/* CẢI TIẾN: Thêm hiệu ứng hover cho avatar */
 .user-avatar:hover,
 .user-avatar-placeholder:hover {
-  transform: scale(1.1); /* Phóng to avatar */
+  transform: scale(1.1);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -174,14 +171,12 @@ logo-image {
   cursor: default;
 }
 
-/* Đảm bảo tên không bị dính hiệu ứng hover */
 .user-profile-container .user-name:hover {
   background-color: transparent !important;
   color: #333 !important;
   cursor: default !important;
 }
 
-/* CSS cho trạng thái loading (giữ nguyên) */
 .loading-skeleton {
   width: 120px;
   height: 32px;
@@ -196,28 +191,17 @@ logo-image {
   100% { opacity: 0.5; }
 }
 
-/* CẢI TIẾN: Thêm hiệu ứng hover cho cả Logo */
-.header-logo a {
-  /* ... (các style logo cũ của bạn) ... */
-  transition: opacity 0.2s ease;
-}
-
-.header-logo a:hover {
-  opacity: 0.7;
-}
-
 .profile-nav-link {
   display: flex;
   align-items: center;
-  gap: 12px; /* Giữ khoảng cách giữa avatar và tên */
-  text-decoration: none; /* Tắt gạch chân của link */
-  color: inherit; /* Kế thừa màu chữ (để tên vẫn có màu #333) */
-  border-radius: 20px; /* Bo góc */
-  padding: 4px; /* Thêm tí đệm */
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 20px;
+  padding: 4px;
   transition: background-color 0.2s ease;
 }
 
-/* Thêm hiệu ứng hover cho cả cụm avatar/tên */
 .profile-nav-link:hover {
-  background-color: #f0f0f0; /* Thêm nền xám nhạt khi hover */
+  background-color: #f0f0f0;
 }

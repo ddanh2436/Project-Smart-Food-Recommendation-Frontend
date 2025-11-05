@@ -4,7 +4,6 @@ import "./globals.css"; //
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@/app/contexts/AuthContext"; // Import
 
-
 // Sửa lỗi font
 const geistSans = Geist({
   variable: "--font-geist-sans",
