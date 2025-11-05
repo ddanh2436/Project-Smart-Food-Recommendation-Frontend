@@ -1,7 +1,27 @@
-/* --- TÙY CHỈNH HIỆU ỨNG --- */
 :root {
-  /* Đây là nơi bạn điều chỉnh thời gian kéo dài hiệu ứng (Constraint 3) */
   --hero-anim-duration: 0.8s;
+}
+
+@keyframes kenBurns {
+  0% {
+    transform: scale(1.05) translate(0, 0);
+  }
+  100% {
+    /* Phóng to hơn một chút và di chuyển nhẹ */
+    transform: scale(1.15) translate(-2%, -1%);
+  }
+}
+
+/* MỚI: Keyframe "Slide Up" (thay thế cho text) */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(100%); /* Bắt đầu từ dưới */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0); /* Đi lên vị trí 0 */
+  }
 }
 
 /* --- Keyframe cho hiệu ứng "Merge" (Fade & Rise Up) --- */
@@ -18,21 +38,34 @@
 
 /* --- Container chính của Hero Section --- */
 .hero-section {
-  /* Thay đổi '/path/to/your/pho-image.jpg' thành đường dẫn ảnh của bạn */
+  /* Xóa background tại đây và chuyển xuống lớp phủ */
+  background-color: #111; /* Màu nền dự phòng nếu ảnh lỗi */
+  height: calc(100vh - 70px);
+  display: flex;
+  align-items: center;
+  padding: 0 4rem;
+  color: white;
+  overflow: hidden; /* Rất quan trọng! */
+  position: relative; /* Cần thiết để chứa lớp phủ */
+}
+
+/* MỚI: Lớp phủ Ken Burns */
+.hero-bg-ken-burns {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1; /* Nằm dưới nội dung */
+
+  /* Chuyển background từ .hero-section sang đây */
   background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
     url("/assets/image/pho.png");
   background-size: cover;
   background-position: center center;
-  
-  /* Chiều cao (lấy 100% chiều cao màn hình trừ đi chiều cao Header của bạn) */
-  /* Giả sử Header cao 70px */
-  height: calc(100vh - 70px); 
-  
-  display: flex;
-  align-items: center; /* Căn giữa nội dung theo chiều dọc */
-  padding: 0 4rem; /* Đệm trái/phải */
-  color: white;
-  overflow: hidden; /* Đảm bảo hiệu ứng không làm vỡ layout */
+
+  /* Áp dụng animation: chạy 20s, lặp lại, chạy ngược lại (alternate) */
+  animation: kenBurns 20s ease-out infinite alternate;
 }
 
 .hero-content {
@@ -40,6 +73,8 @@
   flex-direction: column;
   gap: 1.5rem; /* Khoảng cách giữa các phần tử */
   max-width: 550px; /* Giới hạn chiều rộng của khối nội dung */
+  position: relative;
+  z-index: 2;
 }
 
 /* --- 1. Văn bản tiêu đề --- */
@@ -48,6 +83,13 @@
   font-weight: 700;
   line-height: 1.1;
   margin: 0;
+}
+
+.hero-title-mask {
+  display: block; /* Đảm bảo nó chiếm đủ chiều rộng */
+  overflow: hidden;
+  /* Thêm một chút padding để tránh bị cắt chữ (tùy font) */
+  padding-bottom: 0.2rem;
 }
 
 .hero-title .hero-line-1 {
@@ -68,6 +110,11 @@
   border-radius: 8px;
   padding: 0.75rem 1rem;
   color: #333;
+  transition: box-shadow 0.2s ease;
+}
+
+.search-bar-wrapper:focus-within {
+  box-shadow: 0 0 0 2.5px #d4af37; /* Viền vàng khi focus */
 }
 
 .search-icon {
@@ -82,7 +129,7 @@
   border: none;
   outline: none;
   background-color: transparent;
-  
+
   width: 100%;
   font-size: 1rem;
   color: #111;
@@ -113,42 +160,38 @@
 
 /* --- 4. Nút bấm --- */
 .hero-discover-btn {
-  background-color: rgba(255, 255, 255, 0.1); /* Nền hơi trong suốt */
-  border: 1.5px solid #d4af37; /* Viền màu vàng giống trong ảnh */
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1.5px solid #d4af37;
   color: white;
   padding: 0.8rem 1.5rem;
   border-radius: 6px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
+  align-self: flex-start;
+  /* CẬP NHẬT: transition (giữ nguyên) */
   transition: all 0.2s ease;
-  align-self: flex-start; /* Chỉ cho nút co lại vừa với nội dung */
 }
-
 .hero-discover-btn:hover {
   background-color: #d4af37;
   color: #000;
+
+  /* MỚI: Nâng nút lên và thêm bóng đổ */
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
-
-
-/* --- ÁP DỤNG HIỆU ỨNG (Constraint 2) --- */
-/* * Chúng ta sẽ áp dụng hiệu ứng cho từng phần tử.
- * Tất cả đều phải có 'animation-fill-mode: forwards' 
- * để giữ lại trạng thái cuối cùng (không bị mờ đi sau khi chạy xong).
-*/
 
 /* 1. Dòng chữ 1 */
 .hero-line-1 {
-  opacity: 0; /* Ẩn đi lúc đầu */
-  animation: fadeInUp var(--hero-anim-duration) ease-out forwards;
-  animation-delay: 0.2s; /* Xuất hiện sau 0.2s */
+  opacity: 0;
+  animation: slideUp var(--hero-anim-duration) ease-out forwards;
+  animation-delay: 0.2s;
 }
-
 /* 2. Dòng chữ 2 */
 .hero-line-2 {
   opacity: 0;
-  animation: fadeInUp var(--hero-anim-duration) ease-out forwards;
-  animation-delay: 0.4s; /* Xuất hiện sau dòng 1 */
+  animation: slideUp var(--hero-anim-duration) ease-out forwards;
+  animation-delay: 0.4s;
 }
 
 /* 3. Thanh tìm kiếm */
@@ -169,5 +212,5 @@
 .hero-discover-btn {
   opacity: 0;
   animation: fadeInUp var(--hero-anim-duration) ease-out forwards;
-  animation-delay: 1.0s; /* ... */
+  animation-delay: 1s; /* ... */
 }
