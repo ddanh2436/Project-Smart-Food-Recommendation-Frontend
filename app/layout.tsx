@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css"; //
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@/app/contexts/AuthContext"; // Import
-import "hover.css/css/hover-min.css";
 
 // Sửa lỗi font
 const geistSans = Geist({
