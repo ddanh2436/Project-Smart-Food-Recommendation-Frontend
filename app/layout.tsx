@@ -4,6 +4,10 @@ import "./globals.css"; //
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@/app/contexts/AuthContext"; // Import
 
+// === 1. IMPORT HEADER VÀ CSS CỦA NÓ ===
+import Header from "@/components/Header/Header";
+import "@/components/Header/Header.css"; 
+
 // Sửa lỗi font
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +36,13 @@ export default function RootLayout({
       >
         <AuthProvider> {/* Bọc Provider ở ngoài cùng */}
           <Toaster position="top-center" /> {/* Thêm Toaster */}
+          
+          {/* === 2. THÊM HEADER VÀO ĐÂY === */}
+          <Header />
+          
+          {/* children là các file page.tsx của bạn */}
           {children}
+
         </AuthProvider>
       </body>
     </html>
