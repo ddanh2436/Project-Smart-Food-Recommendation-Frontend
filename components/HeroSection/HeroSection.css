@@ -2,107 +2,136 @@
   --hero-anim-duration: 0.8s;
 }
 
+/* (Keyframes cũ: kenBurns, slideUp, fadeInUp giữ nguyên) */
 @keyframes kenBurns {
   0% {
     transform: scale(1.05) translate(0, 0);
   }
   100% {
-    /* Phóng to hơn một chút và di chuyển nhẹ */
     transform: scale(1.15) translate(-2%, -1%);
   }
 }
-
-/* MỚI: Keyframe "Slide Up" (thay thế cho text) */
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(100%); /* Bắt đầu từ dưới */
+    transform: translateY(100%);
   }
   to {
     opacity: 1;
-    transform: translateY(0); /* Đi lên vị trí 0 */
+    transform: translateY(0);
   }
 }
-
-/* --- Keyframe cho hiệu ứng "Merge" (Fade & Rise Up) --- */
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(25px); /* Bắt đầu từ vị trí thấp hơn 25px */
+    transform: translateY(25px);
   }
   to {
     opacity: 1;
-    transform: translateY(0); /* Di chuyển về vị trí 0 */
+    transform: translateY(0);
   }
 }
 
-/* --- Container chính của Hero Section --- */
+/* === CẬP NHẬT QUAN TRỌNG: KEYFRAME "DỪNG VÀ TRƯỢT" === */
+/*
+  Tổng 15s (3 slide x 5s).
+  Mỗi "bước" chiếm 33.33% tổng thời gian.
+  - 0% -> 30%:    Đứng yên ở Slide 1 (Món ăn)
+  - 33.33%:       Trượt đến Slide 2 (Đồ uống)
+  - 33.33% -> 63.33%: Đứng yên ở Slide 2
+  - 66.66%:       Trượt đến Slide 3 (Nhà hàng)
+  - 66.66% -> 96.66%: Đứng yên ở Slide 3
+  - 100%:         Trượt đến Slide 4 (Bản sao Món ăn)
+*/
+@keyframes slideFeatured-stepped {
+  /* Giai đoạn 1: Hiện Món ăn (5s) */
+  0% {
+    transform: translateX(0); /* Vị trí 0/4 */
+  }
+  30% {
+    transform: translateX(0);
+  }
+  /* Giai đoạn 2: Hiện Đồ uống (5s) */
+  33.33% {
+    transform: translateX(-25%); /* Vị trí 1/4 */
+  }
+  63.33% {
+    transform: translateX(-25%);
+  }
+  /* Giai đoạn 3: Hiện Nhà hàng (5s) */
+  66.66% {
+    transform: translateX(-50%); /* Vị trí 2/4 */
+  }
+  96.66% {
+    transform: translateX(-50%);
+  }
+  /* Giai đoạn 4: Trượt về bản sao để lặp */
+  100% {
+    transform: translateX(-75%); /* Vị trí 3/4 */
+  }
+}
+
+
+/* --- (Tất cả style .hero-section, .hero-content... giữ nguyên) --- */
 .hero-section {
-  /* Xóa background tại đây và chuyển xuống lớp phủ */
-  background-color: #111; /* Màu nền dự phòng nếu ảnh lỗi */
+  background-color: #111;
   height: calc(100vh - 70px);
   display: flex;
   align-items: center;
-  padding: 0 4rem;
   color: white;
-  overflow: hidden; /* Rất quan trọng! */
-  position: relative; /* Cần thiết để chứa lớp phủ */
+  overflow: hidden;
+  position: relative;
 }
-
-/* MỚI: Lớp phủ Ken Burns */
 .hero-bg-ken-burns {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 1; /* Nằm dưới nội dung */
-
-  /* Chuyển background từ .hero-section sang đây */
+  z-index: 1;
   background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
     url("/assets/image/pho.png");
   background-size: cover;
   background-position: center center;
-
-  /* Áp dụng animation: chạy 20s, lặp lại, chạy ngược lại (alternate) */
   animation: kenBurns 20s ease-out infinite alternate;
 }
-
+.hero-main-wrapper {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4rem;
+  box-sizing: border-box;
+}
 .hero-content {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem; /* Khoảng cách giữa các phần tử */
-  max-width: 550px; /* Giới hạn chiều rộng của khối nội dung */
+  gap: 1.5rem;
+  max-width: 550px;
   position: relative;
   z-index: 2;
 }
-
-/* --- 1. Văn bản tiêu đề --- */
 .hero-title {
-  font-size: 3.5rem; /* Cỡ chữ lớn */
+  font-size: 3.5rem;
   font-weight: 700;
   line-height: 1.1;
   margin: 0;
 }
-
 .hero-title-mask {
-  display: block; /* Đảm bảo nó chiếm đủ chiều rộng */
+  display: block;
   overflow: hidden;
-  /* Thêm một chút padding để tránh bị cắt chữ (tùy font) */
   padding-bottom: 0.2rem;
 }
-
 .hero-title .hero-line-1 {
-  font-weight: 400; /* Dòng 1 mỏng hơn */
+  font-weight: 400;
   font-size: 2.8rem;
-  display: block; /* Cho 2 dòng tách biệt */
+  display: block;
 }
-
 .hero-title .hero-line-2 {
-  font-weight: 800; /* Dòng 2 đậm hơn */
+  font-weight: 800;
 }
-
-/* --- 2. Thanh tìm kiếm --- */
 .search-bar-wrapper {
   display: flex;
   align-items: center;
@@ -112,33 +141,26 @@
   color: #333;
   transition: box-shadow 0.2s ease;
 }
-
 .search-bar-wrapper:focus-within {
-  box-shadow: 0 0 0 2.5px #d4af37; /* Viền vàng khi focus */
+  box-shadow: 0 0 0 2.5px #d4af37;
 }
-
 .search-icon {
   margin-right: 0.75rem;
-  color: #555; /* Màu icon */
-  display: flex; /* Giúp icon căn giữa */
+  color: #555;
+  display: flex;
   align-items: center;
 }
-
 .search-input {
-  /* Đây là mấu chốt cho Constraint 4 */
   border: none;
   outline: none;
   background-color: transparent;
-
   width: 100%;
   font-size: 1rem;
   color: #111;
 }
-
 .search-input::placeholder {
   color: #999;
 }
-
 .clear-icon {
   background: none;
   border: none;
@@ -149,16 +171,12 @@
   display: flex;
   align-items: center;
 }
-
-/* --- 3. Chữ "Or" --- */
 .hero-or {
   font-size: 1.1rem;
   font-weight: 500;
   color: #f0f0f0;
   margin-left: 0.5rem;
 }
-
-/* --- 4. Nút bấm --- */
 .hero-discover-btn {
   background-color: rgba(255, 255, 255, 0.1);
   border: 1.5px solid #d4af37;
@@ -169,48 +187,112 @@
   font-weight: 600;
   cursor: pointer;
   align-self: flex-start;
-  /* CẬP NHẬT: transition (giữ nguyên) */
   transition: all 0.2s ease;
 }
 .hero-discover-btn:hover {
   background-color: #d4af37;
   color: #000;
-
-  /* MỚI: Nâng nút lên và thêm bóng đổ */
   transform: translateY(-3px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
-
-/* 1. Dòng chữ 1 */
+/* (Animations .hero-line-1... giữ nguyên) */
 .hero-line-1 {
   opacity: 0;
   animation: slideUp var(--hero-anim-duration) ease-out forwards;
   animation-delay: 0.2s;
 }
-/* 2. Dòng chữ 2 */
 .hero-line-2 {
   opacity: 0;
   animation: slideUp var(--hero-anim-duration) ease-out forwards;
   animation-delay: 0.4s;
 }
-
-/* 3. Thanh tìm kiếm */
 .search-bar-wrapper {
   opacity: 0;
   animation: fadeInUp var(--hero-anim-duration) ease-out forwards;
-  animation-delay: 0.6s; /* ... */
+  animation-delay: 0.6s;
 }
-
-/* 4. Chữ "Or" */
 .hero-or {
   opacity: 0;
   animation: fadeInUp var(--hero-anim-duration) ease-out forwards;
-  animation-delay: 0.8s; /* ... */
+  animation-delay: 0.8s;
 }
-
-/* 5. Nút bấm */
 .hero-discover-btn {
   opacity: 0;
   animation: fadeInUp var(--hero-anim-duration) ease-out forwards;
-  animation-delay: 1s; /* ... */
+  animation-delay: 1s;
+}
+
+/* --- (STYLE CHO PANEL BÊN PHẢI) --- */
+.hero-featured-panel {
+  max-width: 350px;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  color: white;
+  opacity: 0;
+  animation: fadeInUp var(--hero-anim-duration) ease-out forwards;
+  animation-delay: 1.2s;
+}
+
+.featured-slider-wrapper {
+  overflow: hidden;
+}
+
+.featured-slider {
+  display: flex;
+  
+  /* 4 SLIDES = 400% WIDTH */
+  width: 400%;
+  
+  /* === CẬP NHẬT QUAN TRỌNG: SỬ DỤNG KEYFRAME VÀ HIỆU ỨNG MỚI === */
+  animation: slideFeatured-stepped 15s ease-in-out infinite;
+  /*
+    - `slideFeatured-stepped`: Keyframe "dừng"
+    - `15s`: (3 slide x 5 giây)
+    - `ease-in-out`: Hiệu ứng "lướt nhanh" bạn muốn
+    - `infinite`: Lặp vô tận
+  */
+}
+
+.featured-list {
+  /* 1/4 CỦA 400% */
+  width: 25%;
+  
+  flex-shrink: 0;
+  padding: 0 0.5rem;
+  box-sizing: border-box;
+}
+
+/* (Các style .featured-list h3, ul, li giữ nguyên) */
+.featured-list h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #d4af37;
+}
+.featured-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.featured-list li {
+  font-size: 0.95rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+.featured-list li:last-child {
+  border-bottom: none;
+}
+.featured-list li:hover {
+  color: #d4af37;
 }

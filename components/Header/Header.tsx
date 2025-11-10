@@ -1,11 +1,11 @@
 "use client";
-import React, { useState, useEffect } from "react"; // Import thêm useState, useEffect
+import React, { useState, useEffect } from "react";
 import "./Header.css";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { useAuth } from "@/app/contexts/AuthContext";
 import Image from "next/image";
-import Link from 'next/link';
+import Link from 'next/link'; // Bạn đã import sẵn
 
 // (Component DropdownArrow và NavItem interface/data giữ nguyên...)
 const DropdownArrow = () => (
@@ -32,7 +32,7 @@ const navItems: NavItem[] = [
   { label: "Restaurants", href: "/restaurants", hasDropdown: true },
   { label: "Near Me", href: "/near-me" },
   { label: "Foods and Drinks", href: "/foods-and-drinks"  },
-  { label: "About us", href: "/about-us" },
+  { label: "About us", href: "/about-us" }, // Link này sẽ trỏ đến trang chúng ta sắp tạo
 ];
 
 
@@ -40,30 +40,22 @@ const Header: React.FC = () => {
   const router = useRouter();
   const { user, setUser, isLoading } = useAuth();
   
-  // === THÊM MỚI: State để theo dõi trạng thái cuộn ===
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      // Nếu cuộn xuống hơn 10px, đặt isScrolled = true
       if (window.scrollY > 10) {
         setIsScrolled(true);
       } else {
         setIsScrolled(false);
       }
     };
-
-    // Thêm event listener khi component mount
     window.addEventListener("scroll", handleScroll);
-
-    // Xử lý trạng thái ban đầu khi tải trang
     handleScroll();
-
-    // Cleanup: Gỡ bỏ event listener khi component unmount
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, []); // Mảng rỗng đảm bảo useEffect chỉ chạy một lần
+  }, []); 
 
   // (Các hàm handleLogoutClick và handleLoginClick giữ nguyên...)
   const handleLogoutClick = () => {
@@ -80,7 +72,6 @@ const Header: React.FC = () => {
 
 
   return (
-    // === THAY ĐỔI: Thêm class động dựa trên state 'isScrolled' ===
     <header 
       className={`header-container ${isScrolled ? "header-scrolled" : ""}`}
     >
@@ -99,19 +90,23 @@ const Header: React.FC = () => {
 
       {/* 2. Khối bên phải (Giữ nguyên) */}
       <div className="header-right-side">
-        {/* 2a. Điều hướng (Giữ nguyên) */}
+        
+        {/* === THAY ĐỔI DUY NHẤT Ở ĐÂY === */}
         <nav className="header-nav">
           <ul>
             {navItems.map((item) => (
               <li key={item.label}>
-                <a href={item.href}>
+                {/* Thay thế <a> bằng <Link> */}
+                <Link href={item.href}>
                   {item.label}
                   {item.hasDropdown && <DropdownArrow />}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
         </nav>
+        {/* === KẾT THÚC THAY ĐỔI === */}
+
 
         {/* 2b. Đăng nhập/Profile (Giữ nguyên) */}
         <div className="header-login">
