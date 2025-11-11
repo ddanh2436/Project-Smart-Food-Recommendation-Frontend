@@ -5,7 +5,6 @@ body {
   margin: 0;
   /* Thêm padding-top để nội dung không bị header che khuất */
   /* Điều chỉnh 81px này cho phù hợp với chiều cao header của bạn */
-  padding-top: 81px;
 }
 
 /* Container chính của Header */

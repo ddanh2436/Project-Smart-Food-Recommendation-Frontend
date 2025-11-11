@@ -76,10 +76,10 @@ const HeroSection: React.FC = () => {
         <div className="hero-content">
           <h1 className="hero-title">
             <div className="hero-title-mask">
-              <span className="hero-line-1">Open your journey with</span>
+              <span className="hero-line-1">Begin your journey with</span>
             </div>
             <div className="hero-title-mask">
-              <span className="hero-line-2">VietNamese cuisine</span>
+              <span className="hero-line-2">Vietnamese cuisine</span>
             </div>
           </h1>
           <div className="search-bar-wrapper">
@@ -114,7 +114,7 @@ const HeroSection: React.FC = () => {
             
               {/* Slide 1: Top Món ăn */}
               <div className="featured-list foods-list">
-                <h3>Top 5 Món ăn</h3>
+                <h3>Top 5 Dishes</h3>
                 <ul>
                   {topFoods.map((food, index) => (
                     <li key={`food1-${index}`}>{food}</li>
@@ -124,7 +124,7 @@ const HeroSection: React.FC = () => {
 
               {/* Slide 2: Top Đồ uống */}
               <div className="featured-list drinks-list">
-                <h3>Top 5 Đồ uống</h3>
+                <h3>Top 5 Drinks</h3>
                 <ul>
                   {topDrinks.map((drink, index) => (
                     <li key={`drink-${index}`}>{drink}</li>
@@ -134,7 +134,7 @@ const HeroSection: React.FC = () => {
 
               {/* Slide 3: Top Nhà hàng */}
               <div className="featured-list restaurants-list">
-                <h3>Top 5 Nhà hàng</h3>
+                <h3>Top 5 Restaurants</h3>
                 <ul>
                   {topRestaurants.map((restaurant, index) => (
                     <li key={`resto-${index}`}>{restaurant}</li>
@@ -145,7 +145,7 @@ const HeroSection: React.FC = () => {
               {/* === SLIDE 4: BẢN SAO CỦA SLIDE 1 === */}
               {/* Đây là mấu chốt để tạo vòng lặp vô tận */}
               <div className="featured-list foods-list-copy">
-                <h3>Top 5 Món ăn</h3>
+                <h3>Top 5 Dishes</h3>
                 <ul>
                   {topFoods.map((food, index) => (
                     <li key={`food2-${index}`}>{food}</li>
