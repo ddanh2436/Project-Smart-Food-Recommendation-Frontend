@@ -37,8 +37,8 @@ export default function RootLayout({
         <AuthProvider> {/* Bọc Provider ở ngoài cùng */}
           <Toaster position="top-center" /> {/* Thêm Toaster */}
           
-          {/* === 2. THÊM HEADER VÀO ĐÂY === */}
-          <Header />
+          {}
+          
           
           {/* children là các file page.tsx của bạn */}
           {children}
