@@ -12,10 +12,7 @@ export default function MainLayout({
     <>
       <Header />
       
-      {/* THÊM PADDING VÀO ĐÂY
-        Nó sẽ đẩy nội dung trang chính xuống 81px,
-        nhưng sẽ không ảnh hưởng gì đến trang Login 
-      */}
+      {}
       <main style={{ paddingTop: '81px' }}> 
         {children}
       </main>
