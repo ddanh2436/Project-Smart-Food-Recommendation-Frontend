@@ -1,8 +1,35 @@
+// components/HeroSection/HeroSection.tsx
 "use client";
 import React, { useState } from "react";
 import "./HeroSection.css";
+import { useAuth } from "@/app/contexts/AuthContext";
 
-// --- DỮ LIỆU MOCK ---
+// === DỮ LIỆU NGÔN NGỮ ===
+const langData = {
+  en: {
+    line1: "Begin your journey with",
+    line2: "Vietnamese cuisine",
+    placeholder: "Search for your favorites",
+    discoverBtn: "Discover specialities here",
+    or: "Or",
+    topDishes: "Top 5 Dishes",
+    topDrinks: "Top 5 Drinks",
+    topRestaurants: "Top 5 Restaurants",
+  },
+  vn: {
+    line1: "Khám phá hành trình ẩm thực",
+    line2: "Việt Nam",
+    placeholder: "Tìm kiếm món ăn yêu thích của bạn",
+    discoverBtn: "Khám phá đặc sản tại đây",
+    or: "Hoặc",
+    topDishes: "Top 5 Món ăn",
+    topDrinks: "Top 5 Thức uống",
+    topRestaurants: "Top 5 Nhà hàng",
+  }
+};
+// =====================================
+
+// --- DỮ LIỆU MOCK (Giữ nguyên) ---
 const topFoods = [
   "Phở Bò Tái Chín",
   "Bánh Mì Thập Cẩm",
@@ -62,6 +89,8 @@ const ClearIcon = () => (
 
 const HeroSection: React.FC = () => {
   const [searchValue, setSearchValue] = useState("");
+  const { currentLang } = useAuth();
+  const T = langData[currentLang]; 
 
   const handleClearSearch = () => {
     setSearchValue("");
@@ -72,14 +101,14 @@ const HeroSection: React.FC = () => {
       <div className="hero-bg-ken-burns"></div>
       <div className="hero-main-wrapper">
 
-        {/* PHẦN BÊN TRÁI (GIỮ NGUYÊN) */}
+        {/* PHẦN BÊN TRÁI (SỬ DỤNG T) */}
         <div className="hero-content">
           <h1 className="hero-title">
             <div className="hero-title-mask">
-              <span className="hero-line-1">Begin your journey with</span>
+              <span className="hero-line-1">{T.line1}</span>
             </div>
             <div className="hero-title-mask">
-              <span className="hero-line-2">Vietnamese cuisine</span>
+              <span className="hero-line-2">{T.line2}</span>
             </div>
           </h1>
           <div className="search-bar-wrapper">
@@ -89,7 +118,7 @@ const HeroSection: React.FC = () => {
             <input
               type="text"
               className="search-input"
-              placeholder="Search for your favorites"
+              placeholder={T.placeholder} 
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
             />
@@ -99,22 +128,20 @@ const HeroSection: React.FC = () => {
               </button>
             )}
           </div>
-          <span className="hero-or">Or</span>
+          <span className="hero-or">{T.or}</span> 
           <button className="hero-discover-btn">
-            Discover specialities here
+            {T.discoverBtn} 
           </button>
         </div>
 
-        {/* PANEL BÊN PHẢI (CẬP NHẬT VỚI 4 SLIDES) */}
+        {/* PANEL BÊN PHẢI (SỬ DỤNG T) */}
         <div className="hero-featured-panel">
           <div className="featured-slider-wrapper">
-            
-            {/* CẬP NHẬT: Slider bây giờ có 4 item (3 + 1 copy) */}
             <div className="featured-slider">
             
               {/* Slide 1: Top Món ăn */}
               <div className="featured-list foods-list">
-                <h3>Top 5 Dishes</h3>
+                <h3>{T.topDishes}</h3> 
                 <ul>
                   {topFoods.map((food, index) => (
                     <li key={`food1-${index}`}>{food}</li>
@@ -124,7 +151,7 @@ const HeroSection: React.FC = () => {
 
               {/* Slide 2: Top Đồ uống */}
               <div className="featured-list drinks-list">
-                <h3>Top 5 Drinks</h3>
+                <h3>{T.topDrinks}</h3> 
                 <ul>
                   {topDrinks.map((drink, index) => (
                     <li key={`drink-${index}`}>{drink}</li>
@@ -134,7 +161,7 @@ const HeroSection: React.FC = () => {
 
               {/* Slide 3: Top Nhà hàng */}
               <div className="featured-list restaurants-list">
-                <h3>Top 5 Restaurants</h3>
+                <h3>{T.topRestaurants}</h3> 
                 <ul>
                   {topRestaurants.map((restaurant, index) => (
                     <li key={`resto-${index}`}>{restaurant}</li>
@@ -143,9 +170,8 @@ const HeroSection: React.FC = () => {
               </div>
 
               {/* === SLIDE 4: BẢN SAO CỦA SLIDE 1 === */}
-              {/* Đây là mấu chốt để tạo vòng lặp vô tận */}
               <div className="featured-list foods-list-copy">
-                <h3>Top 5 Dishes</h3>
+                <h3>{T.topDishes}</h3> 
                 <ul>
                   {topFoods.map((food, index) => (
                     <li key={`food2-${index}`}>{food}</li>

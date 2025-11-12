@@ -2,7 +2,8 @@
 .profile-page-background {
   background-color: #f4f7f6;
   min-height: 90vh;
-  padding: 40px 20px;
+  /* Đảm bảo có đủ khoảng cách với Header cố định */
+  padding: 80px 20px 40px 20px; 
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
@@ -235,12 +236,12 @@
 }
 
 .btn-update {
-  background-color: #e9a004; /* Màu xanh đậm */
+  background-color: #e9a004; /* Màu cam đậm */
   color: white;
 }
 .btn-update:hover {
   background-color: #bd6f03;
-  box-shadow: 0 4px 10px rgba(13, 71, 161, 0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Tinh chỉnh shadow */
 }
 
 .btn-cancel {
@@ -252,17 +253,22 @@
   background-color: #e0e0e0;
 }
 
+/* --- ĐIỀU CHỈNH NÚT QUAY LẠI CUỐI CÙNG --- */
 .global-back-button {
-  position: absolute;
-  top: 35px; /* Điều chỉnh vị trí từ trên xuống */
-  left: 40px; /* Điều chỉnh vị trí từ trái sang */
+  position: fixed; /* Cố định vị trí */
+  top: 90px;       /* Đặt ngay dưới Header (Header cao khoảng 81px) */
+  left: 20px;      /* Căn lề trái */
+  z-index: 1005;   /* Tăng z-index để nằm trên Header (1000) */
+  
+  /* KÍCH THƯỚC NHỎ LẠI */
+  width: 36px;
+  height: 36px;
   
   /* Style cho nút tròn */
   background-color: #ffffff;
   border: 1px solid #e0e0e0;
   border-radius: 50%;
-  width: 44px;
-  height: 44px;
+  
   display: flex;
   align-items: center;
   justify-content: center;
@@ -271,10 +277,15 @@
   text-decoration: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: all 0.2s ease;
+  
+  transform: scale(1); /* Reset transform ban đầu */
 }
 
 .global-back-button:hover {
-  transform: scale(1.05);
+  transform: scale(1.1); /* Tăng kích thước khi hover */
   color: #0d47a1; /* Màu xanh khi hover */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
+
+/* Xóa media query cũ liên quan đến nút quay lại */
+/* @media (max-width: 1240px) { ... } */

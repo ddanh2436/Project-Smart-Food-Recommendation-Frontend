@@ -1,12 +1,14 @@
+// components/AuthPage/AuthPage.tsx
+
 "use client";
 
 import React, { useState, useEffect } from "react";
-import "./AuthPage.css"; // [cite: AuthPage.css]
+import "./AuthPage.css"; 
 import api from "@/app/lib/api";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import Image from "next/image";
-import { useAuth } from "@/app/contexts/AuthContext"; // 1. IMPORT USEAUTH
+import { useAuth } from "@/app/contexts/AuthContext";
 
 import {
   FaUser,
@@ -18,40 +20,101 @@ import {
 } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 
+// === DỮ LIỆU NGÔN NGỮ ===
+const langData = {
+    en: {
+        signUpTitle: "Create Account",
+        signInTitle: "Sign in",
+        username: "Username",
+        email: "Email",
+        password: "Password",
+        confirmPassword: "Confirm Password",
+        forgotPassword: "Forgot your password?",
+        signUpBtn: "Sign Up",
+        signInBtn: "Sign In",
+        orRegisterWith: "or register with",
+        orSignInWith: "or sign in with",
+        overlayWelcome: "Welcome!",
+        overlaySignInP: "To keep connected with us please sign in with your personal info",
+        overlayHello: "Hello!",
+        overlaySignUpP: "Sign in to discover new experiences",
+        errValidation: "Please check the information entered",
+        errUsername: "Please enter username",
+        errEmail: "Please enter email",
+        errInvalidEmail: "Invalid email",
+        errPassword: "Please enter password",
+        errPasswordLength: "Password must be at least 6 characters",
+        errConfirmPassword: "Please confirm password",
+        errPasswordMismatch: "Passwords do not match",
+        errAuthFailed: "Authentication failed. Please try again.",
+        errUnknown: "An unknown error occurred.",
+        errServer: "Cannot connect to server.",
+        successRegister: "Registration successful! Please log in.",
+        successLogin: "Login successful!",
+        loading: "Signing in..."
+    },
+    vn: {
+        signUpTitle: "Tạo tài khoản",
+        signInTitle: "Đăng nhập",
+        username: "Tên đăng nhập",
+        email: "Email",
+        password: "Mật khẩu",
+        confirmPassword: "Xác nhận Mật khẩu",
+        forgotPassword: "Quên mật khẩu?",
+        signUpBtn: "Đăng Ký",
+        signInBtn: "Đăng Nhập",
+        orRegisterWith: "hoặc đăng ký bằng",
+        orSignInWith: "hoặc đăng nhập bằng",
+        overlayWelcome: "Chào mừng!",
+        overlaySignInP: "Để duy trì kết nối, vui lòng đăng nhập bằng thông tin cá nhân của bạn",
+        overlayHello: "Xin chào!",
+        overlaySignUpP: "Đăng ký để khám phá những trải nghiệm mới",
+        errValidation: "Vui lòng kiểm tra lại thông tin đã nhập",
+        errUsername: "Vui lòng nhập tên đăng nhập",
+        errEmail: "Vui lòng nhập email",
+        errInvalidEmail: "Email không hợp lệ",
+        errPassword: "Vui lòng nhập mật khẩu",
+        errPasswordLength: "Mật khẩu phải có ít nhất 6 ký tự",
+        errConfirmPassword: "Vui lòng xác nhận mật khẩu",
+        errPasswordMismatch: "Mật khẩu không khớp",
+        errAuthFailed: "Xác thực thất bại. Vui lòng thử lại.",
+        errUnknown: "Đã xảy ra lỗi không xác định.",
+        errServer: "Không thể kết nối tới máy chủ.",
+        successRegister: "Đăng ký thành công! Vui lòng đăng nhập.",
+        successLogin: "Đăng nhập thành công!",
+        loading: "Đang đăng nhập..."
+    }
+};
+// =====================================
+
+
 const AuthForm: React.FC = () => {
   const router = useRouter();
-  const { setUser } = useAuth(); // 2. LẤY HÀM SETUSER TỪ CONTEXT
+  const { setUser, currentLang } = useAuth(); 
+  const T = langData[currentLang]; 
 
-  // --- State cho Form ---
+  // --- State cho Form (Giữ nguyên) ---
   const [isRegisterActive, setIsRegisterActive] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  // State cho dữ liệu input
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
-  // State cho lỗi validation
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-
-  // State cho hiện/ẩn mật khẩu
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
-    // Tự động kiểm tra khi trang tải
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      // Bỏ toast ở đây để tránh thông báo liên tục khi vô tình vào /auth
-      // toast.success("Bạn đã đăng nhập!"); 
-      router.push("/");
+    if (typeof window !== 'undefined') {
+        const token = localStorage.getItem("accessToken");
+        if (token) {
+          router.push("/");
+        }
     }
   }, [router]);
 
   // --- Hàm xử lý ---
 
-  // Hàm chuyển đổi form (Login/Register)
   const toggleForm = (isRegister: boolean) => {
     setIsRegisterActive(isRegister);
     setErrors({});
@@ -62,42 +125,41 @@ const AuthForm: React.FC = () => {
     setIsLoading(false);
   };
 
-  // Hàm kiểm tra lỗi (Validation)
+  // Hàm kiểm tra lỗi (Dùng T cho thông báo lỗi)
   const validate = (isRegisterForm: boolean) => {
-    // ... (Code validate của bạn đã đúng, giữ nguyên)
     const newErrors: { [key: string]: string } = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (isRegisterForm) {
-      if (!username) newErrors.username = "Vui lòng nhập tên đăng nhập";
+      if (!username) newErrors.username = T.errUsername;
     }
     if (!email) {
-      newErrors.email = "Vui lòng nhập email";
+      newErrors.email = T.errEmail;
     } else if (!emailRegex.test(email)) {
-      newErrors.email = "Email không hợp lệ";
+      newErrors.email = T.errInvalidEmail;
     }
     if (!password) {
-      newErrors.password = "Vui lòng nhập mật khẩu";
+      newErrors.password = T.errPassword;
     } else if (password.length < 6) {
-      newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
+      newErrors.password = T.errPasswordLength;
     }
     if (isRegisterForm) {
       if (!confirmPassword) {
-        newErrors.confirmPassword = "Vui lòng xác nhận mật khẩu";
+        newErrors.confirmPassword = T.errConfirmPassword;
       } else if (password !== confirmPassword) {
-        newErrors.confirmPassword = "Mật khẩu không khớp";
+        newErrors.confirmPassword = T.errPasswordMismatch;
       }
     }
     return newErrors;
   };
 
-  // Hàm Submit (Chung)
+  // Hàm Submit (Dùng T cho thông báo toast)
   const handleSubmit = async (e: React.FormEvent, isRegisterForm: boolean) => {
     e.preventDefault();
     const validationErrors = validate(isRegisterForm);
 
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
-      toast.error("Vui lòng kiểm tra lại thông tin đã nhập");
+      toast.error(T.errValidation);
       return;
     }
 
@@ -112,35 +174,29 @@ const AuthForm: React.FC = () => {
           email,
           password,
         });
-        toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
-        toggleForm(false); // Chuyển sang form đăng nhập
+        toast.success(T.successRegister);
+        toggleForm(false);
       } else {
-        // --- GỌI API ĐĂNG NHẬP (ĐÃ SỬA) ---
+        // --- GỌI API ĐĂNG NHẬP ---
         const loginResponse = await api.post("/auth/login", {
           email,
           password,
         });
         
-        toast.success("Đăng nhập thành công!");
+        toast.success(T.successLogin);
+        if (typeof window !== 'undefined') {
+            localStorage.setItem("accessToken", loginResponse.data.accessToken);
+            localStorage.setItem("refreshToken", loginResponse.data.refreshToken);
+        }
 
-        // 3. LƯU TOKEN
-        localStorage.setItem("accessToken", loginResponse.data.accessToken);
-        localStorage.setItem("refreshToken", loginResponse.data.refreshToken);
-
-        // 4. LẤY PROFILE NGAY LẬP TỨC
-        // api.ts sẽ tự động đính kèm token bạn vừa lưu
         const profileResponse = await api.get("/auth/profile");
-        
-        // 5. CẬP NHẬT GLOBAL STATE
         setUser(profileResponse.data);
-
-        // 6. ĐIỀU HƯỚNG
         router.push("/");
       }
     } catch (error: any) {
-      // ... (Code xử lý lỗi của bạn đã đúng, giữ nguyên)
+      // --- XỬ LÝ LỖI (Dùng T cho thông báo lỗi) ---
       console.error("Lỗi xác thực:", error);
-      let errorMessage = "Đã xảy ra lỗi không xác định.";
+      let errorMessage = T.errUnknown;
       if (error.response && error.response.data) {
         const serverError = error.response.data.message;
         if (typeof serverError === "string") {
@@ -149,18 +205,17 @@ const AuthForm: React.FC = () => {
           errorMessage = serverError.join(", ");
         }
       } else {
-        errorMessage = "Không thể kết nối tới máy chủ.";
+        errorMessage = T.errServer;
       }
       toast.error(errorMessage);
       setErrors({ api: errorMessage });
+      // ----------------------------------------------------
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    // ... (TOÀN BỘ PHẦN JSX CỦA BẠN GIỮ NGUYÊN) ...
-    // ... (Vì code JSX bạn gửi đã đúng) ...
     <div className="auth-page-container">
       <div
         className={`auth-container ${
@@ -170,12 +225,13 @@ const AuthForm: React.FC = () => {
         {/* FORM ĐĂNG KÝ (REGISTER) */}
         <div className="form-container sign-up-container">
           <form onSubmit={(e) => handleSubmit(e, true)}>
-            <h1>Create Account</h1>
+            <h1>{T.signUpTitle}</h1> 
+            {/* Input Username */}
             <div className="input-group">
               <FaUser />
               <input
                 type="text"
-                placeholder="Username"
+                placeholder={T.username} 
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 disabled={isLoading}
@@ -184,11 +240,12 @@ const AuthForm: React.FC = () => {
             {errors.username && (
               <div className="error-message">{errors.username}</div>
             )}
+            {/* Input Email */}
             <div className="input-group">
               <FaEnvelope />
               <input
                 type="email"
-                placeholder="Email"
+                placeholder={T.email} 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
@@ -197,11 +254,12 @@ const AuthForm: React.FC = () => {
             {errors.email && (
               <div className="error-message">{errors.email}</div>
             )}
+            {/* Input Password */}
             <div className="input-group">
               <FaLock />
               <input
                 type={showPassword ? "text" : "password"}
-                placeholder="Password"
+                placeholder={T.password} 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
@@ -216,11 +274,12 @@ const AuthForm: React.FC = () => {
             {errors.password && (
               <div className="error-message">{errors.password}</div>
             )}
+            {/* Input Confirm Password */}
             <div className="input-group">
               <FaLock />
               <input
                 type={showConfirmPassword ? "text" : "password"}
-                placeholder="Confirm Password"
+                placeholder={T.confirmPassword} 
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={isLoading}
@@ -239,10 +298,10 @@ const AuthForm: React.FC = () => {
               <div className="error-message api-error">{errors.api}</div>
             )}
             <button type="submit" className="auth-button" disabled={isLoading}>
-              {isLoading ? "Signing Up..." : "Sign Up"}
+              {isLoading ? T.loading : T.signUpBtn} 
             </button>
             <div className="form-separator">
-              <span>or register with</span>
+              <span>{T.orRegisterWith}</span> 
             </div>
             <div className="social-container">
               <a href="#" className="social-icon facebook-hover">
@@ -261,12 +320,13 @@ const AuthForm: React.FC = () => {
         {/* FORM ĐĂNG NHẬP (LOGIN) */}
         <div className="form-container sign-in-container">
           <form onSubmit={(e) => handleSubmit(e, false)}>
-            <h1>Sign in</h1>
+            <h1>{T.signInTitle}</h1> 
+            {/* Input Email */}
             <div className="input-group">
               <FaEnvelope />
               <input
                 type="email"
-                placeholder="Email"
+                placeholder={T.email} 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
@@ -275,11 +335,12 @@ const AuthForm: React.FC = () => {
             {errors.email && (
               <div className="error-message">{errors.email}</div>
             )}
+            {/* Input Password */}
             <div className="input-group">
               <FaLock />
               <input
                 type={showPassword ? "text" : "password"}
-                placeholder="Password"
+                placeholder={T.password} 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
@@ -295,16 +356,16 @@ const AuthForm: React.FC = () => {
               <div className="error-message">{errors.password}</div>
             )}
             <a href="#" className="forgot-password">
-              Forgot your password?
+              {T.forgotPassword} 
             </a>
             {errors.api && (
               <div className="error-message api-error">{errors.api}</div>
             )}
             <button type="submit" className="auth-button" disabled={isLoading}>
-              {isLoading ? "Signing In..." : "Sign In"}
+              {isLoading ? T.loading : T.signInBtn} 
             </button>
             <div className="form-separator">
-              <span>or sign in with</span>
+              <span>{T.orSignInWith}</span> 
             </div>
             <div className="social-container">
               <a href="#" className="social-icon facebook-hover">
@@ -324,22 +385,22 @@ const AuthForm: React.FC = () => {
         <div className="overlay-container">
           <div className="overlay">
             <div className="overlay-panel overlay-left">
-              <h1>Welcome!</h1>
+              <h1>{T.overlayWelcome}</h1> 
               <p>
-                To keep connected with us please sign in with your personal info
+                {T.overlaySignInP} 
               </p>
               <button
                 className="ghost-button"
                 onClick={() => toggleForm(false)}
               >
-                Sign In
+                {T.signInBtn}
               </button>
             </div>
             <div className="overlay-panel overlay-right">
-              <h1>Hello!</h1>
-              <p>Sign in to discover new experiences</p>
+              <h1>{T.overlayHello}</h1> 
+              <p>{T.overlaySignUpP}</p> 
               <button className="ghost-button" onClick={() => toggleForm(true)}>
-                Sign Up
+                {T.signUpBtn}
               </button>
             </div>
           </div>
@@ -350,4 +411,3 @@ const AuthForm: React.FC = () => {
 };
 
 export default AuthForm;
-
