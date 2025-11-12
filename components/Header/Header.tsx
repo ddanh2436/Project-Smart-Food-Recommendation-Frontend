@@ -1,13 +1,40 @@
+// components/Header/Header.tsx
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"; 
 import "./Header.css";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { useAuth } from "@/app/contexts/AuthContext";
 import Image from "next/image";
-import Link from 'next/link'; // Bạn đã import sẵn
+import Link from 'next/link';
 
-// (Component DropdownArrow và NavItem interface/data giữ nguyên...)
+// === DỮ LIỆU NGÔN NGỮ ===
+const langData = {
+  en: {
+    restaurants: "Restaurants",
+    nearMe: "Near Me",
+    foodsDrinks: "Foods and Drinks",
+    aboutUs: "About us",
+    loginSignup: "Login / Sign Up",
+    logout: "Logout",
+    langVietnamese: "Tiếng Việt",
+    langEnglish: "English",
+    switchSuccess: "Language switched to English"
+  },
+  vn: {
+    restaurants: "Nhà hàng",
+    nearMe: "Gần tôi",
+    foodsDrinks: "Món ăn & Thức uống",
+    aboutUs: "Giới thiệu",
+    loginSignup: "Đăng nhập / Đăng ký",
+    logout: "Đăng xuất",
+    langVietnamese: "Tiếng Việt",
+    langEnglish: "English",
+    switchSuccess: "Đã chuyển sang Tiếng Việt"
+  }
+};
+// ======================================
+
 const DropdownArrow = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -24,23 +51,36 @@ const DropdownArrow = () => (
   </svg>
 );
 interface NavItem {
-  label: string;
+  key: keyof typeof langData.en; 
   href: string;
   hasDropdown?: boolean;
 }
+
 const navItems: NavItem[] = [
-  { label: "Restaurants", href: "/restaurants", hasDropdown: true },
-  { label: "Near Me", href: "/near-me" },
-  { label: "Foods and Drinks", href: "/foods-and-drinks"  },
-  { label: "About us", href: "/about-us" }, // Link này sẽ trỏ đến trang chúng ta sắp tạo
+  { key: "restaurants", href: "/restaurants", hasDropdown: true },
+  { key: "nearMe", href: "/near-me" },
+  { key: "foodsDrinks", href: "/foods-and-drinks"  },
+  { key: "aboutUs", href: "/about-us" },
 ];
+
+// === SỬ DỤNG IMAGE THỰC TẾ CHO CỜ ===
+const USFlag = () => (
+    <Image src="/assets/image/flags/us.png" alt="US Flag" width={20} height={20} className="flag-icon" />
+);
+const VNFlag = () => (
+    <Image src="/assets/image/flags/vn.png" alt="VN Flag" width={20} height={20} className="flag-icon" />
+);
+// =================================================================
 
 
 const Header: React.FC = () => {
   const router = useRouter();
-  const { user, setUser, isLoading } = useAuth();
+  const { user, setUser, isLoading, currentLang, setLang } = useAuth();
   
+  const T = langData[currentLang]; 
+
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -57,12 +97,19 @@ const Header: React.FC = () => {
     };
   }, []); 
 
-  // (Các hàm handleLogoutClick và handleLoginClick giữ nguyên...)
+  const handleLangSwitch = (lang: 'en' | 'vn') => {
+    setLang(lang);
+    setIsDropdownOpen(false);
+    toast.success(langData[lang].switchSuccess);
+  };
+
   const handleLogoutClick = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
+    if (typeof window !== 'undefined') {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+    }
     setUser(null);
-    toast.success("Đăng xuất thành công!");
+    toast.success(currentLang === 'en' ? "Logout successful!" : "Đăng xuất thành công!");
     router.push("/");
   };
 
@@ -88,27 +135,55 @@ const Header: React.FC = () => {
         </a>
       </div>
 
-      {/* 2. Khối bên phải (Giữ nguyên) */}
+      {/* 2. Khối bên phải */}
       <div className="header-right-side">
         
-        {/* === THAY ĐỔI DUY NHẤT Ở ĐÂY === */}
+        {/* Navigation */}
         <nav className="header-nav">
           <ul>
             {navItems.map((item) => (
-              <li key={item.label}>
-                {/* Thay thế <a> bằng <Link> */}
+              <li key={item.key}>
                 <Link href={item.href}>
-                  {item.label}
+                  {T[item.key]}
                   {item.hasDropdown && <DropdownArrow />}
                 </Link>
               </li>
             ))}
           </ul>
         </nav>
-        {/* === KẾT THÚC THAY ĐỔI === */}
 
+        {/* Language Selector */}
+        <div className="language-selector-wrapper">
+          <button 
+            className="language-toggle-button"
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            aria-expanded={isDropdownOpen}
+          >
+            {currentLang === 'en' ? <USFlag /> : <VNFlag />}
+            <DropdownArrow />
+          </button>
 
-        {/* 2b. Đăng nhập/Profile (Giữ nguyên) */}
+          {isDropdownOpen && (
+            <div className="language-dropdown">
+              <button 
+                className="dropdown-item" 
+                onClick={() => handleLangSwitch('en')}
+                disabled={currentLang === 'en'}
+              >
+                <USFlag /> {T.langEnglish}
+              </button>
+              <button 
+                className="dropdown-item" 
+                onClick={() => handleLangSwitch('vn')}
+                disabled={currentLang === 'vn'}
+              >
+                <VNFlag /> {T.langVietnamese}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* 2b. Đăng nhập/Profile */}
         <div className="header-login">
           {isLoading ? (
             <div className="loading-skeleton"></div>
@@ -122,6 +197,7 @@ const Header: React.FC = () => {
                     width={32}
                     height={32}
                     className="user-avatar"
+                    unoptimized={user.picture.includes('googleusercontent.com')}
                   />
                 ) : (
                   <div className="user-avatar-placeholder">
@@ -136,12 +212,12 @@ const Header: React.FC = () => {
                 </span>
               </Link>
               <button onClick={handleLogoutClick} className="header-auth-button">
-                Logout
+                {T.logout}
               </button>
             </div>
           ) : (
             <button onClick={handleLoginClick} className="header-auth-button">
-              Login / Sign Up
+              {T.loginSignup}
             </button>
           )}
         </div>

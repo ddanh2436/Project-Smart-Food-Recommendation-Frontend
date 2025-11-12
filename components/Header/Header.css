@@ -93,8 +93,6 @@ body {
 }
 
 .header-nav a:hover {
-  /* Giữ nguyên hiệu ứng hover, nhưng màu sắc sẽ được
-     quản lý bởi .header-scrolled */
   color: #d4af37;
   transform: translateY(-2px);
 }
@@ -257,4 +255,98 @@ body {
   .header-nav ul {
     gap: 1rem;
   }
+}
+
+
+/* --- PHẦN BỔ SUNG CHO SONG NGỮ --- */
+.language-selector-wrapper {
+  position: relative;
+  z-index: 1010; 
+}
+
+.language-toggle-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.5); 
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: white; 
+  font-weight: 600;
+}
+
+/* Khi cuộn, nút đổi màu */
+.header-container.header-scrolled .language-toggle-button {
+  border-color: #e0e0e0;
+  color: #4a4a4a; 
+}
+.header-container.header-scrolled .language-toggle-button:hover {
+  background-color: #f0f0f0;
+}
+
+.language-toggle-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Fix size Image Next.js */
+.flag-icon {
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  object-fit: cover;
+}
+
+
+.language-toggle-button svg {
+  width: 10px; 
+  height: 10px;
+  stroke: white; 
+}
+.header-container.header-scrolled .language-toggle-button svg {
+  stroke: #777;
+}
+
+
+/* Dropdown Menu */
+.language-dropdown {
+  position: absolute;
+  top: 100%; 
+  right: 0;
+  margin-top: 10px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  min-width: 150px;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 15px;
+  background-color: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  color: #333;
+  font-size: 0.95rem;
+  transition: background-color 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background-color: #f4f4f4;
+}
+
+.dropdown-item:disabled {
+    background-color: #e3f2fd; 
+    color: #0d47a1;
+    cursor: default;
+    font-weight: 600;
 }

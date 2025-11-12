@@ -1,13 +1,62 @@
+// app/(main)/profile/page.tsx
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import './ProfilePage.css'; // File CSS của bạn
-import api from '@/app/lib/api'; // Import API client
-import { toast } from 'react-hot-toast'; // Import toast
+import './ProfilePage.css'; 
+import api from '@/app/lib/api'; 
+import { toast } from 'react-hot-toast'; 
 import Link from 'next/link';
+
+// === DỮ LIỆU NGÔN NGỮ (ĐÃ SỬA LỖI CÚ PHÁP TS1005) ===
+const langData = {
+  en: {
+    loading: "Loading profile...",
+    redirect: "Redirecting to login...",
+    tabAccount: "Account",
+    settingsTitle: "Account Settings",
+    firstName: "First Name",
+    lastName: "Last Name",
+    email: "Email",
+    phone: "Phone number",
+    company: "Company",
+    designation: "Designation",
+    bio: "Bio",
+    bioPlaceholder: "Tell us about yourself...",
+    companyPlaceholder: "Your company",
+    update: "Update",
+    updating: "Updating...",
+    cancel: "Cancel",
+    updateSuccess: "Profile updated successfully!",
+    updateFailed: "Update failed. Please try again.",
+    cancelToast: "Changes canceled"
+  },
+  vn: {
+    loading: "Đang tải hồ sơ...",
+    redirect: "Đang chuyển hướng đến đăng nhập...",
+    tabAccount: "Tài khoản",
+    settingsTitle: "Cài đặt Tài khoản",
+    firstName: "Tên",
+    lastName: "Họ",
+    email: "Email",
+    phone: "Số điện thoại",
+    company: "Công ty",
+    designation: "Chức danh",
+    bio: "Tiểu sử",
+    bioPlaceholder: "Kể cho chúng tôi về bạn...",
+    companyPlaceholder: "Công ty của bạn",
+    update: "Cập nhật",
+    updating: "Đang cập nhật...",
+    cancel: "Hủy",
+    updateSuccess: "Cập nhật hồ sơ thành công!",
+    updateFailed: "Cập nhật thất bại. Vui lòng thử lại.",
+    cancelToast: "Đã hủy thay đổi"
+  }
+};
+// ===================================
 
 const ArrowLeftIcon = () => (
   <svg 
@@ -27,13 +76,14 @@ const ArrowLeftIcon = () => (
 );
 
 export default function ProfilePage() {
-  const { user, setUser, isLoading } = useAuth(); // Lấy setUser từ context
+  const { user, setUser, isLoading, currentLang } = useAuth(); 
   const router = useRouter();
+  const T = langData[currentLang]; 
 
   // State cho tab
   const [activeTab, setActiveTab] = useState('account');
   
-  // --- LOGIC FORM (MỚI) ---
+  // --- LOGIC FORM ---
   const [isUpdating, setIsUpdating] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
@@ -56,7 +106,7 @@ export default function ProfilePage() {
         bio: user.bio || '',
       });
     }
-  }, [user]); // Chạy lại khi 'user' thay đổi
+  }, [user]); 
 
   // 2. Hàm xử lý thay đổi input
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -69,7 +119,6 @@ export default function ProfilePage() {
 
   // 3. Hàm xử lý nút "Cancel"
   const handleCancel = () => {
-    // Reset form về dữ liệu gốc từ context
     if (user) {
       setFormData({
         firstName: user.firstName || '',
@@ -79,7 +128,7 @@ export default function ProfilePage() {
         designation: user.designation || '',
         bio: user.bio || '',
       });
-      toast.error('Đã hủy thay đổi');
+      toast.error(T.cancelToast);
     }
   };
 
@@ -94,10 +143,10 @@ export default function ProfilePage() {
       // Cập nhật Global State (AuthContext)
       setUser(response.data); 
       
-      toast.success('Cập nhật hồ sơ thành công!');
+      toast.success(T.updateSuccess);
     } catch (error) {
       console.error(error);
-      toast.error('Cập nhật thất bại. Vui lòng thử lại.');
+      toast.error(T.updateFailed);
     } finally {
       setIsUpdating(false);
     }
@@ -105,7 +154,7 @@ export default function ProfilePage() {
 
   // --- LOGIC LOADING VÀ REDIRECT ---
   if (isLoading) {
-    return <div className="profile-loading"><h1>Đang tải hồ sơ...</h1></div>;
+    return <div className="profile-loading"><h1>{T.loading}</h1></div>;
   }
   if (!user) {
     router.replace('/auth');
@@ -114,10 +163,16 @@ export default function ProfilePage() {
 
   // Lấy email (không thể thay đổi) và tên (để hiển thị)
   const email = user.email;
-  const fullName = user.firstName ? `${user.firstName} ${user.lastName}` : user.username;
+  const displayName = formData.firstName || formData.lastName 
+    ? `${formData.firstName} ${formData.lastName}` 
+    : user.username;
+  const avatarText = formData.firstName 
+    ? formData.firstName.charAt(0).toUpperCase()
+    : user.username.charAt(0).toUpperCase();
 
   return (
     <div className="profile-page-background">
+      {/* Nút quay lại sử dụng Link */}
       <Link href="/" className="global-back-button" aria-label="Quay lại trang chủ">
         <ArrowLeftIcon />
       </Link>
@@ -127,29 +182,34 @@ export default function ProfilePage() {
           <div className="profile-user-summary">
             <div className="profile-avatar-large">
               {user.picture ? (
-                <Image src={user.picture} alt={fullName} width={90} height={90} />
+                <Image 
+                    src={user.picture} 
+                    alt={displayName} 
+                    width={90} 
+                    height={90} 
+                    unoptimized={user.picture.includes('googleusercontent.com')}
+                />
               ) : (
                 <div className="profile-avatar-placeholder-large">
-                  {formData.firstName.charAt(0).toUpperCase() || user.username.charAt(0).toUpperCase()}
+                  {avatarText}
                 </div>
               )}
             </div>
             <h2 className="profile-user-name">
-              {formData.firstName || formData.lastName 
-                ? `${formData.firstName} ${formData.lastName}`
-                : user.username
-              }
+              {displayName.trim()}
             </h2>
           </div>
           <ul className="profile-nav-menu">
-            {/* (Menu tabs giữ nguyên...) */}
-            <li className={activeTab === 'account' ? 'active' : ''} onClick={() => setActiveTab('account')}>Account</li>
+            {/* Menu tab */}
+            <li className={activeTab === 'account' ? 'active' : ''} onClick={() => setActiveTab('account')}>
+              {T.tabAccount}
+            </li>
           </ul>
         </div>
 
         {/* === CỘT BÊN PHẢI (FORM) === */}
         <div className="profile-form-right">
-          <h1>Account Settings</h1>
+          <h1>{T.settingsTitle}</h1>
 
           
           {/* 5. Gắn hàm handleSubmit vào <form> */}
@@ -157,19 +217,19 @@ export default function ProfilePage() {
             <div className="form-grid">
               {/* First Name */}
               <div className="form-group">
-                <label htmlFor="firstName">First Name</label>
+                <label htmlFor="firstName">{T.firstName}</label>
                 <input 
                   type="text" 
                   id="firstName" 
                   value={formData.firstName} 
-                  onChange={handleChange} // Thêm onChange
-                  disabled={isUpdating} // Disable khi đang update
+                  onChange={handleChange}
+                  disabled={isUpdating} 
                 />
               </div>
               
               {/* Last Name */}
               <div className="form-group">
-                <label htmlFor="lastName">Last Name</label>
+                <label htmlFor="lastName">{T.lastName}</label>
                 <input 
                   type="text" 
                   id="lastName" 
@@ -181,11 +241,11 @@ export default function ProfilePage() {
               
               {/* Email (Read Only) */}
               <div className="form-group full-width">
-                <label htmlFor="email">Email</label>
+                <label htmlFor="email">{T.email}</label>
                 <input 
                   type="email" 
                   id="email" 
-                  value={email} // Lấy từ user (không đổi)
+                  value={email}
                   readOnly 
                   className="read-only-field"
                 />
@@ -193,7 +253,7 @@ export default function ProfilePage() {
               
               {/* Phone */}
               <div className="form-group">
-                <label htmlFor="phone">Phone number</label>
+                <label htmlFor="phone">{T.phone}</label>
                 <input 
                   type="text" 
                   id="phone" 
@@ -206,11 +266,11 @@ export default function ProfilePage() {
 
               {/* Company */}
               <div className="form-group">
-                <label htmlFor="company">Company</label>
+                <label htmlFor="company">{T.company}</label>
                 <input 
                   type="text" 
                   id="company" 
-                  placeholder="Your company" 
+                  placeholder={T.companyPlaceholder} 
                   value={formData.company} 
                   onChange={handleChange}
                   disabled={isUpdating}
@@ -219,11 +279,11 @@ export default function ProfilePage() {
 
               {/* Designation */}
               <div className="form-group">
-                <label htmlFor="designation">Designation</label>
+                <label htmlFor="designation">{T.designation}</label>
                 <input 
                   type="text" 
                   id="designation" 
-                  placeholder="Your role" 
+                  placeholder={T.designation} 
                   value={formData.designation} 
                   onChange={handleChange}
                   disabled={isUpdating}
@@ -232,11 +292,11 @@ export default function ProfilePage() {
 
               {/* Bio */}
               <div className="form-group full-width">
-                <label htmlFor="bio">Bio</label>
+                <label htmlFor="bio">{T.bio}</label>
                 <textarea 
                   id="bio" 
                   rows={4} 
-                  placeholder="Tell us about yourself..."
+                  placeholder={T.bioPlaceholder}
                   value={formData.bio} 
                   onChange={handleChange}
                   disabled={isUpdating}
@@ -246,10 +306,10 @@ export default function ProfilePage() {
             
             <div className="form-actions">
               <button type="submit" className="btn btn-update" disabled={isUpdating}>
-                {isUpdating ? 'Updating...' : 'Update'}
+                {isUpdating ? T.updating : T.update}
               </button>
               <button type="button" className="btn btn-cancel" onClick={handleCancel} disabled={isUpdating}>
-                Cancel
+                {T.cancel}
               </button>
             </div>
           </form>
