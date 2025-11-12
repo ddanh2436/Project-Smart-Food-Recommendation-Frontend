@@ -17,8 +17,8 @@ const langData = {
     topRestaurants: "Top 5 Restaurants",
   },
   vn: {
-    line1: "Khám phá hành trình ẩm thực",
-    line2: "Việt Nam",
+    line1: "Khởi đầu hành trình của bạn với",
+    line2: "ẩm thực Việt Nam",
     placeholder: "Tìm kiếm món ăn yêu thích của bạn",
     discoverBtn: "Khám phá đặc sản tại đây",
     or: "Hoặc",

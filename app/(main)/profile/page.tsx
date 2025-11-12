@@ -1,4 +1,4 @@
-// app/(main)/profile/page.tsx
+// ddanh2436/project-smart-food-recommendation-frontend/Project-Smart-Food-Recommendation-Frontend-1fc724bd73b2d99b6b7202f40f81236938357594/app/(main)/profile/page.tsx
 
 'use client';
 
@@ -11,12 +11,14 @@ import api from '@/app/lib/api';
 import { toast } from 'react-hot-toast'; 
 import Link from 'next/link';
 
-// === DỮ LIỆU NGÔN NGỮ (ĐÃ SỬA LỖI CÚ PHÁP TS1005) ===
+// === DỮ LIỆU NGÔN NGỮ (THÊM MODAL TEXT) ===
 const langData = {
   en: {
+    // ... (Giữ nguyên các text cũ)
     loading: "Loading profile...",
     redirect: "Redirecting to login...",
     tabAccount: "Account",
+    tabLogout: "Logout",
     settingsTitle: "Account Settings",
     firstName: "First Name",
     lastName: "Last Name",
@@ -32,12 +34,19 @@ const langData = {
     cancel: "Cancel",
     updateSuccess: "Profile updated successfully!",
     updateFailed: "Update failed. Please try again.",
-    cancelToast: "Changes canceled"
+    cancelToast: "Changes canceled",
+    // MODAL TEXTS
+    logoutConfirmTitle: "Confirm Logout",
+    logoutConfirmMessage: "Are you sure you want to log out?",
+    logoutYes: "Yes, Log Out",
+    logoutCancel: "Cancel",
   },
   vn: {
+    // ... (Giữ nguyên các text cũ)
     loading: "Đang tải hồ sơ...",
     redirect: "Đang chuyển hướng đến đăng nhập...",
     tabAccount: "Tài khoản",
+    tabLogout: "Đăng xuất",
     settingsTitle: "Cài đặt Tài khoản",
     firstName: "Tên",
     lastName: "Họ",
@@ -53,7 +62,12 @@ const langData = {
     cancel: "Hủy",
     updateSuccess: "Cập nhật hồ sơ thành công!",
     updateFailed: "Cập nhật thất bại. Vui lòng thử lại.",
-    cancelToast: "Đã hủy thay đổi"
+    cancelToast: "Đã hủy thay đổi",
+    // MODAL TEXTS
+    logoutConfirmTitle: "Xác nhận Đăng xuất",
+    logoutConfirmMessage: "Bạn có chắc chắn muốn đăng xuất không?",
+    logoutYes: "Đăng xuất",
+    logoutCancel: "Hủy bỏ",
   }
 };
 // ===================================
@@ -75,16 +89,46 @@ const ArrowLeftIcon = () => (
   </svg>
 );
 
+// === MODAL COMPONENT (Thêm mới) ===
+interface LogoutModalProps {
+    T: typeof langData.vn; // Sử dụng T để lấy text theo ngôn ngữ
+    onConfirm: () => void;
+    onCancel: () => void;
+}
+
+const LogoutModal: React.FC<LogoutModalProps> = ({ T, onConfirm, onCancel }) => (
+    <div className="modal-overlay" onClick={onCancel}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2>{T.logoutConfirmTitle}</h2>
+            <p>{T.logoutConfirmMessage}</p>
+            <div className="modal-actions">
+                <button 
+                    className="btn-confirm-logout" 
+                    onClick={onConfirm}
+                >
+                    {T.logoutYes}
+                </button>
+                <button 
+                    className="btn-cancel-logout" 
+                    onClick={onCancel}
+                >
+                    {T.logoutCancel}
+                </button>
+            </div>
+        </div>
+    </div>
+);
+// =================================
+
 export default function ProfilePage() {
   const { user, setUser, isLoading, currentLang } = useAuth(); 
   const router = useRouter();
   const T = langData[currentLang]; 
 
-  // State cho tab
   const [activeTab, setActiveTab] = useState('account');
-  
-  // --- LOGIC FORM ---
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false); // TRẠNG THÁI MODAL (Thêm mới)
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -94,7 +138,18 @@ export default function ProfilePage() {
     bio: '',
   });
 
-  // 1. Load data vào form khi user tải xong
+  // Chạy khi user, isLoading thay đổi (Xử lý chuyển hướng Auth)
+  useEffect(() => {
+    if (!isLoading && !user) {
+        const timer = setTimeout(() => {
+            router.replace('/auth');
+            toast.error("Vui lòng đăng nhập để truy cập trang này.");
+        }, 0); 
+        return () => clearTimeout(timer);
+    }
+  }, [user, isLoading, router]);
+
+  // Chạy khi user thay đổi (Tải dữ liệu vào form)
   useEffect(() => {
     if (user) {
       setFormData({
@@ -107,8 +162,25 @@ export default function ProfilePage() {
       });
     }
   }, [user]); 
+  
+  // === HÀM ĐĂNG XUẤT XÁC NHẬN (SỬA ĐỔI) ===
+  const handleConfirmLogout = () => {
+    setShowLogoutModal(false); // Đóng modal
+    if (typeof window !== 'undefined') {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+    }
+    setUser(null);
+    toast.success(currentLang === 'en' ? "Logout successful!" : "Đăng xuất thành công!");
+    router.push("/");
+  };
+  
+  // Hàm gọi modal khi nhấn nút Logout
+  const handleProfileLogout = () => {
+    setShowLogoutModal(true);
+  };
+  // ============================================
 
-  // 2. Hàm xử lý thay đổi input
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
     setFormData((prevData) => ({
@@ -117,7 +189,6 @@ export default function ProfilePage() {
     }));
   };
 
-  // 3. Hàm xử lý nút "Cancel"
   const handleCancel = () => {
     if (user) {
       setFormData({
@@ -132,17 +203,12 @@ export default function ProfilePage() {
     }
   };
 
-  // 4. Hàm xử lý nút "Update"
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsUpdating(true);
     try {
-      // Gửi data lên backend
       const response = await api.patch('/auth/profile', formData);
-      
-      // Cập nhật Global State (AuthContext)
       setUser(response.data); 
-      
       toast.success(T.updateSuccess);
     } catch (error) {
       console.error(error);
@@ -152,16 +218,11 @@ export default function ProfilePage() {
     }
   };
 
-  // --- LOGIC LOADING VÀ REDIRECT ---
-  if (isLoading) {
+
+  if (isLoading || !user) {
     return <div className="profile-loading"><h1>{T.loading}</h1></div>;
   }
-  if (!user) {
-    router.replace('/auth');
-    return null;
-  }
 
-  // Lấy email (không thể thay đổi) và tên (để hiển thị)
   const email = user.email;
   const displayName = formData.firstName || formData.lastName 
     ? `${formData.firstName} ${formData.lastName}` 
@@ -172,13 +233,15 @@ export default function ProfilePage() {
 
   return (
     <div className="profile-page-background">
-      {/* Nút quay lại sử dụng Link */}
+      {/* Nút Quay lại đã được di chuyển bằng CSS */}
       <Link href="/" className="global-back-button" aria-label="Quay lại trang chủ">
         <ArrowLeftIcon />
       </Link>
+      
       <div className="profile-grid-container">
         {/* === CỘT BÊN TRÁI (NAV) === */}
         <div className="profile-nav-left">
+          {/* ... (Giữ nguyên nội dung bên trái) ... */}
           <div className="profile-user-summary">
             <div className="profile-avatar-large">
               {user.picture ? (
@@ -200,9 +263,13 @@ export default function ProfilePage() {
             </h2>
           </div>
           <ul className="profile-nav-menu">
-            {/* Menu tab */}
             <li className={activeTab === 'account' ? 'active' : ''} onClick={() => setActiveTab('account')}>
               {T.tabAccount}
+            </li>
+            
+            {/* GỌI HÀM MỚI ĐỂ MỞ MODAL */}
+            <li className="logout-button" onClick={handleProfileLogout}>
+              {T.tabLogout}
             </li>
           </ul>
         </div>
@@ -210,9 +277,7 @@ export default function ProfilePage() {
         {/* === CỘT BÊN PHẢI (FORM) === */}
         <div className="profile-form-right">
           <h1>{T.settingsTitle}</h1>
-
           
-          {/* 5. Gắn hàm handleSubmit vào <form> */}
           <form className="profile-form" onSubmit={handleSubmit}>
             <div className="form-grid">
               {/* First Name */}
@@ -315,6 +380,15 @@ export default function ProfilePage() {
           </form>
         </div>
       </div>
+      
+      {/* RENDER MODAL TẠI ĐÂY */}
+      {showLogoutModal && (
+          <LogoutModal 
+              T={T}
+              onConfirm={handleConfirmLogout} 
+              onCancel={() => setShowLogoutModal(false)}
+          />
+      )}
     </div>
   );
 }
