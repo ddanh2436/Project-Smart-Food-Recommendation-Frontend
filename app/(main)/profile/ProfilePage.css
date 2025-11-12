@@ -287,5 +287,150 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
+/* --- THÊM: Style cho nút Logout trong Sidebar --- */
+.profile-nav-menu li.logout-button {
+  margin-top: 15px; /* Tạo khoảng cách với các mục menu khác */
+  background-color: transparent; /* Mặc định trong suốt */
+  color: #e60023; /* Màu đỏ nổi bật */
+  border-left-color: transparent;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.profile-nav-menu li.logout-button:hover {
+  background-color: #fce4e4; /* Màu nền đỏ nhạt khi hover */
+  color: #b30018; /* Màu đỏ đậm hơn khi hover */
+  border-left-color: #e60023; /* Viền trái màu đỏ */
+}
+
+.global-back-button {
+  /* Loại bỏ position: absolute cũ và thay bằng fixed */
+  position: fixed; /* Hoặc absolute nếu bạn muốn nó cuộn theo nội dung */
+  top: 30px; /* Cách mép trên */
+  left: 30px; /* Cách mép trái */
+  z-index: 100; /* Đảm bảo nó luôn nằm trên cùng */
+  
+  /* Style cho nút tròn */
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  color: #333; /* Màu icon */
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.global-back-button:hover {
+  background-color: #f0f0f0;
+  border-color: #ccc;
+}
+
+/* === MODAL STYLES (Thêm mới) === */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0; /* Bắt đầu ẩn */
+    animation: fadeIn 0.3s forwards; /* Thêm animation fadeIn (nếu bạn định nghĩa) */
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    
+    /* ÁP DỤNG HIỆU ỨNG POP */
+    animation: modalPopIn 0.5s ease-out forwards;
+}
+
+/* Thêm keyframes fadeIn đơn giản nếu chưa có (dù không cần thiết cho lỗi build, nhưng tốt cho UI) */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    color: #333;
+    font-size: 1.5rem;
+}
+
+.modal-content p {
+    color: #666;
+    margin-bottom: 25px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.modal-actions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.btn-confirm-logout {
+    background-color: #dc3545;
+    color: white;
+}
+.btn-confirm-logout:hover {
+    background-color: #c82333;
+}
+
+.btn-cancel-logout {
+    background-color: #6c757d;
+    color: white;
+}
+.btn-cancel-logout:hover {
+    background-color: #5a6268;
+}
+
+@keyframes modalPopIn {
+    0% {
+        opacity: 0;
+        /* Bắt đầu từ rất nhỏ và ở trên cao (cảm giác rơi) */
+        transform: scale(0.2) translateY(-150px);
+    }
+    30% {
+        opacity: 1;
+        /* Bước 1: Nảy lên vượt quá kích thước cuối */
+        transform: scale(1.2) translateY(0); 
+    }
+    60% {
+        /* Bước 2: Lùi lại (Recoil) */
+        transform: scale(0.9) translateY(0); 
+    }
+    85% {
+        /* Bước 3: Nảy nhẹ lên lần nữa */
+        transform: scale(1.05) translateY(0);
+    }
+    100% {
+        /* Dừng hẳn */
+        transform: scale(1) translateY(0); 
+    }
+}
 /* Xóa media query cũ liên quan đến nút quay lại */
 /* @media (max-width: 1240px) { ... } */
