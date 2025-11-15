@@ -1,26 +1,18 @@
-/* app/(main)/about-us/AboutUsPage.css */
-
 /* 1. IMPORT FONT */
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400&display=swap'); /* <--- THÊM FONT NÀY */
 
-/* 2. PAGE WRAPPER CHUNG
-   - Đây là container chính cho *toàn bộ* trang cuộn
-   - Nền đen, chữ trắng, font serif
-   - position: relative để chứa animation
-*/
+
 .about-us-page-wrapper {
   background-color: #0c0c0c; /* Màu nền gần đen như video */
   color: #f0f0f0;
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Lato', sans-serif;
   position: relative;
   overflow-x: hidden; /* Ngăn cuộn ngang */
   padding-top: 2rem; /* Thêm chút đệm ở trên cùng */
 }
 
-/* 3. HIỆU ỨNG KHÓI (SMOKY ANIMATION)
-   - Dùng position: fixed để nó đứng yên khi cuộn trang
-   - z-index: 1 để nó nằm dưới nội dung
-*/
+
 .smoky-animation-fullpage {
   position: fixed; /* Cố định khi cuộn */
   top: -50%;
@@ -57,8 +49,13 @@
   z-index: 2; /* Nằm trên lớp animation */
   max-width: 1100px;
   margin: 0 auto;
-  padding: 6rem 2rem; /* Khoảng cách lớn giữa các section */
+  padding: 6rem 2rem; 
   box-sizing: border-box;
+
+  /* --- THÊM VÀO ĐỂ TĂNG ĐỘ SÂU --- */
+  /* Thêm viền mờ để bắt sáng nhẹ */
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px; /* Thêm bo góc nhẹ */
 }
 
 /* 5. STYLING CỤ THỂ CHO TỪNG SECTION */
@@ -74,9 +71,6 @@
 }
 
 /* Đảo ngược cột cho Side Dish */
-.section-food.reverse {
-  /* grid-template-areas hoạt động không ổn định, dùng order */
-}
 .section-food.reverse .about-image-col {
   order: 2;
 }
@@ -94,6 +88,13 @@
   border-radius: 8px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+              box-shadow 0.4s ease;
+}
+
+.section-image-style:hover {
+  transform: scale(1.03); /* Phóng to nhẹ */
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.7); /* Tăng bóng mờ */
 }
 
 /* Placeholder cho ảnh (để bạn thấy bố cục) */
@@ -141,10 +142,11 @@
   color: #e9a004; /* Màu cam/vàng đồng */
   letter-spacing: 1px;
   text-transform: uppercase;
-  font-family: 'Arial', sans-serif; 
+  font-family: 'Lato', sans-serif; 
 }
 
 .section-title {
+  font-family: 'Cormorant Garamond', serif;
   font-size: 3.5rem;
   font-weight: 700;
   color: #ffffff;
@@ -157,7 +159,7 @@ p {
   line-height: 1.7;
   color: #ccc; 
   margin-bottom: 2rem;
-  font-family: 'Arial', sans-serif;
+  font-family: 'Lato', sans-serif;
   font-weight: 300;
 }
 
@@ -166,13 +168,23 @@ p {
   text-decoration: none;
   font-weight: 600;
   font-size: 1rem;
-  font-family: 'Arial', sans-serif;
-  border-bottom: 1px solid transparent;
+  /* font-family: 'Arial', sans-serif; <-- Xóa nếu bạn làm theo bước 1 */
+  font-family: 'Lato', sans-serif; /* <-- Thêm nếu bạn làm theo bước 1 */
+  
+  /* --- CẬP NHẬT THÀNH NÚT --- */
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid #e9a004; /* Viền màu vàng đồng */
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
   transition: all 0.3s ease;
 }
+
 .cta-link:hover {
-  color: #ffffff;
-  border-bottom-color: #ffffff;
+  color: #0c0c0c; /* Chữ màu nền (đen) */
+  background-color: #e9a004; /* Nền màu vàng đồng */
+  border-bottom-color: #e9a004; /* Giữ viền khi hover */
 }
 
 /* Chi tiết sự kiện */
@@ -223,4 +235,27 @@ p {
   .section-ingredients .ingredients-grid {
     grid-template-columns: 1fr 1fr; /* 2 cột trên di động */
   }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Lớp (class) để áp dụng animation */
+.animate-fadeIn {
+  /* Mặc định ẩn đi */
+  opacity: 0; 
+  animation-fill-mode: forwards; /* Giữ trạng thái cuối cùng */
+}
+
+/* Khi một section được "kích hoạt" (bằng JS), nó sẽ chạy animation */
+.is-visible .animate-fadeIn {
+  animation: fadeInUp 1s ease-out;
 }
