@@ -1,0 +1,436 @@
+/* Nền xám nhạt cho cả trang */
+.profile-page-background {
+  background-color: #f4f7f6;
+  min-height: 90vh;
+  /* Đảm bảo có đủ khoảng cách với Header cố định */
+  padding: 80px 20px 40px 20px; 
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Container loading */
+.profile-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 90vh;
+  font-family: 'Nunito', sans-serif;
+  color: #555;
+}
+
+/* Grid layout chính */
+.profile-grid-container {
+  display: grid;
+  grid-template-columns: 1fr 3fr; /* Tỷ lệ 1:3 cho 2 cột */
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+}
+
+/* --- CỘT BÊN TRÁI --- */
+.profile-nav-left {
+  background-color: #fafafa;
+  border-right: 1px solid #e0e0e0;
+  padding: 30px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-user-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 20px 30px 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.profile-avatar-large {
+  margin-bottom: 15px;
+  border: 4px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+.profile-avatar-large img {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-avatar-placeholder-large {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background-color: #f57c00;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 48px;
+}
+
+.profile-user-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  text-align: center;
+}
+
+.profile-nav-menu {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0 0 0;
+}
+
+.profile-nav-menu li {
+  padding: 15px 30px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-left: 4px solid transparent;
+}
+
+.profile-nav-menu li:hover {
+  background-color: #f0f0f0;
+  color: #111;
+}
+
+.profile-nav-menu li.active {
+  background-color: #e3f2fd;
+  color: #0d47a1;
+  font-weight: 600;
+  border-left-color: #0d47a1; /* Màu xanh active */
+}
+
+/* --- CỘT BÊN PHẢI --- */
+.profile-form-right {
+  padding: 30px 40px;
+}
+
+.profile-form-right h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #222;
+  margin-top: 0;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1; /* Chiếm toàn bộ chiều rộng */
+}
+
+.form-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"] {
+  width: 100%;
+  padding: 12px 0;
+  border: none;
+  border-bottom: 2px solid #ddd;
+  background-color: #fff;
+  font-size: 1rem;
+  color: #333;
+  transition: border-color 0.2s ease;
+}
+
+.form-group input:read-only,
+.form-group textarea:read-only {
+  background-color: #f9f9f9;
+  color: #777;
+  cursor: not-allowed;
+}
+
+.form-group textarea {
+  width: 100%;
+  min-height: 120px; /* Tăng chiều cao tối thiểu */
+  padding: 12px 15px; /* Thêm padding cho 4 cạnh */
+  
+  /* Thêm nền và viền */
+  background-color: #f9f9f9; /* Nền xám nhạt */
+  border: 2px solid #e0e0e0; /* Viền xám nhạt */
+  border-radius: 8px; /* Bo góc */
+  
+  font-size: 1rem;
+  color: #333;
+  font-family: inherit; /* Đảm bảo dùng đúng font */
+  resize: vertical; /* Cho phép người dùng kéo chiều cao */
+  
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.form-group textarea:focus {
+  outline: none;
+  border-color: #0d47a1; /* Đổi viền sang màu xanh (giống các input khác) */
+  background-color: #ffffff; /* Đổi nền sang màu trắng */
+  box-shadow: 0 0 0 3px rgba(13, 71, 161, 0.1); /* Thêm vòng sáng */
+}
+
+/* Style khi bị disable */
+.form-group textarea:disabled {
+  background-color: #f0f0f0;
+  color: #888;
+  cursor: not-allowed;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-bottom-color: #0d47a1; /* Màu xanh khi focus */
+}
+
+.form-group .read-only-field {
+  background-color: #f9f9f9;
+  color: #777;
+  cursor: not-allowed;
+  border-bottom-color: #eee !important;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Nút bấm */
+.form-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 40px;
+}
+
+.btn {
+  padding: 12px 25px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-update {
+  background-color: #e9a004; /* Màu cam đậm */
+  color: white;
+}
+.btn-update:hover {
+  background-color: #bd6f03;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Tinh chỉnh shadow */
+}
+
+.btn-cancel {
+  background-color: #f1f1f1;
+  color: #555;
+  border: 1px solid #ddd;
+}
+.btn-cancel:hover {
+  background-color: #e0e0e0;
+}
+
+/* --- ĐIỀU CHỈNH NÚT QUAY LẠI CUỐI CÙNG --- */
+.global-back-button {
+  position: fixed; /* Cố định vị trí */
+  top: 90px;       /* Đặt ngay dưới Header (Header cao khoảng 81px) */
+  left: 20px;      /* Căn lề trái */
+  z-index: 1005;   /* Tăng z-index để nằm trên Header (1000) */
+  
+  /* KÍCH THƯỚC NHỎ LẠI */
+  width: 36px;
+  height: 36px;
+  
+  /* Style cho nút tròn */
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 50%;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  color: #333; /* Màu icon */
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+  
+  transform: scale(1); /* Reset transform ban đầu */
+}
+
+.global-back-button:hover {
+  transform: scale(1.1); /* Tăng kích thước khi hover */
+  color: #0d47a1; /* Màu xanh khi hover */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* --- THÊM: Style cho nút Logout trong Sidebar --- */
+.profile-nav-menu li.logout-button {
+  margin-top: 15px; /* Tạo khoảng cách với các mục menu khác */
+  background-color: transparent; /* Mặc định trong suốt */
+  color: #e60023; /* Màu đỏ nổi bật */
+  border-left-color: transparent;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.profile-nav-menu li.logout-button:hover {
+  background-color: #fce4e4; /* Màu nền đỏ nhạt khi hover */
+  color: #b30018; /* Màu đỏ đậm hơn khi hover */
+  border-left-color: #e60023; /* Viền trái màu đỏ */
+}
+
+.global-back-button {
+  /* Loại bỏ position: absolute cũ và thay bằng fixed */
+  position: fixed; /* Hoặc absolute nếu bạn muốn nó cuộn theo nội dung */
+  top: 30px; /* Cách mép trên */
+  left: 30px; /* Cách mép trái */
+  z-index: 100; /* Đảm bảo nó luôn nằm trên cùng */
+  
+  /* Style cho nút tròn */
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  color: #333; /* Màu icon */
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.global-back-button:hover {
+  background-color: #f0f0f0;
+  border-color: #ccc;
+}
+
+/* === MODAL STYLES (Thêm mới) === */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0; /* Bắt đầu ẩn */
+    animation: fadeIn 0.3s forwards; /* Thêm animation fadeIn (nếu bạn định nghĩa) */
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    
+    /* ÁP DỤNG HIỆU ỨNG POP */
+    animation: modalPopIn 0.5s ease-out forwards;
+}
+
+/* Thêm keyframes fadeIn đơn giản nếu chưa có (dù không cần thiết cho lỗi build, nhưng tốt cho UI) */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    color: #333;
+    font-size: 1.5rem;
+}
+
+.modal-content p {
+    color: #666;
+    margin-bottom: 25px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.modal-actions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.btn-confirm-logout {
+    background-color: #dc3545;
+    color: white;
+}
+.btn-confirm-logout:hover {
+    background-color: #c82333;
+}
+
+.btn-cancel-logout {
+    background-color: #6c757d;
+    color: white;
+}
+.btn-cancel-logout:hover {
+    background-color: #5a6268;
+}
+
+@keyframes modalPopIn {
+    0% {
+        opacity: 0;
+        /* Bắt đầu từ rất nhỏ và ở trên cao (cảm giác rơi) */
+        transform: scale(0.2) translateY(-150px);
+    }
+    30% {
+        opacity: 1;
+        /* Bước 1: Nảy lên vượt quá kích thước cuối */
+        transform: scale(1.2) translateY(0); 
+    }
+    60% {
+        /* Bước 2: Lùi lại (Recoil) */
+        transform: scale(0.9) translateY(0); 
+    }
+    85% {
+        /* Bước 3: Nảy nhẹ lên lần nữa */
+        transform: scale(1.05) translateY(0);
+    }
+    100% {
+        /* Dừng hẳn */
+        transform: scale(1) translateY(0); 
+    }
+}
+/* Xóa media query cũ liên quan đến nút quay lại */
+/* @media (max-width: 1240px) { ... } */
