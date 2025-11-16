@@ -143,7 +143,6 @@ const Header: React.FC = () => {
   const handleLangSwitch = (lang: 'en' | 'vn') => {
     setLang(lang);
     setIsDropdownOpen(false);
-    toast.success(langData[lang].switchSuccess);
   };
 
   // === HÀM XÁC NHẬN ĐĂNG XUẤT (THÊM MỚI) ===
