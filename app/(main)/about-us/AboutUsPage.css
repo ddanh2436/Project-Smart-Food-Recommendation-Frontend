@@ -1,20 +1,22 @@
+/* app/(main)/about-us/AboutUsPage.css */
+
 /* 1. IMPORT FONT */
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400&display=swap'); /* <--- THÊM FONT NÀY */
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400&display=swap');
 
 
 .about-us-page-wrapper {
-  background-color: #0c0c0c; /* Màu nền gần đen như video */
+  background-color: #0c0c0c; 
   color: #f0f0f0;
   font-family: 'Lato', sans-serif;
   position: relative;
-  overflow-x: hidden; /* Ngăn cuộn ngang */
-  padding-top: 2rem; /* Thêm chút đệm ở trên cùng */
+  overflow-x: hidden; 
+  padding-top: 2rem; 
 }
 
 
 .smoky-animation-fullpage {
-  position: fixed; /* Cố định khi cuộn */
+  position: fixed; 
   top: -50%;
   left: -50%;
   width: 200%;
@@ -22,14 +24,13 @@
   z-index: 1;
   background-image: radial-gradient(
     circle at 50% 50%,
-    rgba(255, 255, 255, 0.05) 0%, /* Mờ hơn trước */
+    rgba(255, 255, 255, 0.05) 0%, 
     rgba(255, 255, 255, 0) 60%
   );
   animation: moveSmokily 25s linear infinite;
   opacity: 0.5;
 }
 
-/* Keyframes cho hiệu ứng di chuyển */
 @keyframes moveSmokily {
   0% { transform: translate(0, 0); }
   25% { transform: translate(20%, 10%); }
@@ -39,23 +40,16 @@
 }
 
 
-/* 4. STYLE CHUNG CHO CÁC SECTION
-   - Mỗi section là một khối nội dung
-   - z-index: 2 để nổi lên trên animation
-   - Thêm padding lớn để tạo khoảng trắng
-*/
+/* 4. STYLE CHUNG CHO CÁC SECTION */
 .about-section {
   position: relative;
-  z-index: 2; /* Nằm trên lớp animation */
+  z-index: 2; 
   max-width: 1100px;
   margin: 0 auto;
   padding: 6rem 2rem; 
   box-sizing: border-box;
-
-  /* --- THÊM VÀO ĐỂ TĂNG ĐỘ SÂU --- */
-  /* Thêm viền mờ để bắt sáng nhẹ */
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 8px; /* Thêm bo góc nhẹ */
+  border-radius: 8px; 
 }
 
 /* 5. STYLING CỤ THỂ CHO TỪNG SECTION */
@@ -70,7 +64,6 @@
   align-items: center;
 }
 
-/* Đảo ngược cột cho Side Dish */
 .section-food.reverse .about-image-col {
   order: 2;
 }
@@ -93,14 +86,13 @@
 }
 
 .section-image-style:hover {
-  transform: scale(1.03); /* Phóng to nhẹ */
-  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.7); /* Tăng bóng mờ */
+  transform: scale(1.03); 
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.7); 
 }
 
-/* Placeholder cho ảnh (để bạn thấy bố cục) */
 .image-placeholder {
   width: 100%;
-  aspect-ratio: 1 / 1; /* Tạo hộp vuông */
+  aspect-ratio: 1 / 1; 
   background-color: #222;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -112,34 +104,88 @@
   font-size: 1.2rem;
 }
 .image-placeholder.small {
-  aspect-ratio: 4 / 3; /* Vuông hơn cho ingredients */
+  aspect-ratio: 4 / 3; /* Thay đổi tỉ lệ cho ingredients */
 }
 
 
-/* --- Section 2 & 7 (Layout 1 cột, text ở giữa) --- */
+/* --- Section 2 & 7 (Layout 1 cột) --- */
 .section-menu,
 .section-ingredients {
   text-align: center;
 }
 .menu-text-content {
   max-width: 700px;
-  margin: 0 auto; /* Căn giữa */
+  margin: 0 auto; 
 }
 
-/* Grid cho ảnh nguyên liệu */
-.section-ingredients .ingredients-grid {
+/* Grid cho ảnh nguyên liệu (4 cột) */
+.ingredients-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, 1fr); 
   gap: 1.5rem;
   margin-top: 3rem;
 }
 
+/* === CẬP NHẬT: SECTION 5 DESSERT COLLAGE (Cách MỚI) === */
 
-/* 6. STYLING CHUNG CHO VĂN BẢN (Giống video) */
+/* Container chính cho cảnh ghép */
+.dessert-collage-V2 {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  /* Nền màu tối này sẽ hiển thị làm nền chính */
+  background-color: #1a1a1a; 
+  border-radius: 8px;
+  overflow: hidden; 
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); 
+}
+
+/* 1. Ảnh Bàn (nằm trên nền) */
+.dessert-table-V2 {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50%; /* Bàn chiếm 50% chiều cao từ dưới lên */
+  z-index: 1; /* Lớp 1 (trên nền) */
+}
+
+/* 2. KHUNG CHỨA MÓN ĂN (Dùng Flexbox) */
+.dessert-wrapper-V2 {
+  position: absolute;
+  z-index: 2; /* Nằm trên bàn */
+  
+  /* Vị trí đè lên bàn */
+  bottom: 40%; /* Đáy của khung đè lên bàn 10% (50% - 40% = 10%) */
+  left: 0;
+  
+  /* Kích thước */
+  width: 100%;
+  height: 40%; /* Chiều cao tối đa cho các món ăn */
+  
+  /* Căn chỉnh Flexbox */
+  display: flex;
+  justify-content: space-around; /* Dàn 4 món ra xa nhau */
+  align-items: flex-end; /* Căn các món theo đáy */
+  padding: 0 2%; /* Thêm 1 chút padding 2 bên */
+}
+
+/* 3. TỪNG MÓN ĂN (Item bên trong Flexbox) */
+.dessert-item-V2 {
+  position: relative; /* Quan trọng để <Image fill> hoạt động */
+  width: 20%;  /* Mỗi món rộng 20% */
+  height: 100%; /* Chiều cao 100% (của 40% ở trên) */
+}
+
+/* === KẾT THÚC CẬP NHẬT: SECTION 5 === */
+
+
+/* 6. STYLING CHUNG CHO VĂN BẢN (Giữ nguyên) */
 .discover-subtitle {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #e9a004; /* Màu cam/vàng đồng */
+  color: #e9a004; 
   letter-spacing: 1px;
   text-transform: uppercase;
   font-family: 'Lato', sans-serif; 
@@ -168,13 +214,10 @@ p {
   text-decoration: none;
   font-weight: 600;
   font-size: 1rem;
-  /* font-family: 'Arial', sans-serif; <-- Xóa nếu bạn làm theo bước 1 */
-  font-family: 'Lato', sans-serif; /* <-- Thêm nếu bạn làm theo bước 1 */
-  
-  /* --- CẬP NHẬT THÀNH NÚT --- */
+  font-family: 'Lato', sans-serif; 
   display: inline-block;
   padding: 0.75rem 1.5rem;
-  border: 1px solid #e9a004; /* Viền màu vàng đồng */
+  border: 1px solid #e9a004; 
   border-radius: 4px;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -182,12 +225,11 @@ p {
 }
 
 .cta-link:hover {
-  color: #0c0c0c; /* Chữ màu nền (đen) */
-  background-color: #e9a004; /* Nền màu vàng đồng */
-  border-bottom-color: #e9a004; /* Giữ viền khi hover */
+  color: #0c0c0c; 
+  background-color: #e9a004; 
+  border-bottom-color: #e9a004; 
 }
 
-/* Chi tiết sự kiện */
 .event-details {
   margin-top: 1.5rem;
 }
@@ -204,18 +246,16 @@ p {
 /* 7. RESPONSIVE CHO DI ĐỘNG */
 @media (max-width: 768px) {
   .about-section {
-    padding: 3rem 1.5rem; /* Giảm padding */
+    padding: 3rem 1.5rem; 
   }
 
-  /* Chuyển 2 cột thành 1 cột */
   .section-story,
   .section-food,
   .section-events {
-    grid-template-columns: 1fr; /* 1 cột */
+    grid-template-columns: 1fr; 
     gap: 2rem;
   }
   
-  /* Reset lại order cho layout 1 cột */
   .section-food.reverse .about-image-col {
     order: 0;
   }
@@ -223,7 +263,6 @@ p {
     order: 0;
   }
 
-  /* Căn giữa text cho layout 1 cột */
   .about-text-col {
     text-align: center;
   }
@@ -232,30 +271,58 @@ p {
     font-size: 2.5rem;
   }
   
-  .section-ingredients .ingredients-grid {
-    grid-template-columns: 1fr 1fr; /* 2 cột trên di động */
+  .ingredients-grid {
+    grid-template-columns: 1fr 1fr; 
+  }
+  
+  /* Responsive cho dessert collage trên di động */
+  .dessert-collage-V2 {
+    aspect-ratio: 1 / 1; /* Chuyển sang vuông cho cân đối */
+  }
+
+  /* Wrapper flexbox trên di động */
+  .dessert-wrapper-V2 {
+    height: 35%;
+    bottom: 40%;
+  }
+
+  /* Từng món ăn trên di động */
+  .dessert-item-V2 {
+    width: 22%;
   }
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* === KHỐI ANIMATION (Giữ nguyên) === */
 
-/* Lớp (class) để áp dụng animation */
 .animate-fadeIn {
-  /* Mặc định ẩn đi */
-  opacity: 0; 
-  animation-fill-mode: forwards; /* Giữ trạng thái cuối cùng */
+  opacity: 0;
+  transform: translateY(30px); 
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  transition-delay: 0s; 
 }
 
-/* Khi một section được "kích hoạt" (bằng JS), nó sẽ chạy animation */
-.is-visible .animate-fadeIn {
-  animation: fadeInUp 1s ease-out;
+.animate-fadeIn.from-top {
+  transform: translateY(-30px);
+}
+
+.animate-fadeIn.from-bottom {
+  transform: translateY(30px);
+}
+
+.animate-fadeIn.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.stagger-delay-1 {
+  transition-delay: 0.1s;
+}
+.stagger-delay-2 {
+  transition-delay: 0.2s;
+}
+.stagger-delay-3 {
+  transition-delay: 0.3s;
+}
+.stagger-delay-4 {
+  transition-delay: 0.4s;
 }
