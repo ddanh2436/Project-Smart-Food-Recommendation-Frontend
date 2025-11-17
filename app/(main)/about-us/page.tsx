@@ -1,79 +1,103 @@
 // app/(main)/about-us/page.tsx
 
-'use client';
-import React, { useEffect, useRef } from 'react'; 
-import { useAuth } from '@/app/contexts/AuthContext';
-import Image from 'next/image';
-import './AboutUsPage.css'; 
+"use client";
+import React, { useEffect, useRef } from "react";
+import { useAuth } from "@/app/contexts/AuthContext";
+import Image from "next/image";
+import "./AboutUsPage.css";
 
 // === DỮ LIỆU NGÔN NGỮ (Giữ nguyên) ===
 const langData = {
   en: {
-    // Section 1
+    // General
     discover: "Discover",
+    meet: "Meet",
+
+    // Section 1: Story
     storyTitle: "Our Story",
-    storyContent: "Get the best steakhouse experience... Whether you're joining us for a romantic dinner, a business meeting, a private party or just a drink in the bar, our modern steakhouse will deliver superior service and an unforgettable dining experience.",
+    storyContent:
+      "In a world where everything is digital, sharing a meal is one of the last true acts of connection. It’s where deals are made, friendships are forged, and love stories begin. But a bad meal can ruin a good moment. At VietNomNom, our mission is simple: to ensure every gathering is accompanied by great food. We don't just recommend restaurants; we recommend memories. Let us take care of the menu, so you can focus on the people sitting across from you.",
     storyCta: "Show More About Us",
-    
-    // Section 2
-    menuTitle: "Our Menu",
-    menuContent: "Few things come close to the joy of steak and chips - cooked simply with tender, loving care. Rest assured that our chefs treat our Irish beef with the respect it deserves. The open kitchen in many of our steakhouses are testimony to that.",
 
-    // Section 3
-    appetizerTitle: "Appetizer",
-    appetizerContent: "Start with our fresh baked bread with an egg and basil on top.",
+    // Section 2: Intro Members
+    menuTitle: "Our Members",
+    menuContent:
+      "Crafted with love by our members - believers that a good meal can turn a bad day around. Thank you for letting our passion be part of your dining experience.",
 
-    // Section 4
-    sideDishTitle: "Side Dish",
-    sideDishContent: "Have a healthy salad mixed with light diced meat to complement your meal.",
+    // Section 3: Duy Anh
+    appetizerTitle: "Duy Anh",
+    appetizerContent:
+      "The Head Chef of Operations. Blending dry code, raw data, and spicy designs into a perfect recipe. Main job: Making sure the team doesn't burn the deadline (or the office) and keeping cool when the servers heat up.",
+    appetizerDish: "Signature Dish: Black Coffee – Fuel for carrying the team.",
 
-    // Section 5
-    dessertTitle: "Dessert",
-    dessertContent: "Finish your kitchen experience with a cake to cleanse your mouth.",
+    // Section 4: Ho Phuc Kien
+    sideDishTitle: "Ho Phuc Kien",
+    sideDishContent:
+      "Making sure the UI looks as tasty as the food. Believes that good design is like good plating – it makes everything better.",
+    sideDishDish: "Signature Dish: Wagyu Beef – Because presentation is everything.",
 
-    // Section 6
-    eventsTitle: "Upcoming Events",
-    eventsContent: "Not only can you get the best steak in town, we can follow up with your old friends while enjoying the food we provide.",
-    event1: "Barbecue Party",
-    event2: "December 26 | Lunch Time | Casual",
+    // Section 5: Quoc Khanh
+    dessertTitle: "Quoc Khanh",
+    dessertContent:
+      "The Digital Sommelier. Teaching computers to understand cravings. He knows you want pizza before you even realize it yourself.",
+    dessertDish: "Signature Dish: Omakase – Loves the surprise element, just like AI predictions.",
 
-    // Section 7
-    ingredientsTitle: "The Best Ingredients",
-    ingredientsContent: "We put an enormous amount of pride in sourcing our ingredients and only use the finest available. We're truly able to achieve this level of excellence by putting an extra level of care into our menu items that is difficult to find at other restaurants.",
+    // Section 6: Manh Dat
+    eventsTitle: "Manh Dat",
+    eventsContent:
+      "The Data Hunter. Scouring the internet for hidden menus and reviews while you sleep, so you never have to wonder 'what’s good here?' again.",
+    eventsDish: "Signature Dish: Instant Noodles at 2 AM – The fuel of data hunters.",
+
+    // Section 7: Ingredients
+    ingredientsTitle: "The Best Vietnamese Food",
+    ingredientsContent:
+      "The 4 most well-known Vietnamese dishes that our members love to recommend: Pho, Banh Mi, Bun Cha, and Goi Cuon. Each dish is a testament to Vietnam's rich culinary heritage and the passion of our community.",
   },
   vn: {
-    // Section 1
+    // General
     discover: "Khám phá",
+    meet: "Gặp gỡ",
+
+    // Section 1
     storyTitle: "Câu chuyện",
-    storyContent: "Trải nghiệm nhà hàng bít tết tuyệt vời nhất... Dù bạn đến dùng bữa tối lãng mạn, gặp gỡ đối tác, tổ chức tiệc riêng tư hay chỉ đơn giản là thưởng thức đồ uống tại quầy bar, nhà hàng của chúng tôi sẽ mang đến dịch vụ cao cấp và một trải nghiệm khó quên.",
+    storyContent:
+      "Trong một thế giới mà mọi thứ đều được số hóa, việc cùng nhau chia sẻ một bữa ăn là một trong những sợi dây kết nối thực tế cuối cùng còn sót lại. Đó là nơi những hợp đồng được ký kết, tình bạn được thắt chặt và những chuyện tình bắt đầu. Nhưng một bữa ăn tệ có thể phá hỏng khoảnh khắc đẹp đẽ đó. Tại VietNomNom, sứ mệnh của chúng tôi rất đơn giản: đảm bảo mọi cuộc gặp gỡ đều đi kèm với những món ăn tuyệt vời. Chúng tôi không chỉ gợi ý nhà hàng, chúng tôi gợi ý những kỷ niệm. Hãy để chúng tôi lo phần thực đơn, để bạn toàn tâm toàn ý dành thời gian cho những người ngồi đối diện.",
     storyCta: "Xem thêm về chúng tôi",
 
     // Section 2
-    menuTitle: "Thực đơn",
-    menuContent: "Khó có gì sánh bằng niềm vui thưởng thức bít tết và khoai tây chiên - được chế biến đơn giản với sự chăm sóc dịu dàng. Các đầu bếp của chúng tôi luôn trân trọng thịt bò Ailen. Bếp mở ở nhiều nhà hàng của chúng tôi là minh chứng cho điều đó.",
-    
+    menuTitle: "Thành viên của chúng tôi",
+    menuContent:
+      "Được tạo nên bởi cảm hứng của những người tin rằng một bữa ăn ngon có thể thay đổi cả một ngày dài. Cảm ơn bạn đã để tâm huyết của chúng tôi trở thành một phần trong trải nghiệm của bạn.",
+
     // Section 3
-    appetizerTitle: "Khai vị",
-    appetizerContent: "Bắt đầu với bánh mì nướng tươi của chúng tôi cùng một quả trứng và húng quế.",
+    appetizerTitle: "Duy Anh",
+    appetizerContent:
+      "Bếp trưởng điều hành. Người có nhiệm vụ 'trộn' các thuật toán AI khô khan và giao diện bay bổng thành một món ăn hoàn chỉnh. Sở trường: Giữ cho team không 'cháy' deadline như kho thịt cháy và giữ cái đầu lạnh khi server nóng.",
+    appetizerDish: "Món tủ: Cà phê đen – Nguồn năng lượng để vận hành cả team.",
 
     // Section 4
-    sideDishTitle: "Món phụ",
-    sideDishContent: "Thưởng thức món salad lành mạnh trộn với thịt thái hạt lựu để bổ sung cho bữa ăn của bạn.",
+    sideDishTitle: "Hồ Phúc Kiên",
+    sideDishContent:
+      "Người chịu trách nhiệm làm cho website trông 'ngon mắt' như chính món ăn vậy. Tin rằng một giao diện đẹp cũng quan trọng như cách bày biện (plating) trên đĩa.",
+    sideDishDish: "Món tủ: Bò Wagyu – Vì hình thức cũng quan trọng như hương vị.",
 
     // Section 5
-    dessertTitle: "Tráng miệng",
-    dessertContent: "Kết thúc trải nghiệm ẩm thực của bạn với một chiếc bánh ngọt để tráng miệng.",
+    dessertTitle: "Quốc Khánh",
+    dessertContent:
+      "Nhà tâm lý học ẩm thực. Dạy máy tính cách 'đọc vị' cái bụng đói của bạn, thậm chí biết bạn thèm bún bò trước cả khi bạn nhận ra.",
+    dessertDish: "Món tủ: Omakase – Thích sự bất ngờ, giống như cách AI hoạt động.",
 
     // Section 6
-    eventsTitle: "Sự kiện sắp tới",
-    eventsContent: "Bạn không chỉ có được món bít tết ngon nhất thị trấn mà còn có thể quây quần cùng bạn bè cũ trong khi thưởng thức các món ăn chúng tôi cung cấp.",
-    event1: "Tiệc BBQ",
-    event2: "26 tháng 12 | Giờ ăn trưa | Thân mật",
+    eventsTitle: "Mạnh Đạt",
+    eventsContent:
+      "Thợ săn dữ liệu. Trong khi bạn ngủ, anh ấy đang 'quét' sạch menu của cả thành phố để bạn không bao giờ phải hỏi 'quán này bán gì?'.",
+    eventsDish: "Món tủ: Mì tôm chanh lúc 2 giờ sáng – Nhiên liệu của thợ săn dữ liệu.",
 
     // Section 7
     ingredientsTitle: "Nguyên liệu tốt nhất",
-    ingredientsContent: "Chúng tôi vô cùng tự hào về nguồn nguyên liệu và chỉ sử dụng những gì tốt nhất. Chúng tôi thực sự có thể đạt được mức độ xuất sắc này bằng cách chăm chút thêm cho các món trong thực đơn, điều khó tìm thấy ở các nhà hàng khác.",
-  }
+    ingredientsContent:
+      "Chúng tôi vô cùng tự hào về nguồn nguyên liệu và chỉ sử dụng những gì tốt nhất. Chúng tôi thực sự có thể đạt được mức độ xuất sắc này bằng cách chăm chút thêm cho các món trong thực đơn, điều khó tìm thấy ở các nhà hàng khác.",
+  },
 };
 // ===================================
 
@@ -81,7 +105,14 @@ const AboutUsPage: React.FC = () => {
   const { currentLang } = useAuth();
   const T = langData[currentLang];
 
-  // === LOGIC JS CHO ANIMATION (Giữ nguyên) ===
+  const handleScrollToMembers = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault(); // Ngăn chặn hành vi nhảy trang mặc định của thẻ a
+    const membersSection = document.getElementById("our-members");
+    if (membersSection) {
+      membersSection.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const scrollingDown = useRef(true);
   const lastScrollY = useRef(0);
 
@@ -91,40 +122,41 @@ const AboutUsPage: React.FC = () => {
       scrollingDown.current = currentY > lastScrollY.current;
       lastScrollY.current = currentY;
     };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []); 
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          const animatedChildren = entry.target.querySelectorAll<HTMLElement>('.animate-fadeIn');
+          const animatedChildren =
+            entry.target.querySelectorAll<HTMLElement>(".animate-fadeIn");
 
           if (entry.isIntersecting) {
-            animatedChildren.forEach(child => {
+            animatedChildren.forEach((child) => {
               if (scrollingDown.current) {
-                child.classList.add('from-bottom');
-                child.classList.remove('from-top');
+                child.classList.add("from-bottom");
+                child.classList.remove("from-top");
               } else {
-                child.classList.add('from-top');
-                child.classList.remove('from-bottom');
+                child.classList.add("from-top");
+                child.classList.remove("from-bottom");
               }
-              child.classList.add('is-visible');
+              child.classList.add("is-visible");
             });
           } else {
-            animatedChildren.forEach(child => {
-              child.classList.remove('is-visible');
+            animatedChildren.forEach((child) => {
+              child.classList.remove("is-visible");
             });
           }
         });
       },
       {
-        threshold: 0.1, 
+        threshold: 0.1,
       }
     );
 
-    const sections = document.querySelectorAll('.about-section');
+    const sections = document.querySelectorAll(".about-section");
     sections.forEach((section) => {
       observer.observe(section);
     });
@@ -136,18 +168,21 @@ const AboutUsPage: React.FC = () => {
         }
       });
     };
-  }, []); 
+  }, []);
   // === KẾT THÚC LOGIC JS ===
 
-
   return (
-    <div className="about-us-page-wrapper">
+    <div
+      className={`about-us-page-wrapper ${
+        currentLang === "vn" ? "lang-vn" : ""
+      }`}
+    >
       <div className="smoky-animation-fullpage"></div>
 
-      {/* SECTION 1: OUR STORY (Giữ nguyên) */}
+      {/* SECTION 1: OUR STORY */}
       <section className="about-section section-story">
         <div className="about-image-col animate-fadeIn stagger-delay-1">
-          <Image 
+          <Image
             src="/assets/image/pho.png"
             alt="Our Story"
             width={500}
@@ -159,133 +194,148 @@ const AboutUsPage: React.FC = () => {
           <span className="discover-subtitle">{T.discover}</span>
           <h2 className="section-title">{T.storyTitle}</h2>
           <p>{T.storyContent}</p>
-          <a href="#" className="cta-link">{T.storyCta}</a>
+          {/* [CẬP NHẬT] Thêm onClick và href để trỏ tới ID */}
+          <a
+            href="#our-members"
+            onClick={handleScrollToMembers}
+            className="cta-link"
+          >
+            {T.storyCta}
+          </a>
         </div>
       </section>
 
-      {/* SECTION 2: OUR MENU (Giữ nguyên) */}
-      <section className="about-section section-menu">
+      {/* SECTION 2: OUR MENU / INTRO MEMBER */}
+      {/* [CẬP NHẬT] Thêm id="our-members" ở đây */}
+      <section id="our-members" className="about-section section-menu">
         <div className="menu-text-content animate-fadeIn">
-          <span className="discover-subtitle">{T.discover}</span>
+          <span className="discover-subtitle">{T.meet}</span>
           <h2 className="section-title">{T.menuTitle}</h2>
           <p>{T.menuContent}</p>
         </div>
       </section>
 
-      {/* SECTION 3: APPETIZER (Giữ nguyên) */}
+      {/* SECTION 3: DUY ANH */}
       <section className="about-section section-food">
         <div className="about-image-col animate-fadeIn stagger-delay-1">
-           <div className="image-placeholder"><p>Appetizer Image</p></div>
+          <div className="image-placeholder">
+            <p>Duy Anh's Image</p>
+          </div>
         </div>
         <div className="about-text-col animate-fadeIn">
-          <span className="discover-subtitle">{T.discover}</span>
+          <span className="discover-subtitle">{T.meet}</span>
           <h2 className="section-title">{T.appetizerTitle}</h2>
-          <p>{T.appetizerContent}</p>
+          <p>
+            {T.appetizerContent}
+            <br />
+            <br />
+            <em style={{ color: "#e9a004" }}>{T.appetizerDish}</em>
+          </p>
         </div>
       </section>
 
-      {/* SECTION 4: SIDE DISH (Giữ nguyên) */}
+      {/* SECTION 4: HO PHUC KIEN */}
       <section className="about-section section-food reverse">
         <div className="about-text-col animate-fadeIn">
-          <span className="discover-subtitle">{T.discover}</span>
+          <span className="discover-subtitle">{T.meet}</span>
           <h2 className="section-title">{T.sideDishTitle}</h2>
-          <p>{T.sideDishContent}</p>
+          <p>
+            {T.sideDishContent}
+            <br />
+            <br />
+            <em style={{ color: "#e9a004" }}>{T.sideDishDish}</em>
+          </p>
         </div>
         <div className="about-image-col animate-fadeIn stagger-delay-1">
-          <div className="image-placeholder"><p>Side Dish Image</p></div>
+          <div className="image-placeholder">
+            <p>Kien's Image</p>
+          </div>
         </div>
       </section>
 
-      {/* === CẬP NHẬT: SECTION 5 DESSERT (ĐÃ SỬA TÊN CLASS) === */}
+      {/* SECTION 5: QUOC KHANH */}
       <section className="about-section section-food">
         <div className="about-image-col animate-fadeIn stagger-delay-1">
-          {/* Container cho cảnh ghép - ĐÃ ĐỔI TÊN CLASS */}
           <div className="dessert-collage-V2">
-            
-            {/* 1. Ảnh Bàn (z-index: 1) */}
             <Image
-              src="/assets/image/about-us/Dessert_Table.png" 
+              src="/assets/image/about-us/Dessert_Table.png"
               alt="Bàn"
               fill
-              style={{ objectFit: 'cover' }}
-              className="dessert-table-V2" /* ĐỔI TÊN CLASS */
+              style={{ objectFit: "cover" }}
+              className="dessert-table-V2"
             />
-
-            {/* 2. KHUNG CHỨA MÓN ĂN (z-index: 2) */}
             <div className="dessert-wrapper-V2">
-            
-              {/* Món 1 */}
+              <div className="dessert-item-V2">
+                <Image
+                  src="/assets/image/about-us/Banh_Troi.png"
+                  alt="Bánh trôi"
+                  fill
+                  style={{ objectFit: "contain" }}
+                />
+              </div>
               <div className="dessert-item-V2">
                 <Image
                   src="/assets/image/about-us/3_Color_Sweet_Soup.png"
-                  alt="Món tráng miệng 1"
+                  alt="Chè ba màu"
                   fill
-                  style={{ objectFit: 'contain' }}
+                  style={{ objectFit: "contain" }}
                 />
               </div>
-              
-              {/* Món 2 */}
               <div className="dessert-item-V2">
                 <Image
-                  src="/assets/image/about-us/mon-2.png" /* THAY ẢNH NÀY */
-                  alt="Món tráng miệng 2"
+                  src="/assets/image/about-us/Banh_Cam.png"
+                  alt="Bánh cam"
                   fill
-                  style={{ objectFit: 'contain' }}
+                  style={{ objectFit: "contain" }}
                 />
               </div>
-              
-              {/* Món 3 */}
               <div className="dessert-item-V2">
                 <Image
-                  src="/assets/image/about-us/mon-3.png" /* THAY ẢNH NÀY */
-                  alt="Món tráng miệng 3"
+                  src="/assets/image/about-us/Cake.png"
+                  alt="Bánh da lợn"
                   fill
-                  style={{ objectFit: 'contain' }}
+                  style={{ objectFit: "contain" }}
                 />
               </div>
-              
-              {/* Món 4 */}
-              <div className="dessert-item-V2">
-                <Image
-                  src="/assets/image/about-us/mon-4.png" /* THAY ẢNH NÀY */
-                  alt="Món tráng miệng 4"
-                  fill
-                  style={{ objectFit: 'contain' }}
-                />
-              </div>
-
             </div>
           </div>
         </div>
-        
-        {/* CỘT VĂN BẢN (PHẢI) */}
+
         <div className="about-text-col animate-fadeIn">
-          <span className="discover-subtitle">{T.discover}</span>
+          <span className="discover-subtitle">{T.meet}</span>
           <h2 className="section-title">{T.dessertTitle}</h2>
-          <p>{T.dessertContent}</p>
+          <p>
+            {T.dessertContent}
+            <br />
+            <br />
+            <em style={{ color: "#e9a004" }}>{T.dessertDish}</em>
+          </p>
         </div>
       </section>
       {/* === KẾT THÚC SECTION 5 === */}
 
 
-      {/* SECTION 6: UPCOMING EVENTS (Giữ nguyên) */}
+      {/* SECTION 6: MANH DAT */}
       <section className="about-section section-events">
         <div className="about-image-col animate-fadeIn stagger-delay-1">
-          <div className="image-placeholder"><p>Events Image</p></div>
+          <div className="image-placeholder">
+            <p>Dat's Image</p>
+          </div>
         </div>
         <div className="about-text-col animate-fadeIn">
-          <span className="discover-subtitle">{T.discover}</span>
+          <span className="discover-subtitle">{T.meet}</span>
           <h2 className="section-title">{T.eventsTitle}</h2>
-          <p>{T.eventsContent}</p>
-          <div className="event-details">
-            <p><strong>{T.event1}</strong></p>
-            <p>{T.event2}</p>
-          </div>
-          <a href="#" className="cta-link">More Events</a>
+          <p>
+            {T.eventsContent}
+            <br />
+            <br />
+            <em style={{ color: "#e9a004" }}>{T.eventsDish}</em>
+          </p>
+          <div className="event-details"></div>
         </div>
       </section>
 
-      {/* SECTION 7: BEST INGREDIENTS (Giữ nguyên) */}
+      {/* SECTION 7: BEST INGREDIENTS */}
       <section className="about-section section-ingredients">
         <div className="menu-text-content animate-fadeIn">
           <span className="discover-subtitle">{T.discover}</span>
@@ -293,14 +343,20 @@ const AboutUsPage: React.FC = () => {
           <p>{T.ingredientsContent}</p>
         </div>
         <div className="ingredients-grid">
-           {/* Thêm các class so le cho lưới này */}
-           <div className="image-placeholder small animate-fadeIn stagger-delay-1"><p>Ingredient 1</p></div>
-           <div className="image-placeholder small animate-fadeIn stagger-delay-2"><p>Ingredient 2</p></div>
-           <div className="image-placeholder small animate-fadeIn stagger-delay-3"><p>Ingredient 3</p></div>
-           <div className="image-placeholder small animate-fadeIn stagger-delay-4"><p>Ingredient 4</p></div>
+          <div className="image-placeholder small animate-fadeIn stagger-delay-1">
+            <p>Ingredient 1</p>
+          </div>
+          <div className="image-placeholder small animate-fadeIn stagger-delay-2">
+            <p>Ingredient 2</p>
+          </div>
+          <div className="image-placeholder small animate-fadeIn stagger-delay-3">
+            <p>Ingredient 3</p>
+          </div>
+          <div className="image-placeholder small animate-fadeIn stagger-delay-4">
+            <p>Ingredient 4</p>
+          </div>
         </div>
       </section>
-
     </div>
   );
 };
