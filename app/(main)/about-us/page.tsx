@@ -1,12 +1,12 @@
 // app/(main)/about-us/page.tsx
 
 'use client';
-import React from 'react';
+import React, { useEffect, useRef } from 'react'; 
 import { useAuth } from '@/app/contexts/AuthContext';
 import Image from 'next/image';
-import './AboutUsPage.css'; // Import file CSS
+import './AboutUsPage.css'; 
 
-// === DỮ LIỆU NGÔN NGỮ ĐÃ MỞ RỘNG ===
+// === DỮ LIỆU NGÔN NGỮ (Giữ nguyên) ===
 const langData = {
   en: {
     // Section 1
@@ -81,23 +81,81 @@ const AboutUsPage: React.FC = () => {
   const { currentLang } = useAuth();
   const T = langData[currentLang];
 
+  // === LOGIC JS CHO ANIMATION (Giữ nguyên) ===
+  const scrollingDown = useRef(true);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      scrollingDown.current = currentY > lastScrollY.current;
+      lastScrollY.current = currentY;
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []); 
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const animatedChildren = entry.target.querySelectorAll<HTMLElement>('.animate-fadeIn');
+
+          if (entry.isIntersecting) {
+            animatedChildren.forEach(child => {
+              if (scrollingDown.current) {
+                child.classList.add('from-bottom');
+                child.classList.remove('from-top');
+              } else {
+                child.classList.add('from-top');
+                child.classList.remove('from-bottom');
+              }
+              child.classList.add('is-visible');
+            });
+          } else {
+            animatedChildren.forEach(child => {
+              child.classList.remove('is-visible');
+            });
+          }
+        });
+      },
+      {
+        threshold: 0.1, 
+      }
+    );
+
+    const sections = document.querySelectorAll('.about-section');
+    sections.forEach((section) => {
+      observer.observe(section);
+    });
+
+    return () => {
+      sections.forEach((section) => {
+        if (observer) {
+          observer.unobserve(section);
+        }
+      });
+    };
+  }, []); 
+  // === KẾT THÚC LOGIC JS ===
+
+
   return (
     <div className="about-us-page-wrapper">
-      {/* Lớp hiệu ứng khói mờ ảo (Toàn trang, cố định) */}
       <div className="smoky-animation-fullpage"></div>
 
-      {/* SECTION 1: OUR STORY (Như cũ, nhưng là 1 phần của trang) */}
+      {/* SECTION 1: OUR STORY (Giữ nguyên) */}
       <section className="about-section section-story">
-        <div className="about-image-col">
+        <div className="about-image-col animate-fadeIn stagger-delay-1">
           <Image 
-            src="/assets/image/pho.png" // Bạn có thể đổi ảnh này cho phù hợp
+            src="/assets/image/pho.png"
             alt="Our Story"
             width={500}
             height={500}
             className="section-image-style"
           />
         </div>
-        <div className="about-text-col">
+        <div className="about-text-col animate-fadeIn">
           <span className="discover-subtitle">{T.discover}</span>
           <h2 className="section-title">{T.storyTitle}</h2>
           <p>{T.storyContent}</p>
@@ -105,61 +163,117 @@ const AboutUsPage: React.FC = () => {
         </div>
       </section>
 
-      {/* SECTION 2: OUR MENU (Chỉ có text) */}
+      {/* SECTION 2: OUR MENU (Giữ nguyên) */}
       <section className="about-section section-menu">
-        <div className="menu-text-content">
+        <div className="menu-text-content animate-fadeIn">
           <span className="discover-subtitle">{T.discover}</span>
           <h2 className="section-title">{T.menuTitle}</h2>
           <p>{T.menuContent}</p>
         </div>
       </section>
 
-      {/* SECTION 3: APPETIZER (Ảnh trái, chữ phải) */}
+      {/* SECTION 3: APPETIZER (Giữ nguyên) */}
       <section className="about-section section-food">
-        <div className="about-image-col">
-           {/*  */}
+        <div className="about-image-col animate-fadeIn stagger-delay-1">
            <div className="image-placeholder"><p>Appetizer Image</p></div>
         </div>
-        <div className="about-text-col">
+        <div className="about-text-col animate-fadeIn">
           <span className="discover-subtitle">{T.discover}</span>
           <h2 className="section-title">{T.appetizerTitle}</h2>
           <p>{T.appetizerContent}</p>
         </div>
       </section>
 
-      {/* SECTION 4: SIDE DISH (Chữ trái, ảnh phải) */}
+      {/* SECTION 4: SIDE DISH (Giữ nguyên) */}
       <section className="about-section section-food reverse">
-        <div className="about-text-col">
+        <div className="about-text-col animate-fadeIn">
           <span className="discover-subtitle">{T.discover}</span>
           <h2 className="section-title">{T.sideDishTitle}</h2>
           <p>{T.sideDishContent}</p>
         </div>
-        <div className="about-image-col">
-          {/*  */}
+        <div className="about-image-col animate-fadeIn stagger-delay-1">
           <div className="image-placeholder"><p>Side Dish Image</p></div>
         </div>
       </section>
 
-      {/* SECTION 5: DESSERT (Ảnh trái, chữ phải) */}
+      {/* === CẬP NHẬT: SECTION 5 DESSERT (ĐÃ SỬA TÊN CLASS) === */}
       <section className="about-section section-food">
-        <div className="about-image-col">
-          {/*  */}
-          <div className="image-placeholder"><p>Dessert Image</p></div>
+        <div className="about-image-col animate-fadeIn stagger-delay-1">
+          {/* Container cho cảnh ghép - ĐÃ ĐỔI TÊN CLASS */}
+          <div className="dessert-collage-V2">
+            
+            {/* 1. Ảnh Bàn (z-index: 1) */}
+            <Image
+              src="/assets/image/about-us/Dessert_Table.png" 
+              alt="Bàn"
+              fill
+              style={{ objectFit: 'cover' }}
+              className="dessert-table-V2" /* ĐỔI TÊN CLASS */
+            />
+
+            {/* 2. KHUNG CHỨA MÓN ĂN (z-index: 2) */}
+            <div className="dessert-wrapper-V2">
+            
+              {/* Món 1 */}
+              <div className="dessert-item-V2">
+                <Image
+                  src="/assets/image/about-us/3_Color_Sweet_Soup.png"
+                  alt="Món tráng miệng 1"
+                  fill
+                  style={{ objectFit: 'contain' }}
+                />
+              </div>
+              
+              {/* Món 2 */}
+              <div className="dessert-item-V2">
+                <Image
+                  src="/assets/image/about-us/mon-2.png" /* THAY ẢNH NÀY */
+                  alt="Món tráng miệng 2"
+                  fill
+                  style={{ objectFit: 'contain' }}
+                />
+              </div>
+              
+              {/* Món 3 */}
+              <div className="dessert-item-V2">
+                <Image
+                  src="/assets/image/about-us/mon-3.png" /* THAY ẢNH NÀY */
+                  alt="Món tráng miệng 3"
+                  fill
+                  style={{ objectFit: 'contain' }}
+                />
+              </div>
+              
+              {/* Món 4 */}
+              <div className="dessert-item-V2">
+                <Image
+                  src="/assets/image/about-us/mon-4.png" /* THAY ẢNH NÀY */
+                  alt="Món tráng miệng 4"
+                  fill
+                  style={{ objectFit: 'contain' }}
+                />
+              </div>
+
+            </div>
+          </div>
         </div>
-        <div className="about-text-col">
+        
+        {/* CỘT VĂN BẢN (PHẢI) */}
+        <div className="about-text-col animate-fadeIn">
           <span className="discover-subtitle">{T.discover}</span>
           <h2 className="section-title">{T.dessertTitle}</h2>
           <p>{T.dessertContent}</p>
         </div>
       </section>
+      {/* === KẾT THÚC SECTION 5 === */}
 
-      {/* SECTION 6: UPCOMING EVENTS (Ảnh trái, chữ phải) */}
+
+      {/* SECTION 6: UPCOMING EVENTS (Giữ nguyên) */}
       <section className="about-section section-events">
-        <div className="about-image-col">
-          {/*  */}
+        <div className="about-image-col animate-fadeIn stagger-delay-1">
           <div className="image-placeholder"><p>Events Image</p></div>
         </div>
-        <div className="about-text-col">
+        <div className="about-text-col animate-fadeIn">
           <span className="discover-subtitle">{T.discover}</span>
           <h2 className="section-title">{T.eventsTitle}</h2>
           <p>{T.eventsContent}</p>
@@ -171,22 +285,19 @@ const AboutUsPage: React.FC = () => {
         </div>
       </section>
 
-      {/* SECTION 7: BEST INGREDIENTS (Text full-width, ảnh bên dưới) */}
+      {/* SECTION 7: BEST INGREDIENTS (Giữ nguyên) */}
       <section className="about-section section-ingredients">
-        <div className="menu-text-content">
+        <div className="menu-text-content animate-fadeIn">
           <span className="discover-subtitle">{T.discover}</span>
           <h2 className="section-title">{T.ingredientsTitle}</h2>
           <p>{T.ingredientsContent}</p>
         </div>
         <div className="ingredients-grid">
-           {/*  */}
-           <div className="image-placeholder small"><p>Ingredient 1</p></div>
-           {/*  */}
-           <div className="image-placeholder small"><p>Ingredient 2</p></div>
-           {/*  */}
-           <div className="image-placeholder small"><p>Ingredient 3</p></div>
-           {/*  */}
-           <div className="image-placeholder small"><p>Ingredient 4</p></div>
+           {/* Thêm các class so le cho lưới này */}
+           <div className="image-placeholder small animate-fadeIn stagger-delay-1"><p>Ingredient 1</p></div>
+           <div className="image-placeholder small animate-fadeIn stagger-delay-2"><p>Ingredient 2</p></div>
+           <div className="image-placeholder small animate-fadeIn stagger-delay-3"><p>Ingredient 3</p></div>
+           <div className="image-placeholder small animate-fadeIn stagger-delay-4"><p>Ingredient 4</p></div>
         </div>
       </section>
 
