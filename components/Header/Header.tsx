@@ -1,7 +1,5 @@
-// ddanh2436/project-smart-food-recommendation-frontend/Project-Smart-Food-Recommendation-Frontend-1fc724bd73b2d99b6b7202f40f81236938357594/components/Header/Header.tsx
-
 "use client";
-import React, { useState, useEffect } from "react"; 
+import React, { useState } from "react"; // Bỏ useEffect vì không cần bắt sự kiện scroll nữa
 import "./Header.css";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
@@ -9,7 +7,7 @@ import { useAuth } from "@/app/contexts/AuthContext";
 import Image from "next/image";
 import Link from 'next/link';
 
-// === DỮ LIỆU NGÔN NGỮ (ĐÃ THÊM MODAL TEXTS) ===
+// === DỮ LIỆU NGÔN NGỮ GIỮ NGUYÊN ===
 const langData = {
   en: {
     restaurants: "Restaurants",
@@ -22,7 +20,6 @@ const langData = {
     langEnglish: "English",
     switchSuccess: "Language switched to English",
     logoutSuccess: "Logout successful!",
-    // MODAL TEXTS (THÊM MỚI)
     logoutConfirmTitle: "Confirm Logout",
     logoutConfirmMessage: "Are you sure you want to log out?",
     logoutYes: "Yes, Log Out",
@@ -39,14 +36,12 @@ const langData = {
     langEnglish: "English",
     switchSuccess: "Đã chuyển sang Tiếng Việt",
     logoutSuccess: "Đăng xuất thành công!",
-    // MODAL TEXTS (THÊM MỚI)
     logoutConfirmTitle: "Xác nhận Đăng xuất",
     logoutConfirmMessage: "Bạn có chắc chắn muốn đăng xuất không?",
     logoutYes: "Đăng xuất",
     logoutCancel: "Hủy bỏ",
   }
 };
-// ======================================
 
 const DropdownArrow = () => (
   <svg
@@ -83,7 +78,6 @@ const VNFlag = () => (
     <Image src="/assets/image/flags/vn.png" alt="VN Flag" width={20} height={20} className="flag-icon" />
 );
 
-// === MODAL COMPONENT (Định nghĩa lại cho Header) ===
 interface LogoutModalProps {
     T: typeof langData.vn; 
     onConfirm: () => void;
@@ -96,23 +90,12 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ T, onConfirm, onCancel }) => 
             <h2>{T.logoutConfirmTitle}</h2>
             <p>{T.logoutConfirmMessage}</p>
             <div className="modal-actions">
-                <button 
-                    className="btn-confirm-logout" 
-                    onClick={onConfirm}
-                >
-                    {T.logoutYes}
-                </button>
-                <button 
-                    className="btn-cancel-logout" 
-                    onClick={onCancel}
-                >
-                    {T.logoutCancel}
-                </button>
+                <button className="btn-confirm-logout" onClick={onConfirm}>{T.logoutYes}</button>
+                <button className="btn-cancel-logout" onClick={onCancel}>{T.logoutCancel}</button>
             </div>
         </div>
     </div>
 );
-// ===================================================
 
 const Header: React.FC = () => {
   const router = useRouter();
@@ -120,35 +103,17 @@ const Header: React.FC = () => {
   
   const T = langData[currentLang]; 
 
-  const [isScrolled, setIsScrolled] = useState(false);
+  // Đã xóa state isScrolled
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [showLogoutModal, setShowLogoutModal] = useState(false); // TRẠNG THÁI MODAL (THÊM MỚI)
-
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 10) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-    };
-    window.addEventListener("scroll", handleScroll);
-    handleScroll();
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []); 
+  const [showLogoutModal, setShowLogoutModal] = useState(false); 
 
   const handleLangSwitch = (lang: 'en' | 'vn') => {
     setLang(lang);
     setIsDropdownOpen(false);
-    toast.success(langData[lang].switchSuccess);
   };
 
-  // === HÀM XÁC NHẬN ĐĂNG XUẤT (THÊM MỚI) ===
   const handleConfirmLogout = () => {
-    setShowLogoutModal(false); // Đóng modal
+    setShowLogoutModal(false); 
     if (typeof window !== 'undefined') {
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
@@ -157,26 +122,20 @@ const Header: React.FC = () => {
     toast.success(T.logoutSuccess);
     router.push("/");
   };
-  // =========================================
 
-  // === HÀM KHI NHẤN NÚT ĐĂNG XUẤT TRÊN HEADER (SỬA ĐỔI) ===
   const handleLogoutClick = () => {
-    // Chỉ mở modal, không đăng xuất ngay lập tức
     setShowLogoutModal(true); 
   };
-  // =========================================================
 
   const handleLoginClick = () => {
     router.push("/auth");
   };
 
-
   return (
     <>
-      <header 
-        className={`header-container ${isScrolled ? "header-scrolled" : ""}`}
-      >
-        {/* 1. Logo (Giữ nguyên) */}
+      {/* Xóa class header-scrolled động, chỉ giữ header-container */}
+      <header className="header-container">
+        {/* 1. Logo */}
         <div className="header-logo">
           <a href="/">
             <Image 
@@ -242,7 +201,6 @@ const Header: React.FC = () => {
             {isLoading ? (
               <div className="loading-skeleton"></div>
             ) : user ? (
-              // HIỂN THỊ LINK PROFILE + NÚT LOGOUT
               <div className="user-profile-container">
                 <Link href="/profile" className="profile-nav-link">
                   {user.picture ? (
@@ -266,7 +224,6 @@ const Header: React.FC = () => {
                       .join(' ')}
                   </span>
                 </Link>
-                {/* GỌI HÀM MỚI CHỈ MỞ MODAL */}
                 <button onClick={handleLogoutClick} className="header-auth-button">
                   {T.logout} 
                 </button>
@@ -280,7 +237,6 @@ const Header: React.FC = () => {
         </div>
       </header>
 
-      {/* RENDER MODAL TẠI ĐÂY */}
       {showLogoutModal && (
           <LogoutModal 
               T={T}

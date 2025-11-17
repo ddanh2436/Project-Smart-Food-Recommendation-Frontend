@@ -1,20 +1,20 @@
-/* 1. IMPORT FONT */
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400&display=swap'); /* <--- THÊM FONT NÀY */
-
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600&display=swap");
 
 .about-us-page-wrapper {
-  background-color: #0c0c0c; /* Màu nền gần đen như video */
+  background-color: #0c0c0c;
   color: #f0f0f0;
-  font-family: 'Lato', sans-serif;
+  font-family: "Lato", sans-serif;
   position: relative;
-  overflow-x: hidden; /* Ngăn cuộn ngang */
-  padding-top: 2rem; /* Thêm chút đệm ở trên cùng */
+  overflow-x: hidden;
+  padding-top: 2rem;
 }
 
-
+/* --- HIỆU ỨNG KHÓI NỀN (Giữ nguyên) --- */
 .smoky-animation-fullpage {
-  position: fixed; /* Cố định khi cuộn */
+  position: fixed;
   top: -50%;
   left: -50%;
   width: 200%;
@@ -22,45 +22,52 @@
   z-index: 1;
   background-image: radial-gradient(
     circle at 50% 50%,
-    rgba(255, 255, 255, 0.05) 0%, /* Mờ hơn trước */
+    rgba(255, 255, 255, 0.05) 0%,
     rgba(255, 255, 255, 0) 60%
   );
   animation: moveSmokily 25s linear infinite;
   opacity: 0.5;
 }
 
-/* Keyframes cho hiệu ứng di chuyển */
 @keyframes moveSmokily {
-  0% { transform: translate(0, 0); }
-  25% { transform: translate(20%, 10%); }
-  50% { transform: translate(0, 20%); }
-  75% { transform: translate(-20%, 10%); }
-  100% { transform: translate(0, 0); }
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(20%, 10%);
+  }
+  50% {
+    transform: translate(0, 20%);
+  }
+  75% {
+    transform: translate(-20%, 10%);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
 }
 
-
-/* 4. STYLE CHUNG CHO CÁC SECTION
-   - Mỗi section là một khối nội dung
-   - z-index: 2 để nổi lên trên animation
-   - Thêm padding lớn để tạo khoảng trắng
-*/
+/* 4. STYLE CHUNG CHO CÁC SECTION (NÂNG CẤP GLASSMORPHISM) */
 .about-section {
   position: relative;
-  z-index: 2; /* Nằm trên lớp animation */
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 6rem 2rem; 
+  z-index: 2;
+  max-width: 1200px; /* Mở rộng chiều ngang một chút */
+  margin: 0 auto 4rem auto; /* Tăng khoảng cách giữa các section */
+  padding: 5rem 3rem;
   box-sizing: border-box;
 
-  /* --- THÊM VÀO ĐỂ TĂNG ĐỘ SÂU --- */
-  /* Thêm viền mờ để bắt sáng nhẹ */
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 8px; /* Thêm bo góc nhẹ */
+  /* --- HIỆU ỨNG KÍNH MỜ CAO CẤP --- */
+  background: rgba(255, 255, 255, 0.02); /* Nền trong suốt cực nhẹ */
+  backdrop-filter: blur(12px); /* Làm mờ hậu cảnh (khói) */
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08); /* Viền sáng mỏng tinh tế */
+  border-radius: 16px; /* Bo góc mềm mại */
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); /* Đổ bóng sâu */
 }
 
 /* 5. STYLING CỤ THỂ CHO TỪNG SECTION */
 
-/* --- Section 1, 3, 4, 5, 6 (Layout 2 cột) --- */
+/* --- Layout 2 cột --- */
 .section-story,
 .section-food,
 .section-events {
@@ -70,7 +77,6 @@
   align-items: center;
 }
 
-/* Đảo ngược cột cho Side Dish */
 .section-food.reverse .about-image-col {
   order: 2;
 }
@@ -78,88 +84,196 @@
   order: 1;
 }
 
-/* Cột hình ảnh */
+/* --- NÂNG CẤP CỘT HÌNH ẢNH (KHUNG VIỀN VÀNG) --- */
 .about-image-col {
   width: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
+
+/* Tạo khung viền lệch phía sau ảnh */
+.about-image-col::before {
+  content: "";
+  position: absolute;
+  top: -15px;
+  left: -15px;
+  width: 100%;
+  height: 100%;
+  border: 1px solid rgba(233, 160, 4, 0.4); /* Màu vàng đồng mờ */
+  z-index: 0;
+  transition: transform 0.5s ease;
+  border-radius: 8px;
+}
+
+/* Hiệu ứng khi hover vào khung ảnh */
+.about-image-col:hover::before {
+  transform: translate(10px, 10px); /* Khung di chuyển ngược lại */
+}
+
+/* Ảnh chính */
 .section-image-style {
+  position: relative;
+  z-index: 1;
   width: 100%;
   height: auto;
   border-radius: 8px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-              box-shadow 0.4s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    box-shadow 0.5s ease;
 }
 
 .section-image-style:hover {
-  transform: scale(1.03); /* Phóng to nhẹ */
-  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.7); /* Tăng bóng mờ */
+  transform: scale(1.02);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
 }
 
-/* Placeholder cho ảnh (để bạn thấy bố cục) */
+/* Placeholder (cho các ô chưa có ảnh) */
 .image-placeholder {
   width: 100%;
-  aspect-ratio: 1 / 1; /* Tạo hộp vuông */
-  background-color: #222;
+  aspect-ratio: 1 / 1;
+  background-color: #1a1a1a;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #555;
-  font-family: Arial, sans-serif;
+  color: #666;
+  font-family: "Lato", sans-serif;
   font-size: 1.2rem;
-}
-.image-placeholder.small {
-  aspect-ratio: 4 / 3; /* Vuông hơn cho ingredients */
+  position: relative;
+  z-index: 1;
 }
 
-
-/* --- Section 2 & 7 (Layout 1 cột, text ở giữa) --- */
+/* --- Layout 1 cột (Menu & Ingredients) --- */
 .section-menu,
 .section-ingredients {
   text-align: center;
 }
 .menu-text-content {
-  max-width: 700px;
-  margin: 0 auto; /* Căn giữa */
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-/* Grid cho ảnh nguyên liệu */
-.section-ingredients .ingredients-grid {
+/* --- NÂNG CẤP SECTION INGREDIENTS (HÌNH TRÒN) --- */
+.ingredients-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
-  margin-top: 3rem;
+  gap: 2rem;
+  margin-top: 4rem;
 }
 
+/* Biến ô vuông thành hình tròn sang trọng */
+.image-placeholder.small {
+  aspect-ratio: 1 / 1;
+  background: linear-gradient(145deg, #1e1e1e, #252525);
+  border-radius: 50%; /* Hình tròn */
+  border: 1px solid rgba(233, 160, 4, 0.2);
+  transition: all 0.4s ease;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
 
-/* 6. STYLING CHUNG CHO VĂN BẢN (Giống video) */
-.discover-subtitle {
-  font-size: 1.1rem;
+.image-placeholder.small:hover {
+  transform: translateY(-10px);
+  border-color: #e9a004;
+  box-shadow: 0 15px 30px rgba(233, 160, 4, 0.15); /* Glow vàng nhẹ */
+}
+.image-placeholder.small p {
+  color: #e9a004;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.4rem;
   font-weight: 600;
-  color: #e9a004; /* Màu cam/vàng đồng */
-  letter-spacing: 1px;
+  margin: 0;
+}
+
+/* === SECTION 5 DESSERT COLLAGE (GIỮ NGUYÊN LOGIC, THÊM STYLE) === */
+.dessert-collage-V2 {
+  position: relative;
+  z-index: 1; /* Đè lên khung viền vàng */
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background-color: #141414; /* Nền tối hơn */
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+}
+
+.dessert-table-V2 {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  top: 60%;
+  z-index: 1;
+}
+
+.dessert-wrapper-V2 {
+  position: absolute;
+  z-index: 2;
+  bottom: 30%;
+  top: 30%;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  padding: 0 2%;
+}
+
+.dessert-item-V2 {
+  position: relative;
+  width: 22%;
+  height: 100%;
+  transition: transform 0.3s ease; /* Thêm hiệu ứng nhẹ cho món ăn */
+}
+.dessert-item-V2:hover {
+  transform: translateY(-5px) scale(1.05); /* Nổi lên khi hover */
+}
+
+/* --- 6. NÂNG CẤP TYPOGRAPHY --- */
+.discover-subtitle {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #e9a004;
+  letter-spacing: 3px;
   text-transform: uppercase;
-  font-family: 'Lato', sans-serif; 
+  font-family: "Lato", sans-serif;
+  display: inline-block;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+/* Thêm đường gạch ngang trang trí sau subtitle */
+.discover-subtitle::after {
+  content: "";
+  display: inline-block;
+  width: 40px;
+  height: 1px;
+  background-color: #e9a004;
+  vertical-align: middle;
+  margin-left: 15px;
+  opacity: 0.7;
 }
 
 .section-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 3.5rem;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 4rem; /* To hơn, ấn tượng hơn */
   font-weight: 700;
   color: #ffffff;
-  margin: 0.5rem 0 1.5rem 0;
-  line-height: 1.2;
+  margin: 0 0 2rem 0;
+  line-height: 1.1;
+  text-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
 p {
   font-size: 1.1rem;
-  line-height: 1.7;
-  color: #ccc; 
-  margin-bottom: 2rem;
-  font-family: 'Lato', sans-serif;
+  line-height: 1.8;
+  color: #d1d1d1; /* Sáng hơn một chút để dễ đọc trên nền tối */
+  margin-bottom: 2.5rem;
+  font-family: "Lato", sans-serif;
   font-weight: 300;
 }
 
@@ -167,55 +281,47 @@ p {
   color: #e9a004;
   text-decoration: none;
   font-weight: 600;
-  font-size: 1rem;
-  /* font-family: 'Arial', sans-serif; <-- Xóa nếu bạn làm theo bước 1 */
-  font-family: 'Lato', sans-serif; /* <-- Thêm nếu bạn làm theo bước 1 */
-  
-  /* --- CẬP NHẬT THÀNH NÚT --- */
+  font-size: 0.9rem;
+  font-family: "Lato", sans-serif;
   display: inline-block;
-  padding: 0.75rem 1.5rem;
-  border: 1px solid #e9a004; /* Viền màu vàng đồng */
-  border-radius: 4px;
+  padding: 0.8rem 2rem;
+  border: 1px solid #e9a004;
+  border-radius: 2px; /* Vuông vức hơn chút cho sang */
   text-transform: uppercase;
-  letter-spacing: 1px;
-  transition: all 0.3s ease;
+  letter-spacing: 2px;
+  transition: all 0.4s ease;
+  background: transparent;
 }
 
 .cta-link:hover {
-  color: #0c0c0c; /* Chữ màu nền (đen) */
-  background-color: #e9a004; /* Nền màu vàng đồng */
-  border-bottom-color: #e9a004; /* Giữ viền khi hover */
+  color: #000;
+  background-color: #e9a004;
+  box-shadow: 0 0 15px rgba(233, 160, 4, 0.4); /* Phát sáng khi hover */
 }
 
-/* Chi tiết sự kiện */
-.event-details {
-  margin-top: 1.5rem;
-}
-.event-details p {
-  margin-bottom: 0.5rem;
-  font-size: 1rem;
-}
 .event-details p strong {
   color: #fff;
-  font-weight: 600;
+  font-size: 1.2rem;
 }
 
-
-/* 7. RESPONSIVE CHO DI ĐỘNG */
+/* 7. RESPONSIVE */
 @media (max-width: 768px) {
   .about-section {
-    padding: 3rem 1.5rem; /* Giảm padding */
+    padding: 4rem 1.5rem;
   }
 
-  /* Chuyển 2 cột thành 1 cột */
   .section-story,
   .section-food,
   .section-events {
-    grid-template-columns: 1fr; /* 1 cột */
-    gap: 2rem;
+    grid-template-columns: 1fr;
+    gap: 3rem;
   }
-  
-  /* Reset lại order cho layout 1 cột */
+
+  /* Tắt hiệu ứng khung viền lệch trên mobile để đỡ rối */
+  .about-image-col::before {
+    display: none;
+  }
+
   .section-food.reverse .about-image-col {
     order: 0;
   }
@@ -223,39 +329,94 @@ p {
     order: 0;
   }
 
-  /* Căn giữa text cho layout 1 cột */
   .about-text-col {
     text-align: center;
   }
 
+  /* Ẩn đường gạch ngang trên mobile nếu muốn */
+  .discover-subtitle::after {
+    display: none;
+  }
+
   .section-title {
-    font-size: 2.5rem;
+    font-size: 2.8rem;
   }
-  
-  .section-ingredients .ingredients-grid {
-    grid-template-columns: 1fr 1fr; /* 2 cột trên di động */
+
+  .ingredients-grid {
+    grid-template-columns: 1fr 1fr; /* 2 cột */
+  }
+
+  .dessert-collage-V2 {
+    aspect-ratio: 1 / 1;
+  }
+  .dessert-wrapper-V2 {
+    top: 25%;
+    bottom: 35%;
   }
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* === KHỐI ANIMATION (GIỮ NGUYÊN LOGIC NHƯNG TINH CHỈNH TRANSITION CHO MƯỢT) === */
 
-/* Lớp (class) để áp dụng animation */
 .animate-fadeIn {
-  /* Mặc định ẩn đi */
-  opacity: 0; 
-  animation-fill-mode: forwards; /* Giữ trạng thái cuối cùng */
+  opacity: 0;
+  transform: translateY(30px);
+  /* Tăng thời gian transition lên 1s và dùng cubic-bezier để mượt hơn */
+  transition: opacity 1s cubic-bezier(0.215, 0.61, 0.355, 1),
+    transform 1s cubic-bezier(0.215, 0.61, 0.355, 1);
+  will-change: opacity, transform;
 }
 
-/* Khi một section được "kích hoạt" (bằng JS), nó sẽ chạy animation */
-.is-visible .animate-fadeIn {
-  animation: fadeInUp 1s ease-out;
+/* Hỗ trợ logic from-top / from-bottom của bạn */
+.animate-fadeIn.from-top {
+  transform: translateY(-50px); /* Tăng khoảng cách trượt để rõ hiệu ứng hơn */
+}
+
+.animate-fadeIn.from-bottom {
+  transform: translateY(50px);
+}
+
+/* Khi class is-visible được thêm vào bởi JS */
+.animate-fadeIn.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger delay giữ nguyên */
+.stagger-delay-1 {
+  transition-delay: 0.1s;
+}
+.stagger-delay-2 {
+  transition-delay: 0.2s;
+}
+.stagger-delay-3 {
+  transition-delay: 0.3s;
+}
+.stagger-delay-4 {
+  transition-delay: 0.4s;
+}
+
+.about-us-page-wrapper.lang-vn {
+  font-family: "Be Vietnam Pro", sans-serif !important;
+}
+
+/* 2. Đổi font tiêu đề tiếng Việt sang 'Playfair Display' */
+.lang-vn .section-title {
+  font-family: "Playfair Display", serif !important;
+  /* Tinh chỉnh lại kích thước nếu font mới bị to/nhỏ hơn */
+  line-height: 1.3;
+}
+
+.lang-vn .discover-subtitle,
+.lang-vn .cta-link,
+.lang-vn .image-placeholder p {
+  font-family: "Be Vietnam Pro", sans-serif !important;
+  font-weight: 600;
+  letter-spacing: 1px; /* Tiếng Việt dấu nhiều nên giảm khoảng cách chữ một chút cho đẹp */
+}
+
+/* 3. Tinh chỉnh đoạn văn (p) tiếng Việt */
+.lang-vn p {
+  font-family: "Be Vietnam Pro", sans-serif !important;
+  font-size: 1.05rem; /* Font này thường nhỏ hơn Lato chút, nên tăng nhẹ size */
+  line-height: 1.8;
 }
