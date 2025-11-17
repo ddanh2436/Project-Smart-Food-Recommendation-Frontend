@@ -312,6 +312,8 @@ const AboutUsPage: React.FC = () => {
           </p>
         </div>
       </section>
+      {/* === KẾT THÚC SECTION 5 === */}
+
 
       {/* SECTION 6: MANH DAT */}
       <section className="about-section section-events">
