@@ -1,143 +1,143 @@
-/* Thiết lập font chữ chung */
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-    Arial, sans-serif;
-  margin: 0;
-  /* === THAY ĐỔI: Đặt padding-top về 0 vì header không còn fixed nữa === */
-  padding-top: 0; 
-}
+/* components/Header/Header.css */
 
-/* Container chính của Header */
+/* ... (Các phần style chung của .header-container, .header-nav giữ nguyên như cũ) ... */
+
 .header-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
+  padding: 1.5rem 3rem;
   width: 100%;
   box-sizing: border-box;
-  
-  /* === THAY ĐỔI QUAN TRỌNG: Đổi từ fixed sang relative === */
-  position: relative; 
-  /* Bỏ top/left/z-index nếu muốn, hoặc giữ lại cũng không ảnh hưởng nhiều với relative */
+  position: absolute;
+  top: 0;
+  left: 0;
   z-index: 1000; 
-  
-  /* Giữ nguyên nền trắng như yêu cầu trước đó */
-  background-color: #ffffff; 
-  border-bottom: 1px solid #e0e0e0; 
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); 
+  background-color: transparent;
+  border-bottom: none;
+  box-shadow: none;
 }
 
-/* 1. Phần Logo (Giữ nguyên) */
 .header-logo a {
   text-decoration: none;
-  color: #333;
-  font-size: 1.8rem;
-  font-weight: 700;
   display: flex;
   align-items: center;
-  transition: opacity 0.2s ease;
-}
-.logo-image {
-  height: 45px;
-  width: auto;
-  max-width: 100%;
-  display: block;
 }
 
-/* 2. Khối chứa Nav và Login (Giữ nguyên) */
+.logo-image {
+  height: 50px;
+  width: auto;
+  display: block;
+  filter: brightness(0) invert(1); 
+  transition: opacity 0.2s ease;
+}
+
 .header-right-side {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 2.5rem;
 }
 
-/* 3. Phần Điều hướng (Giữ nguyên style màu tối) */
 .header-nav ul {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
-  gap: 1.75rem;
+  gap: 2rem;
 }
-.header-nav li {
-  display: inline-block;
-}
+
 .header-nav a {
   text-decoration: none;
-  font-size: 0.95rem;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  color: #4a4a4a; /* Màu chữ tối */
+  color: #ffffff; 
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
   transition: color 0.3s ease, transform 0.2s ease;
+  font-family: 'Nunito', sans-serif;
 }
+
 .header-nav a:hover {
-  color: #d4af37;
-  transform: translateY(-2px);
+  color: #e9a004;
+  transform: translateY(-1px);
 }
+
 .header-nav svg {
   width: 14px;
   height: 14px;
-  stroke: #777; /* Icon màu tối */
+  stroke: #ffffff;
   transition: stroke 0.3s ease;
 }
+.header-nav a:hover svg {
+  stroke: #e9a004;
+}
 
-/* 4. Phần Đăng nhập (Giữ nguyên) */
 .header-login {
   display: flex;
   align-items: center;
-  cursor: default;
-}
-.header-auth-button {
-  background-color: #f57c00;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-family: "Nunito", sans-serif;
-  font-weight: bold;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.3s ease, transform 0.3s ease,
-    box-shadow 0.3s ease;
-}
-.header-auth-button:hover {
-  background-color: #ff9800;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Phần Profile (Giữ nguyên) */
+.header-auth-button {
+  background-color: transparent;
+  color: #ffffff;
+  border: 1px solid rgba(255,255,255,0.5);
+  padding: 8px 20px;
+  border-radius: 30px;
+  font-family: "Nunito", sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.header-auth-button:hover {
+  background-color: #e9a004;
+  border-color: #e9a004;
+  color: #000;
+}
+
+/* === [CẬP NHẬT CHÍNH] STYLE CHO USER PROFILE === */
 .user-profile-container {
   display: flex;
   align-items: center;
-  gap: 12px;
 }
+
 .profile-nav-link {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  align-items: center; /* Căn giữa theo chiều dọc */
+  gap: 10px; /* Khoảng cách giữa avt và tên */
   text-decoration: none;
-  color: inherit;
-  border-radius: 20px;
-  padding: 4px;
-  transition: background-color 0.2s ease;
+  color: #ffffff;
+  
+  /* Tạo hình viên thuốc (pill shape) mờ */
+  background-color: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  
+  padding: 4px 16px 4px 4px; /* Padding bên phải nhiều hơn cho tên */
+  border-radius: 30px;
+  transition: all 0.2s ease;
 }
+
 .profile-nav-link:hover {
-  background-color: #f0f0f0;
+  background-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.4);
 }
+
 .user-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  cursor: pointer;
+  width: 36px; /* Kích thước cố định */
+  height: 36px;
+  border-radius: 50%; /* Hình tròn hoàn hảo */
+  object-fit: cover; /* Đảm bảo ảnh không bị méo */
+  border: 2px solid rgba(255,255,255,0.8); /* Viền trắng quanh ảnh */
 }
+
 .user-avatar-placeholder {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background-color: #f57c00;
   color: white;
@@ -146,94 +146,47 @@ body {
   justify-content: center;
   font-weight: bold;
   font-size: 16px;
-  line-height: 1;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  cursor: pointer;
+  border: 2px solid white;
 }
-.user-avatar:hover, .user-avatar-placeholder:hover {
-  transform: scale(1.1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
+
 .user-name {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 14px;
-  max-width: 100px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  cursor: default;
-  color: #333; /* Màu tối */
+  color: #ffffff;
+  white-space: nowrap; /* Không xuống dòng */
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
-.user-profile-container .user-name:hover {
-  background-color: transparent !important;
-  color: #333 !important;
-  cursor: default !important;
-}
+/* ============================================= */
 
-.loading-skeleton {
-  width: 120px;
-  height: 32px;
-  background-color: #f0f0f0;
-  border-radius: 20px;
-  animation: pulse 1.5s infinite ease-in-out;
-}
-@keyframes pulse {
-  0% { opacity: 0.5; }
-  50% { opacity: 1; }
-  100% { opacity: 0.5; }
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .header-container {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 1rem;
-  }
-  .header-right-side {
-    gap: 1rem;
-    margin-top: 0.5rem;
-  }
-  .header-nav ul {
-    gap: 1rem;
-  }
-}
-
-/* --- PHẦN SONG NGỮ (Giữ nguyên style nền trắng) --- */
 .language-selector-wrapper {
   position: relative;
   z-index: 1010; 
 }
+
 .language-toggle-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  background-color: transparent;
-  border: 1px solid #e0e0e0;
+  gap: 6px;
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 6px 12px;
   border-radius: 20px;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #4a4a4a;
+  color: #ffffff;
   font-weight: 600;
 }
+
 .language-toggle-button:hover {
-  background-color: #f0f0f0;
-}
-.flag-icon {
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  object-fit: cover;
-}
-.language-toggle-button svg {
-  width: 10px; 
-  height: 10px;
-  stroke: #777;
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Dropdown Menu */
+.language-toggle-button svg {
+  stroke: #ffffff;
+}
+
 .language-dropdown {
   position: absolute;
   top: 100%; 
@@ -241,15 +194,14 @@ body {
   margin-top: 10px;
   min-width: 150px;
   border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-  overflow: hidden;
-  opacity: 0;
-  transform: translateY(-10px);
-  animation: slideDown 0.3s ease-out forwards; 
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   background: #ffffff;
-  backdrop-filter: none;
-  border: 1px solid #e0e0e0;
+  border: none;
+  padding: 5px 0;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease-out;
 }
+
 .dropdown-item {
   display: flex;
   align-items: center;
@@ -260,70 +212,24 @@ body {
   border: none;
   text-align: left;
   cursor: pointer;
-  font-size: 0.95rem;
-  transition: all 0.2s ease;
   color: #333;
-}
-.dropdown-item:hover {
-  background-color: #ffefe2; 
-  color: #f57c00; 
-}
-.dropdown-item:disabled {
-    background-color: #e3f2fd; 
-    color: #0d47a1;
-    cursor: default;
-    font-weight: 600;
+  font-size: 0.95rem;
 }
 
-/* --- MODAL STYLES (Giữ nguyên) --- */
-@keyframes modalPopIn {
-    0% { opacity: 0; transform: scale(0.6) translateY(-60px); }
-    30% { opacity: 1; transform: scale(1.2) translateY(0); }
-    60% { transform: scale(0.9) translateY(0); }
-    85% { transform: scale(1.03) translateY(0); }
-    100% { transform: scale(1) translateY(0); }
+.dropdown-item:hover {
+  background-color: #f5f5f5;
+  color: #e9a004;
 }
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+
+@media (max-width: 768px) {
+  .header-container {
+    padding: 1rem;
+    background: rgba(0,0,0,0.8);
+  }
+  .header-right-side {
+    gap: 1rem;
+  }
+  .header-nav {
+    display: none;
+  }
 }
-@keyframes slideDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-.modal-overlay {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    opacity: 0;
-    animation: fadeIn 0.3s forwards;
-}
-.modal-content {
-    background-color: #fff;
-    padding: 30px;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 400px;
-    text-align: center;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    animation: modalPopIn 0.5s ease-out forwards;
-}
-.modal-content h2 { margin-top: 0; color: #333; font-size: 1.5rem; }
-.modal-content p { color: #666; margin-bottom: 25px; }
-.modal-actions { display: flex; justify-content: center; gap: 15px; }
-.modal-actions button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.2s;
-}
-.btn-confirm-logout { background-color: #dc3545; color: white; }
-.btn-confirm-logout:hover { background-color: #c82333; }
-.btn-cancel-logout { background-color: #6c757d; color: white; }
-.btn-cancel-logout:hover { background-color: #5a6268; }
