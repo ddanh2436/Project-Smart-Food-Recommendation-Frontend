@@ -1,5 +1,6 @@
+// components/Header/Header.tsx
 "use client";
-import React, { useState } from "react"; // Bỏ useEffect vì không cần bắt sự kiện scroll nữa
+import React, { useState } from "react"; 
 import "./Header.css";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
@@ -7,9 +8,10 @@ import { useAuth } from "@/app/contexts/AuthContext";
 import Image from "next/image";
 import Link from 'next/link';
 
-// === DỮ LIỆU NGÔN NGỮ GIỮ NGUYÊN ===
+// === DỮ LIỆU NGÔN NGỮ (ĐÃ CẬP NHẬT HOME) ===
 const langData = {
   en: {
+    home: "Home", // Mới thêm
     restaurants: "Restaurants",
     nearMe: "Near Me",
     foodsDrinks: "Foods and Drinks",
@@ -26,6 +28,7 @@ const langData = {
     logoutCancel: "Cancel",
   },
   vn: {
+    home: "Trang chủ", // Mới thêm
     restaurants: "Nhà hàng",
     nearMe: "Gần tôi",
     foodsDrinks: "Món ăn & Đồ uống",
@@ -58,13 +61,16 @@ const DropdownArrow = () => (
     <polyline points="6 9 12 15 18 9"></polyline>
   </svg>
 );
+
 interface NavItem {
   key: keyof typeof langData.en; 
   href: string;
   hasDropdown?: boolean;
 }
 
+// === THÊM MỤC HOME VÀO ĐẦU DANH SÁCH ===
 const navItems: NavItem[] = [
+  { key: "home", href: "/" }, // Link về trang chủ
   { key: "restaurants", href: "/restaurants", hasDropdown: true },
   { key: "nearMe", href: "/near-me" },
   { key: "foodsDrinks", href: "/foods-and-drinks"  },
@@ -103,7 +109,6 @@ const Header: React.FC = () => {
   
   const T = langData[currentLang]; 
 
-  // Đã xóa state isScrolled
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false); 
 
@@ -133,7 +138,6 @@ const Header: React.FC = () => {
 
   return (
     <>
-      {/* Xóa class header-scrolled động, chỉ giữ header-container */}
       <header className="header-container">
         {/* 1. Logo */}
         <div className="header-logo">
@@ -207,8 +211,8 @@ const Header: React.FC = () => {
                     <Image
                       src={user.picture}
                       alt={user.username}
-                      width={32}
-                      height={32}
+                      width={40} 
+                      height={40}
                       className="user-avatar"
                       unoptimized={user.picture?.includes('googleusercontent.com')}
                     />
@@ -224,9 +228,7 @@ const Header: React.FC = () => {
                       .join(' ')}
                   </span>
                 </Link>
-                <button onClick={handleLogoutClick} className="header-auth-button">
-                  {T.logout} 
-                </button>
+                {/* Nút logout được tách ra hoặc để nhỏ bên cạnh */}
               </div>
             ) : (
               <button onClick={handleLoginClick} className="header-auth-button">
