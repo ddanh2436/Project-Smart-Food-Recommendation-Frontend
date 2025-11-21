@@ -4,6 +4,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation"; // [NEW] Import hook
 import {
   FaFacebookF,
   FaTwitter,
@@ -17,21 +18,28 @@ import {
 import "./Footer.css";
 
 const Footer = () => {
+  const pathname = usePathname(); // [NEW] Lấy đường dẫn hiện tại
+
+  // Kiểm tra nếu đang ở trang About Us thì ẩn CTA Footer
+  const showCta = pathname !== "/about-us";
+
   return (
     <footer className="footer-wrapper">
       
-      {/* === PHẦN 1: CTA SECTION (MINIMALIST) === */}
-      <div className="footer-cta-minimal">
-        <div className="cta-content">
-          <h2 className="cta-title">Tinh hoa Ẩm thực Việt</h2>
-          <p className="cta-desc">
-            Kết nối đam mê, chia sẻ hương vị. Khám phá câu chuyện đằng sau mỗi món ăn cùng VietNomNom.
-          </p>
-          <Link href="/about-us" className="btn-cta-outline">
-            Khám phá câu chuyện của chúng tôi
-          </Link>
+      {/* === PHẦN 1: CTA SECTION (Chỉ hiện nếu không phải trang About Us) === */}
+      {showCta && (
+        <div className="footer-cta-minimal">
+          <div className="cta-content">
+            <h2 className="cta-title">Tinh hoa Ẩm thực Việt</h2>
+            <p className="cta-desc">
+              Kết nối đam mê, chia sẻ hương vị. Khám phá câu chuyện đằng sau mỗi món ăn cùng VietNomNom.
+            </p>
+            <Link href="/about-us" className="btn-cta-outline">
+              Khám phá câu chuyện của chúng tôi
+            </Link>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* === PHẦN 2: MAIN CONTENT === */}
       <div className="footer-main">
@@ -40,7 +48,6 @@ const Footer = () => {
           {/* Cột 1: Brand & Socials */}
           <div className="footer-col brand-col">
             <div className="footer-logo">
-               {/* Logo trắng (dùng filter trong CSS hoặc ảnh trắng) */}
               <Image
                 src="/assets/image/logo.png"
                 alt="VietNomNom Logo"

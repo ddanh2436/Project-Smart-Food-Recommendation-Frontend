@@ -1,116 +1,161 @@
 // app/(main)/about-us/page.tsx
 
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react"; 
 import { useAuth } from "@/app/contexts/AuthContext";
 import Image from "next/image";
 import "./AboutUsPage.css";
 
-// === DỮ LIỆU NGÔN NGỮ (Giữ nguyên) ===
+// === DỮ LIỆU NGÔN NGỮ (GIỮ NGUYÊN) ===
 const langData = {
   en: {
-    // General
+    heroTitle: "The Essence of Vietnamese Cuisine",
+    heroDesc: "Connecting passion, sharing flavors. Discover the stories behind every dish with VietNomNom.",
+    heroBtn: "DISCOVER OUR STORY",
     discover: "Discover",
-    meet: "Meet",
-
-    // Section 1: Story
+    meet: "Meet", 
+    meetTeam: "Meet the Team", 
     storyTitle: "Our Story",
     storyContent:
       "In a world where everything is digital, sharing a meal is one of the last true acts of connection. It’s where deals are made, friendships are forged, and love stories begin. But a bad meal can ruin a good moment. At VietNomNom, our mission is simple: to ensure every gathering is accompanied by great food. We don't just recommend restaurants; we recommend memories. Let us take care of the menu, so you can focus on the people sitting across from you.",
-    storyCta: "Show More About Us",
-
-    // Section 2: Intro Members
+    storyCta: "Read More",
     menuTitle: "Our Members",
     menuContent:
       "Crafted with love by our members - believers that a good meal can turn a bad day around. Thank you for letting our passion be part of your dining experience.",
-
-    // Section 3: Duy Anh
     appetizerTitle: "Duy Anh",
     appetizerContent:
       "The Head Chef of Operations. Blending dry code, raw data, and spicy designs into a perfect recipe. Main job: Making sure the team doesn't burn the deadline (or the office) and keeping cool when the servers heat up.",
     appetizerDish: "Signature Dish: Black Coffee – Fuel for carrying the team.",
-
-    // Section 4: Ho Phuc Kien
     sideDishTitle: "Ho Phuc Kien",
     sideDishContent:
       "Making sure the UI looks as tasty as the food. Believes that good design is like good plating – it makes everything better.",
     sideDishDish: "Signature Dish: Wagyu Beef – Because presentation is everything.",
-
-    // Section 5: Quoc Khanh
-    dessertTitle: "Quoc Khanh",
+    dessertTitle: "Quoc Khánh",
     dessertContent:
       "The Digital Sommelier. Teaching computers to understand cravings. He knows you want pizza before you even realize it yourself.",
     dessertDish: "Signature Dish: Omakase – Loves the surprise element, just like AI predictions.",
-
-    // Section 6: Manh Dat
     eventsTitle: "Manh Dat",
     eventsContent:
       "The Data Hunter. Scouring the internet for hidden menus and reviews while you sleep, so you never have to wonder 'what’s good here?' again.",
     eventsDish: "Signature Dish: Instant Noodles at 2 AM – The fuel of data hunters.",
-
-    // Section 7: Ingredients
     ingredientsTitle: "The Best Vietnamese Food",
     ingredientsContent:
-      "The 4 most well-known Vietnamese dishes that our members love to recommend: Pho, Banh Mi, Bun Cha, and Goi Cuon. Each dish is a testament to Vietnam's rich culinary heritage and the passion of our community.",
+      "Chúng tôi vô cùng tự hào về nguồn nguyên liệu và chỉ sử dụng những gì tốt nhất. Chúng tôi thực sự có thể đạt được mức độ xuất sắc này bằng cách chăm chút thêm cho các món trong thực đơn, điều khó tìm thấy ở các nhà hàng khác.",
+    
+    // [NEW] Ingredients Translations
+    ingredient1: "Herbs",
+    ingredient2: "Fish Sauce",
+    ingredient3: "Rice",
+    ingredient4: "Broth",
   },
   vn: {
-    // General
+    heroTitle: "Tinh hoa Ẩm thực Việt",
+    heroDesc: "Kết nối đam mê, chia sẻ hương vị. Khám phá câu chuyện đằng sau mỗi món ăn cùng VietNomNom.",
+    heroBtn: "KHÁM PHÁ CÂU CHUYỆN CỦA CHÚNG TÔI",
     discover: "Khám phá",
-    meet: "Gặp gỡ",
-
-    // Section 1
+    meet: "Gặp gỡ", 
+    meetTeam: "Giới thiệu thành viên", 
     storyTitle: "Câu chuyện",
     storyContent:
       "Trong một thế giới mà mọi thứ đều được số hóa, việc cùng nhau chia sẻ một bữa ăn là một trong những sợi dây kết nối thực tế cuối cùng còn sót lại. Đó là nơi những hợp đồng được ký kết, tình bạn được thắt chặt và những chuyện tình bắt đầu. Nhưng một bữa ăn tệ có thể phá hỏng khoảnh khắc đẹp đẽ đó. Tại VietNomNom, sứ mệnh của chúng tôi rất đơn giản: đảm bảo mọi cuộc gặp gỡ đều đi kèm với những món ăn tuyệt vời. Chúng tôi không chỉ gợi ý nhà hàng, chúng tôi gợi ý những kỷ niệm. Hãy để chúng tôi lo phần thực đơn, để bạn toàn tâm toàn ý dành thời gian cho những người ngồi đối diện.",
-    storyCta: "Xem thêm về chúng tôi",
-
-    // Section 2
+    storyCta: "Xem chi tiết",
     menuTitle: "Thành viên của chúng tôi",
     menuContent:
       "Được tạo nên bởi cảm hứng của những người tin rằng một bữa ăn ngon có thể thay đổi cả một ngày dài. Cảm ơn bạn đã để tâm huyết của chúng tôi trở thành một phần trong trải nghiệm của bạn.",
-
-    // Section 3
     appetizerTitle: "Duy Anh",
     appetizerContent:
       "Bếp trưởng điều hành. Người có nhiệm vụ 'trộn' các thuật toán AI khô khan và giao diện bay bổng thành một món ăn hoàn chỉnh. Sở trường: Giữ cho team không 'cháy' deadline như kho thịt cháy và giữ cái đầu lạnh khi server nóng.",
     appetizerDish: "Món tủ: Cà phê đen – Nguồn năng lượng để vận hành cả team.",
-
-    // Section 4
     sideDishTitle: "Hồ Phúc Kiên",
     sideDishContent:
       "Người chịu trách nhiệm làm cho website trông 'ngon mắt' như chính món ăn vậy. Tin rằng một giao diện đẹp cũng quan trọng như cách bày biện (plating) trên đĩa.",
     sideDishDish: "Món tủ: Bò Wagyu – Vì hình thức cũng quan trọng như hương vị.",
-
-    // Section 5
     dessertTitle: "Quốc Khánh",
     dessertContent:
       "Nhà tâm lý học ẩm thực. Dạy máy tính cách 'đọc vị' cái bụng đói của bạn, thậm chí biết bạn thèm bún bò trước cả khi bạn nhận ra.",
     dessertDish: "Món tủ: Omakase – Thích sự bất ngờ, giống như cách AI hoạt động.",
-
-    // Section 6
     eventsTitle: "Mạnh Đạt",
     eventsContent:
       "Thợ săn dữ liệu. Trong khi bạn ngủ, anh ấy đang 'quét' sạch menu của cả thành phố để bạn không bao giờ phải hỏi 'quán này bán gì?'.",
     eventsDish: "Món tủ: Mì tôm chanh lúc 2 giờ sáng – Nhiên liệu của thợ săn dữ liệu.",
-
-    // Section 7
     ingredientsTitle: "Nguyên liệu tốt nhất",
     ingredientsContent:
       "Chúng tôi vô cùng tự hào về nguồn nguyên liệu và chỉ sử dụng những gì tốt nhất. Chúng tôi thực sự có thể đạt được mức độ xuất sắc này bằng cách chăm chút thêm cho các món trong thực đơn, điều khó tìm thấy ở các nhà hàng khác.",
+    
+    // [NEW] Ingredients Translations
+    ingredient1: "Rau Thơm",
+    ingredient2: "Nước Mắm",
+    ingredient3: "Gạo Tẻ",
+    ingredient4: "Nước Dùng",
   },
 };
-// ===================================
+
+// === HÀM SMOOTH SCROLL (Giữ nguyên) ===
+const smoothScrollTo = (targetId: string, duration: number) => {
+  const target = document.getElementById(targetId);
+  if (!target) return;
+
+  const start = window.scrollY;
+  const targetPosition = target.getBoundingClientRect().top + window.scrollY;
+  const distance = targetPosition - start;
+  let startTime: number | null = null;
+
+  const animation = (currentTime: number) => {
+    if (startTime === null) startTime = currentTime;
+    const timeElapsed = currentTime - startTime;
+    const run = (t: number, b: number, c: number, d: number) => {
+      t /= d / 2;
+      if (t < 1) return (c / 2) * t * t + b;
+      t--;
+      return (-c / 2) * (t * (t - 2) - 1) + b;
+    };
+    const nextScrollY = run(timeElapsed, start, distance, duration);
+    window.scrollTo(0, nextScrollY);
+    if (timeElapsed < duration) {
+      requestAnimationFrame(animation);
+    }
+  };
+  requestAnimationFrame(animation);
+};
+
+// === ICON SCROLL (Giữ nguyên) ===
+const ScrollDownIcon = () => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="20" 
+    height="20" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2.5" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+    className="scroll-down-icon" // <-- Class cho CSS animation
+  >
+    <polyline points="12 5 12 19"></polyline>
+    <polyline points="19 12 12 19 5 12"></polyline>
+  </svg>
+);
+
 
 const AboutUsPage: React.FC = () => {
   const { currentLang } = useAuth();
   const T = langData[currentLang];
 
+  const [showScrollPrompt, setShowScrollPrompt] = useState(false); 
+
+  const handleScrollToStory = () => {
+    smoothScrollTo("our-story", 2000);
+  };
+
   const handleScrollToMembers = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault(); // Ngăn chặn hành vi nhảy trang mặc định của thẻ a
-    const membersSection = document.getElementById("our-members");
-    if (membersSection) {
-      membersSection.scrollIntoView({ behavior: "smooth" });
-    }
+    e.preventDefault();
+    smoothScrollTo("our-members", 1500);
+  };
+  
+  const handleScrollToDuyAnh = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    smoothScrollTo("member-duyanh", 1500);
   };
 
   const scrollingDown = useRef(true);
@@ -121,11 +166,45 @@ const AboutUsPage: React.FC = () => {
       const currentY = window.scrollY;
       scrollingDown.current = currentY > lastScrollY.current;
       lastScrollY.current = currentY;
+      
+      // === LOGIC DÒNG CHỮ CUỘN (TINH CHỈNH ĐIỂM DỪNG CUỐI CÙNG) ===
+      const memberStartElement = document.getElementById('member-duyanh');
+      // Section BẮT ĐẦU sau thành viên cuối cùng
+      const ingredientsStartElement = document.querySelector('.section-ingredients'); 
+
+      if (memberStartElement && ingredientsStartElement) {
+        // Ép kiểu sang HTMLElement để truy cập offsetTop
+        const memberStart = memberStartElement as HTMLElement; 
+        const ingredientsStart = ingredientsStartElement as HTMLElement;
+
+        const startY = memberStart.offsetTop; 
+        // Điểm biến mất: Đỉnh của Section Ingredients (Section 7)
+        const endYThreshold = ingredientsStart.offsetTop; 
+        const windowHeight = window.innerHeight;
+
+        // Start Threshold: Dòng chữ hiện ra khi cuộn qua điểm 1/3 màn hình kể từ top của Duy Anh
+        const startThreshold = startY - windowHeight / 3;
+
+        // End Threshold: Dòng chữ biến mất khi đỉnh của Section Ingredients chạm đáy màn hình.
+        // Ta trừ đi windowHeight để có tọa độ scrollY mà tại đó đỉnh section 7 vừa chạm đáy viewport.
+        const endThreshold = endYThreshold - windowHeight + 1; // Sử dụng buffer +1 để ẩn ngay khi chạm đáy viewport.
+
+        // Hiển thị nếu cuộn đã qua điểm bắt đầu VÀ chưa chạm ngưỡng biến mất.
+        if (window.scrollY >= startThreshold && window.scrollY < endThreshold) { 
+          setShowScrollPrompt(true);
+        } else {
+          setShowScrollPrompt(false);
+        }
+      } else {
+        setShowScrollPrompt(false);
+      }
+      // === KẾT THÚC LOGIC DÒNG CHỮ CUỘN ===
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, []); 
 
+  // Logic IntersectionObserver cũ cho animate-fadeIn (Giữ nguyên)
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -151,25 +230,16 @@ const AboutUsPage: React.FC = () => {
           }
         });
       },
-      {
-        threshold: 0.1,
-      }
+      { threshold: 0.1 }
     );
 
     const sections = document.querySelectorAll(".about-section");
-    sections.forEach((section) => {
-      observer.observe(section);
-    });
+    sections.forEach((section) => observer.observe(section));
 
     return () => {
-      sections.forEach((section) => {
-        if (observer) {
-          observer.unobserve(section);
-        }
-      });
+      sections.forEach((section) => observer.unobserve(section));
     };
   }, []);
-  // === KẾT THÚC LOGIC JS ===
 
   return (
     <div
@@ -179,8 +249,19 @@ const AboutUsPage: React.FC = () => {
     >
       <div className="smoky-animation-fullpage"></div>
 
-      {/* SECTION 1: OUR STORY */}
-      <section className="about-section section-story">
+      {/* HERO SECTION */}
+      <div className="about-page-hero">
+        <div className="about-hero-content">
+          <h1 className="about-hero-title">{T.heroTitle}</h1>
+          <p className="about-hero-desc">{T.heroDesc}</p>
+          <button onClick={handleScrollToStory} className="btn-hero-gold">
+            {T.heroBtn}
+          </button>
+        </div>
+      </div>
+
+      {/* SECTION 1: STORY */}
+      <section id="our-story" className="about-section section-story">
         <div className="about-image-col animate-fadeIn stagger-delay-1">
           <Image
             src="/assets/image/pho.png"
@@ -194,7 +275,6 @@ const AboutUsPage: React.FC = () => {
           <span className="discover-subtitle">{T.discover}</span>
           <h2 className="section-title">{T.storyTitle}</h2>
           <p>{T.storyContent}</p>
-          {/* [CẬP NHẬT] Thêm onClick và href để trỏ tới ID */}
           <a
             href="#our-members"
             onClick={handleScrollToMembers}
@@ -205,25 +285,32 @@ const AboutUsPage: React.FC = () => {
         </div>
       </section>
 
-      {/* SECTION 2: OUR MENU / INTRO MEMBER */}
-      {/* [CẬP NHẬT] Thêm id="our-members" ở đây */}
+      {/* SECTION 2: MEMBERS */}
       <section id="our-members" className="about-section section-menu">
         <div className="menu-text-content animate-fadeIn">
-          <span className="discover-subtitle">{T.meet}</span>
+          <span className="discover-subtitle">{T.meet}</span> 
           <h2 className="section-title">{T.menuTitle}</h2>
           <p>{T.menuContent}</p>
+          
+          <a
+            href="#member-duyanh"
+            onClick={handleScrollToDuyAnh}
+            className="cta-link"
+          >
+            {T.meetTeam} 
+          </a>
         </div>
       </section>
 
       {/* SECTION 3: DUY ANH */}
-      <section className="about-section section-food">
+      <section id="member-duyanh" className="about-section section-food">
         <div className="about-image-col animate-fadeIn stagger-delay-1">
           <div className="image-placeholder">
             <p>Duy Anh's Image</p>
           </div>
         </div>
         <div className="about-text-col animate-fadeIn">
-          <span className="discover-subtitle">{T.meet}</span>
+          <span className="discover-subtitle">{T.meet}</span> 
           <h2 className="section-title">{T.appetizerTitle}</h2>
           <p>
             {T.appetizerContent}
@@ -237,7 +324,7 @@ const AboutUsPage: React.FC = () => {
       {/* SECTION 4: HO PHUC KIEN */}
       <section className="about-section section-food reverse">
         <div className="about-text-col animate-fadeIn">
-          <span className="discover-subtitle">{T.meet}</span>
+          <span className="discover-subtitle">{T.meet}</span> 
           <h2 className="section-title">{T.sideDishTitle}</h2>
           <p>
             {T.sideDishContent}
@@ -302,7 +389,7 @@ const AboutUsPage: React.FC = () => {
         </div>
 
         <div className="about-text-col animate-fadeIn">
-          <span className="discover-subtitle">{T.meet}</span>
+          <span className="discover-subtitle">{T.meet}</span> 
           <h2 className="section-title">{T.dessertTitle}</h2>
           <p>
             {T.dessertContent}
@@ -312,8 +399,6 @@ const AboutUsPage: React.FC = () => {
           </p>
         </div>
       </section>
-      {/* === KẾT THÚC SECTION 5 === */}
-
 
       {/* SECTION 6: MANH DAT */}
       <section className="about-section section-events">
@@ -323,7 +408,7 @@ const AboutUsPage: React.FC = () => {
           </div>
         </div>
         <div className="about-text-col animate-fadeIn">
-          <span className="discover-subtitle">{T.meet}</span>
+          <span className="discover-subtitle">{T.meet}</span> 
           <h2 className="section-title">{T.eventsTitle}</h2>
           <p>
             {T.eventsContent}
@@ -343,20 +428,56 @@ const AboutUsPage: React.FC = () => {
           <p>{T.ingredientsContent}</p>
         </div>
         <div className="ingredients-grid">
+          {/* Item 1 */}
           <div className="image-placeholder small animate-fadeIn stagger-delay-1">
-            <p>Ingredient 1</p>
+            <Image
+              src="/assets/image/about-us/Herb.jpg" 
+              alt={T.ingredient1}
+              fill
+              style={{ objectFit: "cover" }}
+            />
+            <p>{T.ingredient1}</p>
           </div>
+          {/* Item 2 */}
           <div className="image-placeholder small animate-fadeIn stagger-delay-2">
-            <p>Ingredient 2</p>
+            <Image
+              src="/assets/image/about-us/Fish_Sauce.jpg" 
+              alt={T.ingredient2}
+              fill
+              style={{ objectFit: "cover" }}
+            />
+            <p>{T.ingredient2}</p>
           </div>
+          {/* Item 3 */}
           <div className="image-placeholder small animate-fadeIn stagger-delay-3">
-            <p>Ingredient 3</p>
+            <Image
+              src="/assets/image/about-us/Rice.jpg" 
+              alt={T.ingredient3}
+              fill
+              style={{ objectFit: "cover" }}
+            />
+            <p>{T.ingredient3}</p>
           </div>
+          {/* Item 4 */}
           <div className="image-placeholder small animate-fadeIn stagger-delay-4">
-            <p>Ingredient 4</p>
+            <Image
+              src="/assets/image/about-us/Broth.jpg" 
+              alt={T.ingredient4}
+              fill
+              style={{ objectFit: "cover" }}
+            />
+            <p>{T.ingredient4}</p>
           </div>
         </div>
       </section>
+      
+      {/* DÒNG CHỮ SCROLLING CỐ ĐỊNH Ở ĐÁY */}
+      {showScrollPrompt && (
+        <div className="scroll-prompt-container">
+          <p>{currentLang === 'vn' ? "Lướt xuống dưới để xem tiếp" : "Scroll down to continue"}</p>
+          <ScrollDownIcon />
+        </div>
+      )}
     </div>
   );
 };
