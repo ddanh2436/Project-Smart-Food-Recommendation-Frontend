@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
-// import Link from "next/link"; // Không dùng Link nữa
+import Link from "next/link"; 
 import { getTopRatedRestaurants } from "@/app/lib/api";
 import "./TopRatingSection.css";
 
@@ -36,12 +36,17 @@ const TopRatingSection = () => {
   const [selectedRes, setSelectedRes] = useState<Restaurant | null>(null);
   
   const sliderRef = useRef<HTMLDivElement>(null);
-  
-  // Refs cho chức năng Drag
   const isDown = useRef(false);
   const startX = useRef(0);
   const scrollLeft = useRef(0);
-  const isDragging = useRef(false); // Để phân biệt click và drag
+  const isDragging = useRef(false);
+
+  // [FIX 1] Cleanup Effect: Đảm bảo luôn mở khóa scroll khi component bị unmount (rời trang)
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -57,7 +62,6 @@ const TopRatingSection = () => {
     fetchData();
   }, []);
 
-  // Scroll bằng nút
   const handleScrollButton = (direction: 'left' | 'right') => {
     if (sliderRef.current) {
       const scrollAmount = 340;
@@ -69,7 +73,7 @@ const TopRatingSection = () => {
     }
   };
 
-  // === CÁC HÀM XỬ LÝ KÉO CHUỘT (DRAG) ===
+  // Drag Events
   const onMouseDown = (e: React.MouseEvent) => {
     if (!sliderRef.current) return;
     isDown.current = true;
@@ -78,48 +82,40 @@ const TopRatingSection = () => {
     startX.current = e.pageX - sliderRef.current.offsetLeft;
     scrollLeft.current = sliderRef.current.scrollLeft;
   };
-
   const onMouseLeave = () => {
     if (!sliderRef.current) return;
     isDown.current = false;
     sliderRef.current.classList.remove('active');
   };
-
   const onMouseUp = () => {
     if (!sliderRef.current) return;
     isDown.current = false;
     sliderRef.current.classList.remove('active');
-    // Để click hoạt động được thì phải kiểm tra xem có drag không
     setTimeout(() => { isDragging.current = false; }, 0);
   };
-
   const onMouseMove = (e: React.MouseEvent) => {
     if (!isDown.current || !sliderRef.current) return;
     e.preventDefault();
     const x = e.pageX - sliderRef.current.offsetLeft;
-    const walk = (x - startX.current) * 2; // Tốc độ cuộn
+    const walk = (x - startX.current) * 2;
     sliderRef.current.scrollLeft = scrollLeft.current - walk;
-    
-    // Nếu di chuyển chuột > 5px thì coi là đang drag
-    if (Math.abs(walk) > 5) {
-      isDragging.current = true;
-    }
+    if (Math.abs(walk) > 5) isDragging.current = true;
   };
 
-  // Modal Handlers
+  // Modal Logic
   const handleCardClick = (res: Restaurant) => {
-    // Chỉ mở modal nếu không phải đang kéo chuột
-    if (!isDragging.current) {
-      openModal(res);
-    }
+    if (!isDragging.current) openModal(res);
   };
-
+  
   const openModal = (res: Restaurant) => {
     setSelectedRes(res);
+    // Khóa scroll khi mở modal
     document.body.style.overflow = 'hidden';
   };
+  
   const closeModal = () => {
     setSelectedRes(null);
+    // Mở khóa scroll khi đóng modal
     document.body.style.overflow = 'unset';
   };
 
@@ -131,13 +127,11 @@ const TopRatingSection = () => {
             <h2 className="section-title">Top Rated Restaurants</h2>
             <p className="section-subtitle">Khám phá những địa điểm được yêu thích nhất</p>
           </div>
-          <a href="/restaurants" className="link-view-all">Xem tất cả &rarr;</a>
+          <Link href="/restaurants" className="link-view-all">Xem tất cả &rarr;</Link>
         </div>
 
         <div className="slider-wrapper">
           <button className="nav-btn prev-btn" onClick={() => handleScrollButton('left')}><ChevronLeft /></button>
-
-          {/* Thêm các sự kiện chuột vào đây */}
           <div 
             className="rating-slider" 
             ref={sliderRef}
@@ -153,7 +147,6 @@ const TopRatingSection = () => {
                 <div 
                   key={res._id} 
                   className="rating-card clickable"
-                  // Thay đổi sự kiện click
                   onClick={() => handleCardClick(res)}
                 >
                   <div className="card-image-wrapper">
@@ -163,58 +156,57 @@ const TopRatingSection = () => {
                       width={400} height={300}
                       className="card-image"
                       unoptimized={true}
-                      draggable={false} // Chặn kéo ảnh
+                      draggable={false}
                     />
-                    <div className="rating-badge">
-                      {res.diemTrungBinh ? res.diemTrungBinh.toFixed(1) : "N/A"}
-                    </div>
+                    <div className="rating-badge">{res.diemTrungBinh ? res.diemTrungBinh.toFixed(1) : "N/A"}</div>
                   </div>
-
                   <div className="card-content">
                     <h3 className="restaurant-name">{res.tenQuan}</h3>
-                    <p className="restaurant-address">
-                       <MapPinIcon /> {res.diaChi}
-                    </p>
+                    <p className="restaurant-address"><MapPinIcon /> {res.diaChi}</p>
                     <div className="card-meta-row">
-                        <div className="meta-item price">
-                            <MoneyIcon />
-                            <span>{res.giaCa || "Đang cập nhật"}</span>
-                        </div>
-                        <div className="meta-item hours">
-                            <ClockIcon />
-                            <span>{res.gioMoCua || "Đang cập nhật"}</span>
-                        </div>
+                        <div className="meta-item price"><MoneyIcon /><span>{res.giaCa || "Đang cập nhật"}</span></div>
+                        <div className="meta-item hours"><ClockIcon /><span>{res.gioMoCua || "Đang cập nhật"}</span></div>
                     </div>
                   </div>
                 </div>
               ))
             )}
           </div>
-
           <button className="nav-btn next-btn" onClick={() => handleScrollButton('right')}><ChevronRight /></button>
         </div>
 
-        {/* Modal Panel (Giữ nguyên) */}
+        {/* === MODAL PANEL === */}
         {selectedRes && (
           <div className="modal-overlay" onClick={closeModal}>
             <div className="modal-panel" onClick={(e) => e.stopPropagation()}>
               <button className="modal-close-btn" onClick={closeModal}><XIcon /></button>
+              
               <div className="modal-layout">
                 <div className="modal-image-col">
-                  <Image src={selectedRes.avatarUrl || "/assets/image/pho.png"} alt={selectedRes.tenQuan} width={900} height={700} className="modal-main-img" unoptimized={true} />
+                  <Image 
+                    src={selectedRes.avatarUrl || "/assets/image/pho.png"} 
+                    alt={selectedRes.tenQuan} 
+                    width={900} height={700} 
+                    className="modal-main-img"
+                    unoptimized={true}
+                  />
                   <div className="modal-rating-overlay">
-                    <span className="big-score">{selectedRes.diemTrungBinh.toFixed(1)}</span>
+                    <span className="big-score">{selectedRes.diemTrungBinh ? selectedRes.diemTrungBinh.toFixed(1) : "N/A"}</span>
                     <span className="score-label">Rất tốt</span>
                   </div>
                 </div>
+
                 <div className="modal-info-col">
                   <h2 className="modal-title">{selectedRes.tenQuan}</h2>
                   <p className="modal-address"><MapPinIcon /> {selectedRes.diaChi}</p>
+                  
                   <div className="modal-meta-grid">
                     <div className="modal-meta-item"><ClockIcon /> {selectedRes.gioMoCua || "Đang cập nhật"}</div>
                     <div className="modal-meta-item highlight"><MoneyIcon /> {selectedRes.giaCa || "Đang cập nhật"}</div>
                   </div>
+
                   <hr className="modal-divider" />
+
                   <h4 className="detail-rating-heading">Đánh giá chi tiết</h4>
                   <div className="rating-bars">
                     <RatingRow label="Chất lượng" score={selectedRes.diemChatLuong} />
@@ -223,7 +215,18 @@ const TopRatingSection = () => {
                     <RatingRow label="Phục vụ" score={selectedRes.diemPhucVu} />
                     <RatingRow label="Giá cả" score={selectedRes.diemGiaCa} />
                   </div>
-                  <a href={`/restaurants/${selectedRes._id}`} className="btn-go-detail">Xem chi tiết đầy đủ</a>
+
+                  {/* [FIX 2] Mở khóa scroll ngay khi bấm link chuyển trang */}
+                  <Link 
+                    href={`/restaurants/${selectedRes._id}`} 
+                    className="btn-go-detail"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      document.body.style.overflow = 'unset'; // MỞ KHÓA SCROLL
+                    }}
+                  >
+                    Xem chi tiết đầy đủ
+                  </Link>
                 </div>
               </div>
             </div>

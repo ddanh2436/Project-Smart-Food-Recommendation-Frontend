@@ -1,0 +1,237 @@
+/* app/(main)/restaurants/[id]/RestaurantDetail.css */
+
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Nunito:wght@400;600;700&display=swap");
+
+.detail-page-wrapper {
+  background-color: #050505;
+  min-height: 100vh;
+  color: #fff;
+  padding-top: 80px; /* Tránh header */
+  padding-bottom: 4rem;
+  font-family: "Nunito", sans-serif;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* --- HERO BANNER --- */
+.detail-hero {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 3rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.detail-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+  display: flex;
+  align-items: flex-end;
+  padding: 40px;
+}
+
+.hero-content h1 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 4rem;
+  color: #e9a004;
+  margin: 0 0 10px 0;
+  line-height: 1;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.hero-rating {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.hero-score {
+  background: #e9a004;
+  color: #000;
+  font-weight: 800;
+  font-size: 1.5rem;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(233, 160, 4, 0.4);
+}
+
+.hero-address {
+  font-size: 1.2rem;
+  color: #ddd;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.hero-address svg {
+  color: #e9a004;
+}
+
+/* --- CONTENT GRID --- */
+.detail-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr; /* Cột trái lớn gấp đôi cột phải */
+  gap: 4rem;
+}
+
+/* Left Column */
+.info-box {
+  background: #121212;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.section-heading {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 2rem;
+  color: #fff;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.15);
+  padding-bottom: 0.5rem;
+}
+
+/* Info Rows (Giá, Giờ, Tọa độ) */
+.info-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.2rem;
+  font-size: 1.1rem;
+  color: #ccc;
+}
+.info-icon {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  color: #e9a004;
+}
+.info-label {
+  font-weight: 700;
+  color: #fff;
+  margin-right: 10px;
+}
+
+/* Right Column (Rating Bars) */
+.rating-box {
+  background: #1a1a1a;
+  border: 1px solid #e9a004;
+  border-radius: 16px;
+  padding: 2rem;
+  position: sticky;
+  top: 100px; /* Dính khi cuộn */
+}
+
+.rating-box h3 {
+  text-align: center;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: #e9a004;
+}
+
+.rating-bar-item {
+  margin-bottom: 1.2rem;
+}
+.rating-bar-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+.r-label {
+  font-size: 1rem;
+  color: #ccc;
+}
+.r-score {
+  font-weight: 700;
+  color: #e9a004;
+}
+
+.progress-bg {
+  width: 100%;
+  height: 8px;
+  background: #333;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: #e9a004;
+  border-radius: 4px;
+}
+
+.btn-foody {
+  /* --- CẬP NHẬT QUAN TRỌNG --- */
+  display: flex; /* Chuyển sang Flexbox để căn ngang */
+  align-items: center; /* Căn giữa theo chiều dọc */
+  justify-content: center; /* Căn giữa theo chiều ngang */
+  gap: 10px; /* Khoảng cách giữa chữ và icon */
+  /* --------------------------- */
+
+  width: 100%;
+  background: #e9a004;
+  color: #000;
+  font-weight: 800;
+  text-decoration: none;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 2rem;
+  transition: transform 0.2s;
+}
+.btn-foody:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 20px rgba(233, 160, 4, 0.3);
+}
+/* Loading */
+.loading-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #050505;
+  color: #e9a004;
+  font-size: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .detail-hero {
+    height: 300px;
+  }
+  .hero-content h1 {
+    font-size: 2.5rem;
+  }
+  .detail-content {
+    grid-template-columns: 1fr;
+  }
+  .rating-box {
+    position: static;
+  }
+}
+
+body:has(.detail-page-wrapper) .footer-wrapper {
+  display: none !important;
+}

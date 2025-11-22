@@ -50,4 +50,14 @@ export const getAllRestaurants = async () => {
   }
 };
 
+export const getRestaurantById = async (id: string) => {
+  try {
+    const res = await api.get(`/restaurants/${id}`);
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching restaurant detail:", error);
+    return null;
+  }
+};
+
 export default api;
