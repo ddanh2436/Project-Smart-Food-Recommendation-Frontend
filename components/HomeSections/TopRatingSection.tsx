@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
-// import Link from "next/link"; // Tạm thời không dùng Link nữa
+// import Link from "next/link"; // Không dùng Link nữa
 import { getTopRatedRestaurants } from "@/app/lib/api";
 import "./TopRatingSection.css";
 
@@ -15,7 +15,6 @@ const MoneyIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="no
 const MapPinIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>;
 const XIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
 
-// Interface khớp với dữ liệu backend
 interface Restaurant {
   _id: string;
   tenQuan: string;
@@ -24,7 +23,6 @@ interface Restaurant {
   giaCa: string;
   diemTrungBinh: number;
   avatarUrl: string;
-  // Các điểm chi tiết
   diemKhongGian: number;
   diemViTri: number;
   diemChatLuong: number;
@@ -35,8 +33,15 @@ interface Restaurant {
 const TopRatingSection = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedRes, setSelectedRes] = useState<Restaurant | null>(null); // State cho Modal
+  const [selectedRes, setSelectedRes] = useState<Restaurant | null>(null);
+  
   const sliderRef = useRef<HTMLDivElement>(null);
+  
+  // Refs cho chức năng Drag
+  const isDown = useRef(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
+  const isDragging = useRef(false); // Để phân biệt click và drag
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,9 +57,10 @@ const TopRatingSection = () => {
     fetchData();
   }, []);
 
-  const handleScroll = (direction: 'left' | 'right') => {
+  // Scroll bằng nút
+  const handleScrollButton = (direction: 'left' | 'right') => {
     if (sliderRef.current) {
-      const scrollAmount = 320; 
+      const scrollAmount = 340;
       if (direction === 'left') {
         sliderRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
       } else {
@@ -63,52 +69,101 @@ const TopRatingSection = () => {
     }
   };
 
-  // Hàm mở Modal
-  const openModal = (res: Restaurant) => {
-    setSelectedRes(res);
-    document.body.style.overflow = 'hidden'; // Khóa cuộn trang web
+  // === CÁC HÀM XỬ LÝ KÉO CHUỘT (DRAG) ===
+  const onMouseDown = (e: React.MouseEvent) => {
+    if (!sliderRef.current) return;
+    isDown.current = true;
+    isDragging.current = false;
+    sliderRef.current.classList.add('active');
+    startX.current = e.pageX - sliderRef.current.offsetLeft;
+    scrollLeft.current = sliderRef.current.scrollLeft;
   };
 
-  // Hàm đóng Modal
+  const onMouseLeave = () => {
+    if (!sliderRef.current) return;
+    isDown.current = false;
+    sliderRef.current.classList.remove('active');
+  };
+
+  const onMouseUp = () => {
+    if (!sliderRef.current) return;
+    isDown.current = false;
+    sliderRef.current.classList.remove('active');
+    // Để click hoạt động được thì phải kiểm tra xem có drag không
+    setTimeout(() => { isDragging.current = false; }, 0);
+  };
+
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!isDown.current || !sliderRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - sliderRef.current.offsetLeft;
+    const walk = (x - startX.current) * 2; // Tốc độ cuộn
+    sliderRef.current.scrollLeft = scrollLeft.current - walk;
+    
+    // Nếu di chuyển chuột > 5px thì coi là đang drag
+    if (Math.abs(walk) > 5) {
+      isDragging.current = true;
+    }
+  };
+
+  // Modal Handlers
+  const handleCardClick = (res: Restaurant) => {
+    // Chỉ mở modal nếu không phải đang kéo chuột
+    if (!isDragging.current) {
+      openModal(res);
+    }
+  };
+
+  const openModal = (res: Restaurant) => {
+    setSelectedRes(res);
+    document.body.style.overflow = 'hidden';
+  };
   const closeModal = () => {
     setSelectedRes(null);
-    document.body.style.overflow = 'unset'; // Mở lại cuộn
+    document.body.style.overflow = 'unset';
   };
 
   return (
     <section className="top-rating-section">
       <div className="container">
-        
         <div className="section-header-row">
           <div>
             <h2 className="section-title">Top Rated Restaurants</h2>
-            <p className="section-subtitle">Những nhà hàng được chấm điểm tốt nhất</p>
+            <p className="section-subtitle">Khám phá những địa điểm được yêu thích nhất</p>
           </div>
           <a href="/restaurants" className="link-view-all">Xem tất cả &rarr;</a>
         </div>
 
         <div className="slider-wrapper">
-          <button className="nav-btn prev-btn" onClick={() => handleScroll('left')}><ChevronLeft /></button>
+          <button className="nav-btn prev-btn" onClick={() => handleScrollButton('left')}><ChevronLeft /></button>
 
-          <div className="rating-slider" ref={sliderRef}>
+          {/* Thêm các sự kiện chuột vào đây */}
+          <div 
+            className="rating-slider" 
+            ref={sliderRef}
+            onMouseDown={onMouseDown}
+            onMouseLeave={onMouseLeave}
+            onMouseUp={onMouseUp}
+            onMouseMove={onMouseMove}
+          >
             {loading ? (
                [...Array(5)].map((_, i) => <div key={i} className="skeleton-card"></div>)
             ) : (
               restaurants.map((res) => (
-                // Thay đổi Link thành div để bắt sự kiện click mở Modal
                 <div 
                   key={res._id} 
-                  className="rating-card clickable" 
-                  onClick={() => openModal(res)}
+                  className="rating-card clickable"
+                  // Thay đổi sự kiện click
+                  onClick={() => handleCardClick(res)}
                 >
                   <div className="card-image-wrapper">
                     <Image
-                      src={res.avatarUrl ? res.avatarUrl : "/assets/image/pho.png"} 
+                      src={res.avatarUrl || "/assets/image/pho.png"} 
                       alt={res.tenQuan}
-                      width={400}
-                      height={300}
+                      width={400} height={300}
                       className="card-image"
-                      unoptimized={true} 
+                      unoptimized={true}
+                      draggable={false} // Chặn kéo ảnh
                     />
                     <div className="rating-badge">
                       {res.diemTrungBinh ? res.diemTrungBinh.toFixed(1) : "N/A"}
@@ -136,48 +191,30 @@ const TopRatingSection = () => {
             )}
           </div>
 
-          <button className="nav-btn next-btn" onClick={() => handleScroll('right')}><ChevronRight /></button>
+          <button className="nav-btn next-btn" onClick={() => handleScrollButton('right')}><ChevronRight /></button>
         </div>
 
-        {/* === MODAL PANEL === */}
+        {/* Modal Panel (Giữ nguyên) */}
         {selectedRes && (
           <div className="modal-overlay" onClick={closeModal}>
             <div className="modal-panel" onClick={(e) => e.stopPropagation()}>
               <button className="modal-close-btn" onClick={closeModal}><XIcon /></button>
-              
               <div className="modal-layout">
-                {/* Cột trái: Ảnh */}
                 <div className="modal-image-col">
-                  <Image 
-                    src={selectedRes.avatarUrl || "/assets/image/pho.png"} 
-                    alt={selectedRes.tenQuan} 
-                    width={600} height={400} 
-                    className="modal-main-img"
-                    unoptimized={true}
-                  />
+                  <Image src={selectedRes.avatarUrl || "/assets/image/pho.png"} alt={selectedRes.tenQuan} width={900} height={700} className="modal-main-img" unoptimized={true} />
                   <div className="modal-rating-overlay">
                     <span className="big-score">{selectedRes.diemTrungBinh.toFixed(1)}</span>
                     <span className="score-label">Rất tốt</span>
                   </div>
                 </div>
-
-                {/* Cột phải: Thông tin chi tiết */}
                 <div className="modal-info-col">
                   <h2 className="modal-title">{selectedRes.tenQuan}</h2>
                   <p className="modal-address"><MapPinIcon /> {selectedRes.diaChi}</p>
-                  
                   <div className="modal-meta-grid">
-                    <div className="modal-meta-item">
-                      <ClockIcon /> {selectedRes.gioMoCua || "Đang cập nhật"}
-                    </div>
-                    <div className="modal-meta-item highlight">
-                      <MoneyIcon /> {selectedRes.giaCa || "Đang cập nhật"}
-                    </div>
+                    <div className="modal-meta-item"><ClockIcon /> {selectedRes.gioMoCua || "Đang cập nhật"}</div>
+                    <div className="modal-meta-item highlight"><MoneyIcon /> {selectedRes.giaCa || "Đang cập nhật"}</div>
                   </div>
-
                   <hr className="modal-divider" />
-
-                  {/* Bảng điểm chi tiết */}
                   <h4 className="detail-rating-heading">Đánh giá chi tiết</h4>
                   <div className="rating-bars">
                     <RatingRow label="Chất lượng" score={selectedRes.diemChatLuong} />
@@ -186,28 +223,21 @@ const TopRatingSection = () => {
                     <RatingRow label="Phục vụ" score={selectedRes.diemPhucVu} />
                     <RatingRow label="Giá cả" score={selectedRes.diemGiaCa} />
                   </div>
-
-                  <a href={`/restaurants/${selectedRes._id}`} className="btn-go-detail">
-                    Xem chi tiết đầy đủ
-                  </a>
+                  <a href={`/restaurants/${selectedRes._id}`} className="btn-go-detail">Xem chi tiết đầy đủ</a>
                 </div>
               </div>
             </div>
           </div>
         )}
-
       </div>
     </section>
   );
 };
 
-// Component con hiển thị thanh điểm
 const RatingRow = ({ label, score }: { label: string, score: number }) => (
   <div className="rating-row">
     <span className="rating-label">{label}</span>
-    <div className="rating-bar-bg">
-      <div className="rating-bar-fill" style={{ width: `${(score || 0) * 10}%` }}></div>
-    </div>
+    <div className="rating-bar-bg"><div className="rating-bar-fill" style={{ width: `${(score || 0) * 10}%` }}></div></div>
     <span className="rating-value">{score ? score.toFixed(1) : "-"}</span>
   </div>
 );

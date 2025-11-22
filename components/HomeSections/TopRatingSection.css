@@ -4,7 +4,7 @@
 
 .top-rating-section {
   background-color: #050505;
-  /* Tăng padding 2 bên để chừa chỗ cho nút bấm nằm ngoài */
+  /* Tăng padding để chừa chỗ cho nút nằm ngoài */
   padding: 5rem 4rem; 
   color: #fff;
   font-family: 'Nunito', sans-serif;
@@ -14,7 +14,6 @@
 .container {
   max-width: 1300px;
   margin: 0 auto;
-  /* padding: 0 20px; -> Bỏ padding này để slider căn thẳng với tiêu đề */
   position: relative;
 }
 
@@ -61,17 +60,32 @@
   /* Không để overflow hidden ở đây để nút bấm có thể "thò" ra ngoài */
 }
 
-/* Thanh trượt chính */
+/* Thanh trượt (Flexbox) */
 .rating-slider {
   display: flex;
   gap: 1.5rem;
   overflow-x: auto;
-  scroll-behavior: smooth;
   padding: 10px 5px 30px 5px;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none;  /* IE */
+  
+  /* Ẩn thanh cuộn */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  
+  /* CẢM ỨNG & KÉO */
+  cursor: grab; /* Hình bàn tay mở */
+  scroll-snap-type: x mandatory; /* Tự động bắt dính vào thẻ */
+  scroll-behavior: smooth;
+  
+  /* QUAN TRỌNG CHO IOS */
+  -webkit-overflow-scrolling: touch;
 }
-.rating-slider::-webkit-scrollbar { display: none; } /* Chrome */
+
+.rating-slider.active {
+  cursor: grabbing; /* Hình bàn tay nắm */
+  scroll-snap-type: none; /* Tắt snap khi đang kéo để mượt hơn */
+  scroll-behavior: auto;
+}
+.rating-slider::-webkit-scrollbar { display: none; }
 
 /* --- Card Styling --- */
 .rating-card {
@@ -85,7 +99,15 @@
   transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   display: flex;
   flex-direction: column;
+  
+  /* QUAN TRỌNG: CHẶN BÔI ĐEN VĂN BẢN KHI KÉO */
+  user-select: none; 
+  -webkit-user-drag: none;
+  
+  /* Snap vào vị trí */
+  scroll-snap-align: start;
 }
+.rating-card.clickable { cursor: pointer; }
 
 .rating-card:hover {
   transform: translateY(-8px);
@@ -101,342 +123,181 @@
 }
 
 .card-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: 100%; height: 100%; object-fit: cover;
+  pointer-events: none; /* Không cho kéo ảnh ra ngoài */
 }
-
 .rating-badge {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: #e9a004;
-  color: #000;
-  font-weight: 800;
-  width: 36px;
-  height: 36px;
+  top: 10px; right: 10px;
+  background-color: #e9a004; color: #000;
+  font-weight: 800; width: 36px; height: 36px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   font-size: 0.9rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
 
 .card-content {
   padding: 1.2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  flex-grow: 1;
+  display: flex; flex-direction: column; gap: 0.5rem; flex-grow: 1;
 }
 
+/* Tên nhà hàng (xuống dòng tối đa 2 dòng) */
 .restaurant-name {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 1.4rem;
-  color: #fff;
-  margin: 0;
-  font-weight: 700;
-  line-height: 1.2;
-  white-space: normal;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 1.4rem; color: #fff; margin: 0; font-weight: 700; line-height: 1.2;
+  white-space: normal; display: -webkit-box;
+  -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; text-overflow: ellipsis;
   height: 3.4rem;
 }
 
 .restaurant-address {
-  font-size: 0.9rem;
-  color: #aaa;
-  margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  font-size: 0.9rem; color: #aaa; margin: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  display: flex; align-items: center; gap: 6px;
 }
-.restaurant-address svg {
-  min-width: 14px;
-  color: #888;
-}
+.restaurant-address svg { min-width: 14px; color: #888; }
 
-/* Meta row: Giá và Giờ (Dọc) */
+/* Meta row (Dọc) */
 .card-meta-row {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.6rem;
-  margin-top: auto;
-  padding-top: 0.8rem;
-  border-top: 1px dashed rgba(255, 255, 255, 0.15);
-  width: 100%;
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: 0.6rem; margin-top: auto; padding-top: 0.8rem;
+  border-top: 1px dashed rgba(255, 255, 255, 0.15); width: 100%;
 }
 
 .meta-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.9rem;
-  color: #ccc;
-  width: 100%;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 0.9rem; color: #ccc; width: 100%;
 }
+.meta-item svg { color: #e9a004; min-width: 16px; height: 16px; }
+.meta-item.price { font-weight: 600; color: #fff; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.meta-item.hours { font-size: 0.85rem; color: #aaa; }
 
-.meta-item svg {
-  color: #e9a004;
-  min-width: 16px;
-  height: 16px;
-}
-
-.meta-item.price {
-  font-weight: 600;
-  color: #fff;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.meta-item.hours {
-  font-size: 0.85rem;
-  color: #aaa;
-}
-
-/* --- [CẬP NHẬT] NÚT ĐIỀU HƯỚNG NẰM NGOÀI --- */
+/* --- NÚT ĐIỀU HƯỚNG (Nằm ngoài) --- */
 .nav-btn {
   position: absolute;
-  top: 50%; 
-  transform: translateY(-50%);
+  top: 50%; transform: translateY(-50%);
   z-index: 10;
-  width: 48px; /* Tăng kích thước nút một chút */
-  height: 48px;
+  width: 48px; height: 48px;
   border-radius: 50%;
-  
-  /* Nền trắng rõ ràng */
   background-color: #ffffff;
   border: 1px solid #e0e0e0;
-  
   color: #000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   cursor: pointer;
   box-shadow: 0 4px 15px rgba(0,0,0,0.2);
   transition: all 0.3s ease;
-  
-  /* Luôn hiển thị */
-  opacity: 1;
-  visibility: visible;
+  opacity: 1; visibility: visible;
 }
 
 .nav-btn:hover {
-  background-color: #e9a004;
-  color: #fff;
-  border-color: #e9a004;
+  background-color: #e9a004; color: #fff; border-color: #e9a004;
   transform: translateY(-50%) scale(1.1);
 }
 
-/* Vị trí nằm NGOÀI panel */
-.prev-btn {
-  left: -60px; /* Đẩy ra bên trái ngoài khung chứa */
-}
+.prev-btn { left: -60px; }
+.next-btn { right: -60px; }
 
-.next-btn {
-  right: -60px; /* Đẩy ra bên phải ngoài khung chứa */
-}
-
-/* Skeleton */
-.skeleton-card {
-  min-width: 290px;
-  height: 340px;
-  background: #1a1a1a;
-  border-radius: 12px;
-  animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-  0% { opacity: 0.6; }
-  50% { opacity: 1; }
-  100% { opacity: 0.6; }
-}
-
-/* Responsive: Trên mobile thì ẩn nút đi vì màn hình bé quá */
-@media (max-width: 768px) {
-  .top-rating-section { padding: 3rem 1rem; }
-  .nav-btn { display: none; }
-  .section-title { font-size: 2rem; }
-  .rating-slider { gap: 1rem; }
-  .rating-card { min-width: 250px; max-width: 250px; }
-}
-
-.rating-card.clickable {
-  cursor: pointer;
-}
-
-/* === MODAL STYLES === */
+/* --- MODAL STYLES (Panel To) --- */
 .modal-overlay {
-  position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(8px); /* Hiệu ứng mờ nền đằng sau */
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
   z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   padding: 20px;
   animation: fadeIn 0.3s ease;
 }
 
 .modal-panel {
   background-color: #1a1a1a;
-  width: 95%; /* Chiếm 95% chiều ngang màn hình */
-  max-width: 1200px; 
+  width: 95%; max-width: 1200px; /* To hơn */
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-  position: relative;
-  overflow: hidden;
+  position: relative; overflow: hidden;
   animation: scaleIn 0.3s ease;
-  display: flex;
-  flex-direction: column;
+  display: flex; flex-direction: column;
 }
+
 .modal-close-btn {
-  position: absolute;
-  top: 15px; right: 15px;
-  background: rgba(0,0,0,0.5);
-  border: none;
-  color: #fff;
-  border-radius: 50%;
-  width: 36px; height: 36px;
-  cursor: pointer;
-  z-index: 10;
+  position: absolute; top: 15px; right: 15px;
+  background: rgba(0,0,0,0.5); border: none; color: #fff;
+  border-radius: 50%; width: 36px; height: 36px;
+  cursor: pointer; z-index: 10;
   display: flex; align-items: center; justify-content: center;
   transition: all 0.2s;
 }
 .modal-close-btn:hover { background: #e9a004; color: #000; }
 
 .modal-layout {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr; 
-  height: 650px; 
+  display: grid; grid-template-columns: 1.4fr 1fr; height: 650px; /* To hơn */
 }
 
-/* CỘT TRÁI: ẢNH */
-.modal-image-col {
-  position: relative;
-  height: 100%;
-  background: #000;
-}
-.modal-main-img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-}
+.modal-image-col { position: relative; height: 100%; background: #000; }
+.modal-main-img { width: 100%; height: 100%; object-fit: cover; }
 .modal-rating-overlay {
-  position: absolute;
-  bottom: 20px; left: 20px;
+  position: absolute; bottom: 20px; left: 20px;
   background: rgba(233, 160, 4, 0.95);
-  padding: 10px 20px;
-  border-radius: 12px;
-  color: #000;
-  display: flex; flex-direction: column; align-items: center;
+  padding: 10px 20px; border-radius: 12px;
+  color: #000; display: flex; flex-direction: column; align-items: center;
   box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
-.big-score {
-  font-size: 2rem; font-weight: 800; line-height: 1;
-}
-.score-label {
-  font-size: 0.8rem; font-weight: 600; text-transform: uppercase;
-}
+.big-score { font-size: 2rem; font-weight: 800; line-height: 1; }
+.score-label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; }
 
-/* CỘT PHẢI: INFO */
 .modal-info-col {
-  padding: 40px 30px;
-  color: #fff;
-  display: flex; flex-direction: column;
-  overflow-y: auto; /* Cho phép cuộn nếu nội dung dài */
+  padding: 40px 30px; color: #fff;
+  display: flex; flex-direction: column; overflow-y: auto;
 }
-
 .modal-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 2.2rem;
-  color: #e9a004;
-  margin: 0 0 10px 0;
-  line-height: 1.1;
+  font-family: 'Cormorant Garamond', serif; font-size: 2.5rem;
+  color: #e9a004; margin: 0 0 10px 0; line-height: 1.1;
 }
-
-.modal-address {
-  color: #ccc; font-size: 1rem;
-  display: flex; align-items: flex-start; gap: 8px;
-  margin-bottom: 20px;
-}
+.modal-address { color: #ccc; font-size: 1rem; display: flex; align-items: flex-start; gap: 8px; margin-bottom: 20px; }
 .modal-address svg { color: #888; margin-top: 3px; }
 
-.modal-meta-grid {
-  display: flex; gap: 20px; margin-bottom: 20px;
-}
-.modal-meta-item {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 0.95rem; color: #ddd;
-}
+.modal-meta-grid { display: flex; gap: 20px; margin-bottom: 20px; }
+.modal-meta-item { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; color: #ddd; }
 .modal-meta-item.highlight { color: #fff; font-weight: 600; }
 .modal-meta-item svg { color: #e9a004; }
 
-.modal-divider {
-  border: 0; border-top: 1px dashed rgba(255,255,255,0.15);
-  margin: 10px 0 20px 0; width: 100%;
-}
+.modal-divider { border: 0; border-top: 1px dashed rgba(255,255,255,0.15); margin: 10px 0 20px 0; width: 100%; }
 
-/* Rating Bars */
-.detail-rating-heading {
-  font-size: 1.1rem; color: #fff; margin-bottom: 15px; font-weight: 600;
-}
-.rating-bars {
-  display: flex; flex-direction: column; gap: 12px;
-  margin-bottom: 30px;
-}
-.rating-row {
-  display: flex; align-items: center; gap: 15px;
-}
-.rating-label {
-  width: 80px; font-size: 0.9rem; color: #aaa;
-}
-.rating-bar-bg {
-  flex-grow: 1; height: 6px; background: #333; border-radius: 3px; overflow: hidden;
-}
-.rating-bar-fill {
-  height: 100%; background: #e9a004; border-radius: 3px;
-}
-.rating-value {
-  width: 30px; text-align: right; font-weight: 700; color: #e9a004;
-}
+.detail-rating-heading { font-size: 1.1rem; color: #fff; margin-bottom: 15px; font-weight: 600; }
+.rating-bars { display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px; }
+.rating-row { display: flex; align-items: center; gap: 15px; }
+.rating-label { width: 90px; font-size: 0.9rem; color: #aaa; }
+.rating-bar-bg { flex-grow: 1; height: 6px; background: #333; border-radius: 3px; overflow: hidden; }
+.rating-bar-fill { height: 100%; background: #e9a004; border-radius: 3px; }
+.rating-value { width: 30px; text-align: right; font-weight: 700; color: #e9a004; }
 
-/* Button */
 .btn-go-detail {
-  margin-top: auto;
-  text-align: center;
-  background: transparent;
-  border: 1px solid #e9a004;
-  color: #e9a004;
-  padding: 12px;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: 700;
-  transition: all 0.3s;
+  margin-top: auto; text-align: center; background: transparent;
+  border: 1px solid #e9a004; color: #e9a004; padding: 12px;
+  border-radius: 8px; text-decoration: none; font-weight: 700; transition: all 0.3s;
 }
-.btn-go-detail:hover {
-  background: #e9a004; color: #000;
-}
+.btn-go-detail:hover { background: #e9a004; color: #000; }
 
-/* Animation */
+/* Skeleton & Animations */
+.skeleton-card {
+  min-width: 290px; height: 340px; background: #1a1a1a; border-radius: 12px; animation: pulse 1.5s infinite;
+}
+@keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
+/* Responsive */
 @media (max-width: 768px) {
+  .top-rating-section { padding: 3rem 1rem; }
+  .nav-btn { display: none; }
+  .section-title { font-size: 2rem; }
+  .rating-slider { gap: 1rem; }
+  .rating-card { min-width: 250px; max-width: 250px; }
+  /* Modal Mobile */
   .modal-layout { grid-template-columns: 1fr; height: auto; }
-  /* Tăng chiều cao ảnh trên mobile một chút */
-  .modal-image-col { height: 300px; } 
+  .modal-image-col { height: 300px; }
   .modal-info-col { padding: 20px; }
   .modal-title { font-size: 1.8rem; }
 }
