@@ -39,4 +39,15 @@ export const getTopRatedRestaurants = async (limit: number = 6) => {
   }
 };
 
+export const getAllRestaurants = async () => {
+  try {
+    // Gọi API lấy tất cả (backend của bạn là /restaurants)
+    const res = await api.get('/restaurants'); 
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching all restaurants:", error);
+    return [];
+  }
+};
+
 export default api;
