@@ -31,7 +31,7 @@ api.interceptors.request.use(
 export const getTopRatedRestaurants = async (limit: number = 10) => {
   try {
     const res = await api.get(`/restaurants?page=1&limit=${limit}`);
-    return res.data.data; 
+    return res.data?.data || []; 
   } catch (error) {
     console.error("Error fetching top restaurants:", error);
     return [];
