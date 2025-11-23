@@ -28,25 +28,23 @@ api.interceptors.request.use(
   }
 );
 
-export const getTopRatedRestaurants = async (limit: number = 6) => {
+export const getTopRatedRestaurants = async (limit: number = 10) => {
   try {
-    // Gọi vào endpoint findAll của bạn, backend đã sort sẵn ở Bước 1
-    const res = await api.get(`/restaurants?limit=${limit}`);
-    return res.data;
+    const res = await api.get(`/restaurants?page=1&limit=${limit}`);
+    return res.data.data; 
   } catch (error) {
     console.error("Error fetching top restaurants:", error);
     return [];
   }
 };
 
-export const getAllRestaurants = async () => {
+export const getAllRestaurants = async (page: number = 1, limit: number = 100) => {
   try {
-    // Gọi API lấy tất cả (backend của bạn là /restaurants)
-    const res = await api.get('/restaurants'); 
-    return res.data;
+    const res = await api.get(`/restaurants?page=${page}&limit=${limit}`);
+    return res.data; 
   } catch (error) {
     console.error("Error fetching all restaurants:", error);
-    return [];
+    return { data: [], totalPages: 0 };
   }
 };
 
