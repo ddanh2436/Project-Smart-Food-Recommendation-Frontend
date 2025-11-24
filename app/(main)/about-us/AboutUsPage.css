@@ -246,6 +246,14 @@
   margin-top: 4rem;
 }
 
+/* --- [MỚI] BỔ SUNG CHO MỤC 3 ẢNH --- */
+.ingredients-grid.three-cols {
+  grid-template-columns: repeat(3, 1fr); /* Chia 3 cột đều nhau */
+  max-width: 900px; /* Giới hạn chiều rộng để các vòng tròn không quá to */
+  margin-left: auto;
+  margin-right: auto;
+}
+
 /* ============================================ */
 /* === [HOVER EFFECT FOR INGREDIENTS] === */
 /* ============================================ */
@@ -466,6 +474,11 @@ p {
   .ingredients-grid {
     grid-template-columns: 1fr 1fr;
   }
+  
+  /* [MỚI] Responsive cho grid 3 cột trên mobile */
+  .ingredients-grid.three-cols {
+    grid-template-columns: 1fr; /* Mobile hiện 1 cột dọc */
+  }
 
   .dessert-collage-V2 {
     aspect-ratio: 1 / 1;
@@ -505,6 +518,7 @@ p {
 
 /* === LANGUAGE SPECIFIC === */
 .about-us-page-wrapper.lang-vn {
+  /* [SỬA ĐỔI] Áp dụng Be Vietnam Pro làm font chính cho chế độ Tiếng Việt */
   font-family: "Be Vietnam Pro", sans-serif !important;
 }
 
@@ -516,6 +530,15 @@ p {
   line-height: 1.3;
 }
 
+/* [FIX LỖI MẤT CÂN BẰNG ĐỘ ĐẬM] Tăng font-weight lên 500 */
+.lang-vn p,
+.lang-vn .about-hero-desc {
+  font-family: "Be Vietnam Pro", sans-serif !important;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  font-weight: 500 !important; /* Đã tăng lên 500 để cân bằng hơn */
+}
+
 /* Các text còn lại dùng Be Vietnam Pro (Sans-serif) */
 .lang-vn .discover-subtitle,
 .lang-vn .cta-link,
@@ -525,37 +548,35 @@ p {
   letter-spacing: 1px;
 }
 
-.lang-vn p,
-.lang-vn .about-hero-desc {
-  font-family: "Be Vietnam Pro", sans-serif !important;
-  font-size: 1.05rem;
-  line-height: 1.8;
-}
-
 /* ============================================ */
 /* --- CSS CHO DÒNG CHỮ CUỘN Ở ĐÁY (Scroll Prompt) --- */
 /* ============================================ */
 
 .scroll-prompt-container {
   position: fixed;
-  bottom: 20px; 
+  bottom: 30px;
   left: 50%;
   transform: translateX(-50%);
   
   z-index: 900;
   
+  /* Xếp ngang hàng: Đã đảm bảo */
   display: flex;
   align-items: center;
-  gap: 10px;
-  
-  padding: 8px 20px;
-  border-radius: 30px;
+  /* [CẬP NHẬT] Giảm khoảng cách giữa chữ và icon */
+  gap: 6px; 
   
   /* Glassmorphism nhẹ */
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  
+  /* [CẬP NHẬT] Giảm padding để làm nhỏ panel */
+  border-radius: 50px;
+  padding: 6px 12px;
+  
+  border: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   
   color: #fff;
   font-family: 'Be Vietnam Pro', sans-serif;
@@ -565,13 +586,31 @@ p {
   /* Animation fade in/out */
   opacity: 1; 
   transition: opacity 0.3s ease-in-out;
+  pointer-events: none;
+}
+
+/* Reset margin cho thẻ P bên trong */
+.scroll-prompt-container p {
+  margin: 0 !important;
+  padding: 0;
+  color: #fff;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  /* [CẬP NHẬT] Giảm cỡ chữ */
+  font-size: 0.8rem;
+  font-weight: 500; /* Tăng độ dày chữ lên xíu cho rõ */
+  line-height: 1;
+  white-space: nowrap;
+  text-shadow: none; 
 }
 
 /* Icon (dùng cho ScrollDownIcon component) */
 .scroll-down-icon {
+    /* [CẬP NHẬT] Giảm kích thước icon */
+    width: 16px; 
+    height: 16px;
     stroke: #e9a004; /* Màu vàng */
-    transition: all 0.3s ease;
-    animation: bounce 1.5s infinite; /* Thêm animation dao động */
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+    animation: bounce 2s infinite; /* Thêm animation dao động */
 }
 
 /* Keyframes cho hiệu ứng dao động (bounce) */
@@ -580,9 +619,9 @@ p {
         transform: translateY(0);
     }
     40% {
-        transform: translateY(-10px);
+        transform: translateY(4px);
     }
     60% {
-        transform: translateY(-5px);
+        transform: translateY(2px);
     }
 }

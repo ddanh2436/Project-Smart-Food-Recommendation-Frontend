@@ -6,7 +6,7 @@ import { useAuth } from "@/app/contexts/AuthContext";
 import Image from "next/image";
 import "./AboutUsPage.css";
 
-// === DỮ LIỆU NGÔN NGỮ (GIỮ NGUYÊN) ===
+// === DỮ LIỆU NGÔN NGỮ ===
 const langData = {
   en: {
     heroTitle: "The Essence of Vietnamese Cuisine",
@@ -38,11 +38,20 @@ const langData = {
     eventsContent:
       "The Data Hunter. Scouring the internet for hidden menus and reviews while you sleep, so you never have to wonder 'what’s good here?' again.",
     eventsDish: "Signature Dish: Instant Noodles at 2 AM – The fuel of data hunters.",
-    ingredientsTitle: "The Best Vietnamese Food",
-    ingredientsContent:
-      "Chúng tôi vô cùng tự hào về nguồn nguyên liệu và chỉ sử dụng những gì tốt nhất. Chúng tôi thực sự có thể đạt được mức độ xuất sắc này bằng cách chăm chút thêm cho các món trong thực đơn, điều khó tìm thấy ở các nhà hàng khác.",
     
-    // [NEW] Ingredients Translations
+    // --- [UPDATED] MASTERPIECE SECTION (English) ---
+    masterpieceSubtitle: "Masterpieces",
+    masterpieceTitle: "Vietnamese Cuisine",
+    masterpieceContent: "Vietnamese cuisine holds a magical allure, not only for those born and raised in this S-shaped land but also for travelers eager to conquer the world's mysteries. The essence and heritage of our culinary traditions are preserved and continue to reach the world, fueled by the passion and enthusiasm within every Vietnamese person.",
+    
+    mpItem1: "Pho",
+    mpItem2: "Banh mi",
+    mpItem3: "Coffee",
+
+    // Ingredients Translations
+    ingredientsTitle: "The Best Vietnamese Ingredients",
+    ingredientsContent:
+      "We take great pride in our ingredients and use only the best. We can truly achieve this level of excellence by putting extra care into our menu items, something hard to find at other restaurants.",
     ingredient1: "Herbs",
     ingredient2: "Fish Sauce",
     ingredient3: "Rice",
@@ -78,11 +87,20 @@ const langData = {
     eventsContent:
       "Thợ săn dữ liệu. Trong khi bạn ngủ, anh ấy đang 'quét' sạch menu của cả thành phố để bạn không bao giờ phải hỏi 'quán này bán gì?'.",
     eventsDish: "Món tủ: Mì tôm chanh lúc 2 giờ sáng – Nhiên liệu của thợ săn dữ liệu.",
+    
+    // --- [UPDATED] MASTERPIECE SECTION (Vietnamese) ---
+    masterpieceSubtitle: "Tuyệt tác",
+    masterpieceTitle: "Ẩm thực Việt Nam",
+    masterpieceContent: "Ẩm thực Việt Nam là một sự quyến rũ kì diệu không chỉ với những người sinh ra và lớn lên ở mảnh đất hình chữ S, mà còn với cả những du khách sẵn sàng chinh phục những điều bí ẩn trên thế giới này. Những tinh hoa và di sản của ẩm thực Việt Nam đã và đang tiếp tục được gìn giữ, và không ngừng vươn xa ra thế giới bởi chính niềm đam mê và sự nhiệt huyết có trong mỗi người Việt Nam.",
+    
+    mpItem1: "Phở",
+    mpItem2: "Bánh mì",
+    mpItem3: "Cà phê",
+
+    // Ingredients Translations
     ingredientsTitle: "Nguyên liệu tốt nhất",
     ingredientsContent:
       "Chúng tôi vô cùng tự hào về nguồn nguyên liệu và chỉ sử dụng những gì tốt nhất. Chúng tôi thực sự có thể đạt được mức độ xuất sắc này bằng cách chăm chút thêm cho các món trong thực đơn, điều khó tìm thấy ở các nhà hàng khác.",
-    
-    // [NEW] Ingredients Translations
     ingredient1: "Rau Thơm",
     ingredient2: "Nước Mắm",
     ingredient3: "Gạo Tẻ",
@@ -130,7 +148,7 @@ const ScrollDownIcon = () => (
     strokeWidth="2.5" 
     strokeLinecap="round" 
     strokeLinejoin="round"
-    className="scroll-down-icon" // <-- Class cho CSS animation
+    className="scroll-down-icon"
   >
     <polyline points="12 5 12 19"></polyline>
     <polyline points="19 12 12 19 5 12"></polyline>
@@ -167,29 +185,21 @@ const AboutUsPage: React.FC = () => {
       scrollingDown.current = currentY > lastScrollY.current;
       lastScrollY.current = currentY;
       
-      // === LOGIC DÒNG CHỮ CUỘN (TINH CHỈNH ĐIỂM DỪNG CUỐI CÙNG) ===
+      // Logic dòng chữ cuộn
       const memberStartElement = document.getElementById('member-duyanh');
-      // Section BẮT ĐẦU sau thành viên cuối cùng
       const ingredientsStartElement = document.querySelector('.section-ingredients'); 
 
       if (memberStartElement && ingredientsStartElement) {
-        // Ép kiểu sang HTMLElement để truy cập offsetTop
         const memberStart = memberStartElement as HTMLElement; 
         const ingredientsStart = ingredientsStartElement as HTMLElement;
 
         const startY = memberStart.offsetTop; 
-        // Điểm biến mất: Đỉnh của Section Ingredients (Section 7)
         const endYThreshold = ingredientsStart.offsetTop; 
         const windowHeight = window.innerHeight;
 
-        // Start Threshold: Dòng chữ hiện ra khi cuộn qua điểm 1/3 màn hình kể từ top của Duy Anh
         const startThreshold = startY - windowHeight / 3;
+        const endThreshold = endYThreshold - windowHeight + 1;
 
-        // End Threshold: Dòng chữ biến mất khi đỉnh của Section Ingredients chạm đáy màn hình.
-        // Ta trừ đi windowHeight để có tọa độ scrollY mà tại đó đỉnh section 7 vừa chạm đáy viewport.
-        const endThreshold = endYThreshold - windowHeight + 1; // Sử dụng buffer +1 để ẩn ngay khi chạm đáy viewport.
-
-        // Hiển thị nếu cuộn đã qua điểm bắt đầu VÀ chưa chạm ngưỡng biến mất.
         if (window.scrollY >= startThreshold && window.scrollY < endThreshold) { 
           setShowScrollPrompt(true);
         } else {
@@ -198,13 +208,11 @@ const AboutUsPage: React.FC = () => {
       } else {
         setShowScrollPrompt(false);
       }
-      // === KẾT THÚC LOGIC DÒNG CHỮ CUỘN ===
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []); 
 
-  // Logic IntersectionObserver cũ cho animate-fadeIn (Giữ nguyên)
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -306,7 +314,12 @@ const AboutUsPage: React.FC = () => {
       <section id="member-duyanh" className="about-section section-food">
         <div className="about-image-col animate-fadeIn stagger-delay-1">
           <div className="image-placeholder">
-            <p>Duy Anh's Image</p>
+            <Image
+            src="/assets/image/members/Danh.png"
+            alt="Duy Anh Profile"
+            fill
+            style={{ objectFit: "cover" }}
+            />
           </div>
         </div>
         <div className="about-text-col animate-fadeIn">
@@ -335,59 +348,31 @@ const AboutUsPage: React.FC = () => {
         </div>
         <div className="about-image-col animate-fadeIn stagger-delay-1">
           <div className="image-placeholder">
-            <p>Kien's Image</p>
+            <Image
+            src="/assets/image/members/Kien.png"
+            alt="Kien's Profile"
+            fill
+            style={{ objectFit: "cover" }}
+            />
           </div>
         </div>
       </section>
 
-      {/* SECTION 5: QUOC KHANH */}
+      {/* SECTION 5: QUOC KHANH - ĐÃ KHÔI PHỤC TEXT VÀ DÙNG ẢNH ĐƠN */}
       <section className="about-section section-food">
+        {/* IMAGE COLUMN - Left */}
         <div className="about-image-col animate-fadeIn stagger-delay-1">
-          <div className="dessert-collage-V2">
+          <div className="image-placeholder">
             <Image
-              src="/assets/image/about-us/Dessert_Table.png"
-              alt="Bàn"
-              fill
-              style={{ objectFit: "cover" }}
-              className="dessert-table-V2"
+            src="/assets/image/members/Khanh.png" 
+            alt="Khanh's Profile"
+            fill
+            style={{ objectFit: "cover" }}
             />
-            <div className="dessert-wrapper-V2">
-              <div className="dessert-item-V2">
-                <Image
-                  src="/assets/image/about-us/Banh_Troi.png"
-                  alt="Bánh trôi"
-                  fill
-                  style={{ objectFit: "contain" }}
-                />
-              </div>
-              <div className="dessert-item-V2">
-                <Image
-                  src="/assets/image/about-us/3_Color_Sweet_Soup.png"
-                  alt="Chè ba màu"
-                  fill
-                  style={{ objectFit: "contain" }}
-                />
-              </div>
-              <div className="dessert-item-V2">
-                <Image
-                  src="/assets/image/about-us/Banh_Cam.png"
-                  alt="Bánh cam"
-                  fill
-                  style={{ objectFit: "contain" }}
-                />
-              </div>
-              <div className="dessert-item-V2">
-                <Image
-                  src="/assets/image/about-us/Cake.png"
-                  alt="Bánh da lợn"
-                  fill
-                  style={{ objectFit: "contain" }}
-                />
-              </div>
-            </div>
           </div>
         </div>
-
+        
+        {/* TEXT COLUMN - Right (Đã khôi phục) */}
         <div className="about-text-col animate-fadeIn">
           <span className="discover-subtitle">{T.meet}</span> 
           <h2 className="section-title">{T.dessertTitle}</h2>
@@ -400,13 +385,9 @@ const AboutUsPage: React.FC = () => {
         </div>
       </section>
 
-      {/* SECTION 6: MANH DAT */}
-      <section className="about-section section-events">
-        <div className="about-image-col animate-fadeIn stagger-delay-1">
-          <div className="image-placeholder">
-            <p>Dat's Image</p>
-          </div>
-        </div>
+      {/* SECTION 6: MANH DAT - ĐÃ SỬA LẠI THỨ TỰ THƯỜNG (IMAGE LEFT, TEXT RIGHT) HOẶC REVERSE (TEXT LEFT, IMAGE RIGHT) */}
+      {/* Do Section 5 đã là IMAGE LEFT, TEXT RIGHT, Section 6 nên dùng REVERSE (TEXT LEFT, IMAGE RIGHT) để luân phiên */}
+      <section className="about-section section-food reverse">
         <div className="about-text-col animate-fadeIn">
           <span className="discover-subtitle">{T.meet}</span> 
           <h2 className="section-title">{T.eventsTitle}</h2>
@@ -418,9 +399,66 @@ const AboutUsPage: React.FC = () => {
           </p>
           <div className="event-details"></div>
         </div>
+        <div className="about-image-col animate-fadeIn stagger-delay-1">
+          <div className="image-placeholder">
+            <Image
+            src="/assets/image/members/Dat.png"
+            alt="Dat's Profile"
+            fill
+            style={{ objectFit: "cover" }}
+            />
+          </div>
+        </div>
       </section>
 
-      {/* SECTION 7: BEST INGREDIENTS */}
+      {/* === SECTION 7: TUYỆT TÁC ẨM THỰC (MASTERPIECES) === */}
+      <section className="about-section section-ingredients">
+        <div className="menu-text-content animate-fadeIn">
+          <span className="discover-subtitle">{T.masterpieceSubtitle}</span>
+          <h2 className="section-title">{T.masterpieceTitle}</h2>
+          <p>{T.masterpieceContent}</p>
+        </div>
+
+        {/* Grid 3 cột */}
+        <div className="ingredients-grid three-cols">
+          
+          {/* Ảnh 1 */}
+          <div className="image-placeholder small animate-fadeIn stagger-delay-1">
+            <Image
+              src="/assets/image/about-us/pho2.png" 
+              alt={T.mpItem1}
+              fill
+              style={{ objectFit: "cover" }}
+            />
+            <p>{T.mpItem1}</p>
+          </div>
+
+          {/* Ảnh 2 */}
+          <div className="image-placeholder small animate-fadeIn stagger-delay-2">
+            <Image
+              src="/assets/image/about-us/Banh_mi.png" 
+              alt={T.mpItem2}
+              fill
+              style={{ objectFit: "cover" }}
+            />
+            <p>{T.mpItem2}</p>
+          </div>
+
+          {/* Ảnh 3 */}
+          <div className="image-placeholder small animate-fadeIn stagger-delay-3">
+            <Image
+              src="/assets/image/about-us/coffee.png" 
+              alt={T.mpItem3}
+              fill
+              style={{ objectFit: "cover" }}
+            />
+            <p>{T.mpItem3}</p>
+          </div>
+
+        </div>
+      </section>
+
+      {/* === SECTION 8: NGUYÊN LIỆU TỐT NHẤT (INGREDIENTS) === */}
       <section className="about-section section-ingredients">
         <div className="menu-text-content animate-fadeIn">
           <span className="discover-subtitle">{T.discover}</span>
