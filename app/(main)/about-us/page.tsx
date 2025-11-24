@@ -4,6 +4,7 @@
 import React, { useEffect, useRef, useState } from "react"; 
 import { useAuth } from "@/app/contexts/AuthContext";
 import Image from "next/image";
+import Link from "next/link"; // [MỚI] Thêm import Link
 import "./AboutUsPage.css";
 
 // === DỮ LIỆU NGÔN NGỮ ===
@@ -358,7 +359,7 @@ const AboutUsPage: React.FC = () => {
         </div>
       </section>
 
-      {/* SECTION 5: QUOC KHANH - ĐÃ KHÔI PHỤC TEXT VÀ DÙNG ẢNH ĐƠN */}
+      {/* SECTION 5: QUOC KHANH */}
       <section className="about-section section-food">
         {/* IMAGE COLUMN - Left */}
         <div className="about-image-col animate-fadeIn stagger-delay-1">
@@ -372,7 +373,7 @@ const AboutUsPage: React.FC = () => {
           </div>
         </div>
         
-        {/* TEXT COLUMN - Right (Đã khôi phục) */}
+        {/* TEXT COLUMN - Right */}
         <div className="about-text-col animate-fadeIn">
           <span className="discover-subtitle">{T.meet}</span> 
           <h2 className="section-title">{T.dessertTitle}</h2>
@@ -385,8 +386,7 @@ const AboutUsPage: React.FC = () => {
         </div>
       </section>
 
-      {/* SECTION 6: MANH DAT - ĐÃ SỬA LẠI THỨ TỰ THƯỜNG (IMAGE LEFT, TEXT RIGHT) HOẶC REVERSE (TEXT LEFT, IMAGE RIGHT) */}
-      {/* Do Section 5 đã là IMAGE LEFT, TEXT RIGHT, Section 6 nên dùng REVERSE (TEXT LEFT, IMAGE RIGHT) để luân phiên */}
+      {/* SECTION 6: MANH DAT */}
       <section className="about-section section-food reverse">
         <div className="about-text-col animate-fadeIn">
           <span className="discover-subtitle">{T.meet}</span> 
@@ -422,8 +422,11 @@ const AboutUsPage: React.FC = () => {
         {/* Grid 3 cột */}
         <div className="ingredients-grid three-cols">
           
-          {/* Ảnh 1 */}
-          <div className="image-placeholder small animate-fadeIn stagger-delay-1">
+          {/* Ảnh 1: Phở -> Dẫn đến /about-us/cuisine/pho */}
+          <Link 
+            href="/about-us/cuisine/pho"
+            className="image-placeholder small animate-fadeIn stagger-delay-1"
+          >
             <Image
               src="/assets/image/about-us/pho2.png" 
               alt={T.mpItem1}
@@ -431,10 +434,13 @@ const AboutUsPage: React.FC = () => {
               style={{ objectFit: "cover" }}
             />
             <p>{T.mpItem1}</p>
-          </div>
+          </Link>
 
-          {/* Ảnh 2 */}
-          <div className="image-placeholder small animate-fadeIn stagger-delay-2">
+          {/* Ảnh 2: Bánh mì -> Dẫn đến /about-us/cuisine/banh-mi */}
+          <Link 
+            href="/about-us/cuisine/banh-mi"
+            className="image-placeholder small animate-fadeIn stagger-delay-2"
+          >
             <Image
               src="/assets/image/about-us/Banh_mi.png" 
               alt={T.mpItem2}
@@ -442,10 +448,13 @@ const AboutUsPage: React.FC = () => {
               style={{ objectFit: "cover" }}
             />
             <p>{T.mpItem2}</p>
-          </div>
+          </Link>
 
-          {/* Ảnh 3 */}
-          <div className="image-placeholder small animate-fadeIn stagger-delay-3">
+          {/* Ảnh 3: Cà phê -> Dẫn đến /about-us/cuisine/coffee */}
+          <Link 
+            href="/about-us/cuisine/coffee"
+            className="image-placeholder small animate-fadeIn stagger-delay-3"
+          >
             <Image
               src="/assets/image/about-us/coffee.png" 
               alt={T.mpItem3}
@@ -453,7 +462,7 @@ const AboutUsPage: React.FC = () => {
               style={{ objectFit: "cover" }}
             />
             <p>{T.mpItem3}</p>
-          </div>
+          </Link>
 
         </div>
       </section>

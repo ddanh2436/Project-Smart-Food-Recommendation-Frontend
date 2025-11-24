@@ -625,3 +625,22 @@ p {
         transform: translateY(2px);
     }
 }
+
+.image-with-caption-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.image-caption {
+  margin-top: 1rem;
+  font-family: "Cormorant Garamond", serif; /* Font kiểu cổ điển hợp lịch sử */
+  font-size: 1.1rem;
+  font-style: italic;
+  color: #e9a004; /* Màu vàng kim */
+  text-align: center;
+  max-width: 80%;
+  border-bottom: 1px solid rgba(233, 160, 4, 0.3); /* Gạch chân mờ */
+  padding-bottom: 5px;
+}
