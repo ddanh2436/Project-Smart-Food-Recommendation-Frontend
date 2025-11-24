@@ -1,0 +1,326 @@
+/* app/(main)/about-us/cuisine/[slug]/CuisineDetail.css */
+
+/* 1. IMPORT CẢ 2 FONT */
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600&display=swap");
+
+.cuisine-detail-page {
+  background-color: #0c0c0c;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 120px 20px 60px 20px;
+  
+  /* Font mặc định cho toàn trang là Be Vietnam Pro (cho các nút, tag, menu...) */
+  font-family: "Be Vietnam Pro", sans-serif;
+  color: #fff;
+}
+
+.cuisine-container {
+  max-width: 1100px;
+  width: 100%;
+  position: relative;
+}
+
+.mb-20 {
+  margin-bottom: 5rem;
+}
+
+/* --- NÚT QUAY LẠI --- */
+.back-btn {
+  background: transparent;
+  border: none;
+  color: #aaa;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 3rem;
+  transition: color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* Giữ font sans-serif cho nút điều hướng */
+  font-family: "Be Vietnam Pro", sans-serif;
+}
+.back-btn:hover { color: #e9a004; }
+
+/* --- GRID LAYOUT --- */
+.detail-grid, .history-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+/* --- ẢNH --- */
+.detail-image-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  border: 2px solid rgba(233, 160, 4, 0.3);
+  box-shadow: 0 0 50px rgba(233, 160, 4, 0.15);
+  overflow: hidden;
+}
+.detail-img { object-fit: cover; transition: transform 0.5s ease; }
+.detail-image-wrapper:hover .detail-img { transform: scale(1.05); }
+
+/* ========================================= */
+/* === TYPOGRAPHY (ĐÃ ĐIỀU CHỈNH LẠI) === */
+/* ========================================= */
+
+/* 1. Subtitle (Dòng chữ nhỏ màu vàng) */
+.detail-subtitle {
+  color: #e9a004;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  font-weight: 600; /* Đậm hơn chút để rõ */
+  display: block;
+  margin-bottom: 1rem;
+  font-family: "Be Vietnam Pro", sans-serif; /* Dùng font hiện đại cho text nhỏ */
+}
+
+/* 2. TIÊU ĐỀ CHÍNH (Tên món) -> QUAY VỀ FONT CŨ */
+.detail-title {
+  font-family: "Cormorant Garamond", serif; /* Font cũ sang trọng */
+  font-size: 4.5rem; /* Kích thước lớn */
+  font-weight: 700;
+  line-height: 1;
+  margin: 0 0 1.5rem 0;
+  color: #fff;
+}
+
+/* 3. ĐOẠN MÔ TẢ -> DÙNG FONT MỚI ĐỂ DỄ ĐỌC */
+.detail-desc {
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #e0e0e0; /* Màu sáng hơn xíu để đỡ bị chìm */
+  margin-bottom: 2.5rem;
+  font-weight: 400; /* [QUAN TRỌNG] Dùng độ đậm thường (400) thay vì mỏng (300) */
+  text-align: justify;
+}
+
+/* 4. Features Tag */
+.detail-features { display: flex; flex-wrap: wrap; gap: 10px; }
+.feature-tag {
+  padding: 8px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 30px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #ddd;
+  transition: all 0.3s;
+  font-family: "Be Vietnam Pro", sans-serif;
+}
+.feature-tag:hover {
+  border-color: #e9a004;
+  color: #e9a004;
+  background: rgba(233, 160, 4, 0.05);
+}
+
+/* === PHẦN LỊCH SỬ (HISTORY) === */
+.history-section {
+  padding-top: 3rem;
+  border-top: 1px dashed rgba(255, 255, 255, 0.15);
+}
+
+/* Tiêu đề Lịch sử -> Font Cũ */
+.history-heading {
+  font-family: "Cormorant Garamond", serif; /* Giống tiêu đề chính */
+  font-size: 3rem;
+  font-weight: 700;
+  color: #e9a004;
+  margin-bottom: 1.5rem;
+}
+
+/* Nội dung Lịch sử -> Font Mới đậm đà */
+.history-desc {
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #d0d0d0;
+  font-weight: 400; /* Độ đậm 400 giúp chữ đều màu, không bị "nhạt" */
+  text-align: justify;
+}
+
+/* Ảnh Lịch sử */
+.history-img-frame {
+  position: relative;
+  width: 100%;
+  height: 350px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.history-img { object-fit: cover; }
+
+/* Chú thích ảnh -> Font Cũ (Style nghiêng) */
+.history-caption {
+  margin-top: 12px;
+  font-family: "Cormorant Garamond", serif; /* Font cũ cho chú thích nghệ thuật */
+  font-style: italic;
+  font-size: 1.1rem; /* Tăng size lên chút */
+  color: #aaa;
+  text-align: center;
+  border-bottom: 1px solid #e9a004;
+  display: inline-block;
+  padding-bottom: 4px;
+}
+
+.history-image-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* === ANIMATIONS & RESPONSIVE (Giữ nguyên) === */
+.animate-pop { animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+.animate-slideUp { opacity: 0; animation: slideUp 0.8s ease-out 0.3s forwards; }
+.delay-200 { animation-delay: 0.5s; }
+
+@keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 768px) {
+  .detail-grid, .history-grid {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 3rem;
+  }
+  .detail-image-wrapper { max-width: 300px; margin: 0 auto; }
+  .detail-title { font-size: 3rem; }
+  .detail-features { justify-content: center; }
+  
+  .history-grid.reverse-layout {
+    display: flex;
+    flex-direction: column-reverse;
+  }
+}
+
+.recipe-section {
+  padding-top: 4rem;
+  margin-top: 4rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+}
+
+/* Tiêu đề lớn (dùng Font Cũ Cormorant Garamond) */
+.recipe-heading {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 3rem;
+  font-weight: 700;
+  color: #e9a004;
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+/* Khung chứa nội dung công thức */
+.recipe-container {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr; /* Cột cách làm rộng hơn cột nguyên liệu */
+  gap: 4rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 3rem;
+  backdrop-filter: blur(10px);
+}
+
+/* Tiêu đề nhỏ (Nguyên liệu / Các bước) */
+.recipe-subheading {
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e9a004;
+  display: inline-block;
+  padding-bottom: 5px;
+}
+
+/* Danh sách Nguyên liệu */
+.ingredients-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.ingredients-list li {
+  margin-bottom: 12px;
+  font-size: 1rem;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-weight: 400;
+  color: #d0d0d0;
+  padding-left: 20px;
+  position: relative;
+}
+
+/* Dấu chấm đầu dòng màu vàng */
+.ingredients-list li::before {
+  content: "•";
+  color: #e9a004;
+  font-size: 1.5rem;
+  position: absolute;
+  left: 0;
+  top: -5px;
+  line-height: 1;
+}
+
+/* Danh sách Các bước thực hiện */
+.steps-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.steps-list li {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 1.5rem;
+  align-items: flex-start;
+}
+
+/* Số thứ tự các bước (vòng tròn vàng) */
+.step-num {
+  background-color: #e9a004;
+  color: #000;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-weight: 700;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px; /* Căn chỉnh với dòng chữ đầu */
+  font-size: 0.9rem;
+}
+
+.steps-list p {
+  margin: 0;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #e0e0e0;
+  font-weight: 400;
+  text-align: justify;
+}
+
+/* Responsive cho phần Recipe */
+@media (max-width: 768px) {
+  .recipe-container {
+    grid-template-columns: 1fr; /* Chuyển về 1 cột trên mobile */
+    padding: 1.5rem;
+    gap: 3rem;
+  }
+  
+  .recipe-heading {
+    font-size: 2.2rem;
+  }
+}
