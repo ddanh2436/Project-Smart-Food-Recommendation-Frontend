@@ -29,7 +29,7 @@ export const getTopRatedRestaurants = async (limit: number = 10) => {
   }
 };
 
-// [CẬP NHẬT] Thêm openNow
+// [CẬP NHẬT QUAN TRỌNG] Thêm tham số search vào cuối cùng
 export const getAllRestaurants = async (
   page: number = 1, 
   limit: number = 32,
@@ -38,10 +38,11 @@ export const getAllRestaurants = async (
   rating: string = 'all',
   openNow: string = 'false',
   userLat: string = '', 
-  userLon: string = ''
+  userLon: string = '',
+  search: string = '' // <--- Thêm tham số này để AI hoạt động
 ) => {
   try {
-    const res = await api.get(`/restaurants?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&rating=${rating}&openNow=${openNow}&userLat=${userLat}&userLon=${userLon}`);
+    const res = await api.get(`/restaurants?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&rating=${rating}&openNow=${openNow}&userLat=${userLat}&userLon=${userLon}&search=${encodeURIComponent(search)}`);
     return res.data; 
   } catch (error) {
     console.error("Error fetching all restaurants:", error);

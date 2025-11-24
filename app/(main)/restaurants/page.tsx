@@ -1,14 +1,14 @@
 // app/(main)/restaurants/page.tsx
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getAllRestaurants } from "@/app/lib/api";
 import "./RestaurantsPage.css";
 
-// ... (Giữ nguyên các Icons và Interface cũ) ...
+// ... (Giữ nguyên toàn bộ phần Icons và Interface Restaurant) ...
 const FilterIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>;
 const CheckIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>;
 const ChevronDownIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="chevron-icon"><path d="M6 9l6 6 6-6"/></svg>;
@@ -23,7 +23,7 @@ const SadSearchIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="11" cy="11" r="8"></circle>
     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-    <line x1="8" y1="11" x2="14" y2="11"></line> {/* Đường gạch ngang thể hiện không tìm thấy */}
+    <line x1="8" y1="11" x2="14" y2="11"></line>
   </svg>
 );
 const RefreshIcon = () => (
@@ -68,8 +68,8 @@ const SORT_OPTIONS = [
 
 const RATING_RANGES = [
   { id: 'all', label: 'Tất cả' },
-  { id: 'gte9', label: 'Xuất sắc (> 9.0)' }, // Đổi '9+' thành 'gte9'
-  { id: '8to9', label: 'Rất tốt (8.0 - 9.0)' }, // Đổi '8-9' thành '8to9'
+  { id: 'gte9', label: 'Xuất sắc (> 9.0)' },
+  { id: '8to9', label: 'Rất tốt (8.0 - 9.0)' },
   { id: '7to8', label: 'Tốt (7.0 - 8.0)' },
   { id: '6to7', label: 'Khá (6.0 - 7.0)' },
   { id: 'lt6', label: 'Bình dân (< 6.0)' },
@@ -92,49 +92,77 @@ export default function RestaurantsPage() {
   const [selectedSort, setSelectedSort] = useState<string>('default');
   const [selectedRating, setSelectedRating] = useState<string>('all');
   const [selectedOrder, setSelectedOrder] = useState<string>('desc'); 
-  const [isOpenNow, setIsOpenNow] = useState<boolean>(false); // [MỚI] State cho Open Now
+  const [isOpenNow, setIsOpenNow] = useState<boolean>(false);
 
   // Active States
   const [activeSort, setActiveSort] = useState<string>('default');
   const [activeRating, setActiveRating] = useState<string>('all');
   const [activeOrder, setActiveOrder] = useState<string>('desc'); 
-  const [activeOpenNow, setActiveOpenNow] = useState<boolean>(false); // [MỚI]
+  const [activeOpenNow, setActiveOpenNow] = useState<boolean>(false);
 
   const [selectedRes, setSelectedRes] = useState<Restaurant | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [showBackToTop, setShowBackToTop] = useState(false);
+
+  // [1. FIX GPS] Thêm state userLocation
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
+
+  const LIMIT = 32; 
+
+  // [2. FIX GPS] Tự động lấy GPS ngay khi vào trang
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          console.log("Frontend: Đã lấy được tọa độ", position.coords);
+          setUserLocation({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.warn("Frontend: Không thể lấy vị trí", error.message);
+        }
+      );
+    }
+  }, []);
+
+  // [3. FIX SORT] Tự động chuyển 'asc' khi chọn Distance/Price
   const handleSelectSort = (sortId: string) => {
     setSelectedSort(sortId);
-
     if (sortId === 'distance' || sortId === 'price') {
       setSelectedOrder('asc'); 
     } else {
       setSelectedOrder('desc');
     }
   };
-  const LIMIT = 32; 
 
   // --- MAIN DATA FETCHING ---
   useEffect(() => {
     const page = Number(searchParams.get('page')) || 1;
     const sort = searchParams.get('sort') || 'default';
     const rating = searchParams.get('rating') || 'all';
-    const order = searchParams.get('order') || 'desc';
-    const open = searchParams.get('openNow') === 'true'; // [MỚI]
+    let order = searchParams.get('order'); // Để let để có thể sửa
+    const open = searchParams.get('openNow') === 'true'; 
+    const search = searchParams.get('search') || ''; 
+
+    // [4. FIX SORT] Nếu URL chưa có order, tự động set default dựa vào sort
+    if (!order) {
+      if (sort === 'distance' || sort === 'price') order = 'asc';
+      else order = 'desc';
+    }
 
     setCurrentPage(page);
     setActiveSort(sort);
     setActiveRating(rating);
     setActiveOrder(order);
-    setActiveOpenNow(open); // [MỚI]
+    setActiveOpenNow(open);
     
-    // Sync UI states
     setSelectedSort(sort);
     setSelectedRating(rating);
     setSelectedOrder(order);
-    setIsOpenNow(open); // [MỚI]
+    setIsOpenNow(open);
 
     const fetchData = async () => {
       setLoading(true);
@@ -151,35 +179,17 @@ export default function RestaurantsPage() {
         default: dbSortBy = 'diemTrungBinh';
       }
 
+      // [5. FIX GPS] LUÔN GỬI tọa độ nếu có (để AI dùng), không cần check sort='distance'
       let latStr = '';
       let lonStr = '';
-
-      if (sort === 'distance') {
-        // Nếu đã có location trong state thì dùng luôn
-        if (userLocation) {
-          latStr = String(userLocation.lat);
-          lonStr = String(userLocation.lon);
-        } else {
-          // Nếu chưa có, thử lấy ngay lập tức
-          try {
-            const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-              navigator.geolocation.getCurrentPosition(resolve, reject);
-            });
-            latStr = String(position.coords.latitude);
-            lonStr = String(position.coords.longitude);
-            setUserLocation({ lat: position.coords.latitude, lon: position.coords.longitude });
-          } catch (e) {
-            console.error("Không thể lấy vị trí:", e);
-            // Có thể fallback về sort mặc định nếu không lấy được vị trí
-            // Nhưng ở đây ta cứ gửi rỗng để BE xử lý (sẽ xếp cuối)
-          }
-        }
+      if (userLocation) {
+        latStr = String(userLocation.lat);
+        lonStr = String(userLocation.lon);
       }
 
       try {
-        // [MỚI] Truyền thêm latStr, lonStr
         const response = await getAllRestaurants(
-          page, LIMIT, dbSortBy, order, rating, String(open), latStr, lonStr
+          page, LIMIT, dbSortBy, order!, rating, String(open), latStr, lonStr, search
         );
         
         setRestaurants(response.data || []);
@@ -192,13 +202,13 @@ export default function RestaurantsPage() {
     };
 
     fetchData();
-  }, [searchParams, userLocation]);
+  }, [searchParams, userLocation]); // Reload khi URL đổi HOẶC khi lấy được GPS
 
-  // --- HANDLERS ---
+  // --- HANDLERS (Giữ nguyên) ---
   const updateURL = (newParams: any) => {
     const params = new URLSearchParams(searchParams.toString());
     Object.entries(newParams).forEach(([key, value]) => {
-        if (value && value !== 'false') { // Không lưu 'false' lên URL cho gọn
+        if (value && value !== 'false') { 
             params.set(key, value as string);
         } else {
             params.delete(key);
@@ -213,7 +223,7 @@ export default function RestaurantsPage() {
         sort: selectedSort,
         rating: selectedRating,
         order: selectedOrder,
-        openNow: String(isOpenNow) // [MỚI]
+        openNow: String(isOpenNow)
     });
     setIsFilterOpen(false); 
   };
@@ -228,7 +238,6 @@ export default function RestaurantsPage() {
     }
   };
 
-  // Helpers UI
   const getSortLabel = (id: string) => SORT_OPTIONS.find(opt => opt.id === id)?.label;
   const getRatingLabelText = (id: string) => RATING_RANGES.find(opt => opt.id === id)?.label;
   const getOrderLabelText = (id: string) => id === 'asc' ? 'Tăng dần' : 'Giảm dần';
@@ -264,7 +273,7 @@ export default function RestaurantsPage() {
           <ChevronDownIcon />
         </button>
 
-        {/* Active Indicators (Thêm Open Now) */}
+        {/* Active Indicators */}
         {(activeSort !== 'default' || activeRating !== 'all' || activeOrder !== 'desc' || activeOpenNow) && (
           <div className="active-filters-bar">
             <span className="active-filters-label">Đang lọc theo:</span>
@@ -281,8 +290,6 @@ export default function RestaurantsPage() {
         {/* Filter Panel */}
         {isFilterOpen && (
           <div className="advanced-filter-panel">
-            
-            {/* 1. Sắp xếp */}
             <div className="filter-row">
               <div className="filter-label">Tiêu chí:</div>
               <div className="filter-options">
@@ -297,8 +304,6 @@ export default function RestaurantsPage() {
                 ))}
               </div>
             </div>
-
-            {/* 2. Thứ tự */}
             <div className="filter-row">
               <div className="filter-label">Thứ tự:</div>
               <div className="filter-options order-options">
@@ -309,8 +314,6 @@ export default function RestaurantsPage() {
                 ))}
               </div>
             </div>
-
-            {/* 3. Điểm số */}
             <div className="filter-row">
               <div className="filter-label">Điểm số:</div>
               <div className="filter-options">
@@ -321,21 +324,14 @@ export default function RestaurantsPage() {
                 ))}
               </div>
             </div>
-
-            {/* 4. [MỚI] Trạng thái (Open Now) */}
             <div className="filter-row">
               <div className="filter-label">Trạng thái:</div>
               <div className="filter-options">
-                <button 
-                  className={`filter-chip ${isOpenNow ? 'active' : ''}`} 
-                  onClick={() => setIsOpenNow(!isOpenNow)}
-                >
+                <button className={`filter-chip ${isOpenNow ? 'active' : ''}`} onClick={() => setIsOpenNow(!isOpenNow)}>
                   <ClockIcon /> Đang mở cửa
                 </button>
               </div>
             </div>
-
-            {/* Actions */}
             <div className="filter-actions">
               <button className="btn-apply-filter" onClick={handleApplyFilter}>Lọc kết quả <CheckIcon /></button>
               <button className="btn-reset-filter" onClick={handleResetFilter}>Reset</button>
@@ -344,7 +340,7 @@ export default function RestaurantsPage() {
           </div>
         )}
 
-        {/* Grid Content (Giữ nguyên) */}
+        {/* Grid Content */}
         {loading ? (
           <div className="loading-container"><div className="spinner"></div> Đang tải dữ liệu trang {currentPage}...</div>
         ) : (
@@ -369,17 +365,10 @@ export default function RestaurantsPage() {
                 ))
               ) : (
                 <div className="empty-state-container">
-                <div className="empty-state-icon">
-                  <SadSearchIcon />
-                </div>
+                <div className="empty-state-icon"><SadSearchIcon /></div>
                 <h3 className="empty-state-title">Không tìm thấy kết quả</h3>
-                <p className="empty-state-desc">
-                  Rất tiếc, chúng tôi không tìm thấy nhà hàng nào phù hợp với bộ lọc hiện tại của bạn. 
-                  Hãy thử thay đổi tiêu chí hoặc đặt lại bộ lọc nhé.
-                </p>
-                <button className="btn-empty-reset" onClick={handleResetFilter}>
-                  <RefreshIcon /> Xóa bộ lọc & Thử lại
-                </button>
+                <p className="empty-state-desc">Rất tiếc, chúng tôi không tìm thấy nhà hàng nào phù hợp.</p>
+                <button className="btn-empty-reset" onClick={handleResetFilter}><RefreshIcon /> Xóa bộ lọc & Thử lại</button>
               </div>
               )}
             </div>
@@ -393,7 +382,6 @@ export default function RestaurantsPage() {
           </>
         )}
 
-        {/* Modal (Giữ nguyên) */}
         {selectedRes && (
           <div className="modal-overlay" onClick={closeModal}>
             <div className="modal-panel" onClick={(e) => e.stopPropagation()}>

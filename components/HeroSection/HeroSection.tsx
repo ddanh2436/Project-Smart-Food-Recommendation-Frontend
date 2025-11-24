@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import "./HeroSection.css";
 import { useAuth } from "@/app/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 // === DỮ LIỆU NGÔN NGỮ (Cập nhật text tiếng Anh) ===
 const langData = {
@@ -49,6 +50,20 @@ const HeroSection: React.FC = () => {
   const [searchValue, setSearchValue] = useState("");
   const { currentLang } = useAuth();
   const T = langData[currentLang]; 
+  const router = useRouter(); 
+
+  const handleSearch = () => {
+    if (searchValue.trim()) {
+      // Chuyển hướng sang trang restaurants kèm query param
+      router.push(`/restaurants?search=${encodeURIComponent(searchValue)}`);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
   return (
     <section className="hero-section">
@@ -77,6 +92,7 @@ const HeroSection: React.FC = () => {
                 placeholder={T.placeholder}
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
+                onKeyDown={handleKeyDown}
               />
             </div>
           </div>
@@ -84,7 +100,7 @@ const HeroSection: React.FC = () => {
           {/* Nút Discover */}
           <div className="hero-actions">
             <span className="hero-divider">{T.or}</span>
-            <button className="btn-discover-glow">
+            <button className="btn-discover-glow" onClick={handleSearch}>
               {T.discoverBtn}
               <ArrowRightIcon />
             </button>
