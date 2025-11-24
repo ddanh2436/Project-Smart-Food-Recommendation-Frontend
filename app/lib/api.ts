@@ -2,35 +2,26 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:3001", // Đảm bảo đây là port Backend (BE)
+  baseURL: "http://localhost:3001",
 });
 
-// Sử dụng "interceptors" để đính kèm token
 api.interceptors.request.use(
   (config) => {
-    // --- BỔ SUNG LOGIC NÀY ---
-    // Nếu là route 'login' hoặc 'register' thì KHÔNG đính kèm token
     if (config.url === "/auth/login" || config.url === "/auth/register") {
-      return config; // Gửi request đi mà không có header
+      return config;
     }
-    // --- KẾT THÚC BỔ SUNG ---
-
-    // Lấy token từ localStorage
     const token = localStorage.getItem("accessToken");
-
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 export const getTopRatedRestaurants = async (limit: number = 10) => {
   try {
-    const res = await api.get(`/restaurants?page=1&limit=${limit}`);
+    const res = await api.get(`/restaurants?page=1&limit=${limit}&sortBy=diemTrungBinh&order=desc`);
     return res.data?.data || []; 
   } catch (error) {
     console.error("Error fetching top restaurants:", error);
@@ -38,9 +29,19 @@ export const getTopRatedRestaurants = async (limit: number = 10) => {
   }
 };
 
-export const getAllRestaurants = async (page: number = 1, limit: number = 100) => {
+// [CẬP NHẬT] Thêm openNow
+export const getAllRestaurants = async (
+  page: number = 1, 
+  limit: number = 32,
+  sortBy: string = 'diemTrungBinh',
+  order: string = 'desc',
+  rating: string = 'all',
+  openNow: string = 'false',
+  userLat: string = '', 
+  userLon: string = ''
+) => {
   try {
-    const res = await api.get(`/restaurants?page=${page}&limit=${limit}`);
+    const res = await api.get(`/restaurants?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&rating=${rating}&openNow=${openNow}&userLat=${userLat}&userLon=${userLon}`);
     return res.data; 
   } catch (error) {
     console.error("Error fetching all restaurants:", error);

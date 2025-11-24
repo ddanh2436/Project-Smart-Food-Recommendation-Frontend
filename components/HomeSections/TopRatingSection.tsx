@@ -7,7 +7,7 @@ import Link from "next/link";
 import { getTopRatedRestaurants } from "@/app/lib/api";
 import "./TopRatingSection.css";
 
-// --- ICONS ---
+// ... (Giữ nguyên phần import Icons cũ) ...
 const ChevronLeft = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>;
 const ChevronRight = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>;
 const ClockIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>;
@@ -15,6 +15,7 @@ const MoneyIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="no
 const MapPinIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>;
 const XIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
 
+// ... (Giữ nguyên Interface cũ) ...
 interface Restaurant {
   _id: string;
   tenQuan: string;
@@ -35,13 +36,13 @@ const TopRatingSection = () => {
   const [loading, setLoading] = useState(true);
   const [selectedRes, setSelectedRes] = useState<Restaurant | null>(null);
   
+  // ... (Giữ nguyên các logic Ref và Scroll cũ) ...
   const sliderRef = useRef<HTMLDivElement>(null);
   const isDown = useRef(false);
   const startX = useRef(0);
   const scrollLeft = useRef(0);
   const isDragging = useRef(false);
 
-  // [FIX 1] Cleanup Effect: Đảm bảo luôn mở khóa scroll khi component bị unmount (rời trang)
   useEffect(() => {
     return () => {
       document.body.style.overflow = 'unset';
@@ -62,6 +63,19 @@ const TopRatingSection = () => {
     fetchData();
   }, []);
 
+  // === [MỚI] HÀM XỬ LÝ NHÃN ĐIỂM SỐ ===
+  const getRatingLabel = (score: number) => {
+    if (!score && score !== 0) return "N/A";
+    if (score >= 9.0) return "Xuất sắc";
+    if (score >= 8.0) return "Rất tốt";
+    if (score >= 7.0) return "Tốt"; // Mức 7.0 - 7.9
+    if (score >= 6.0) return "Khá"; // Mức 6.0 - 6.9 (Sẽ hiển thị cho 6.8)
+    if (score >= 5.0) return "Trung bình";
+    return "Cần cải thiện";
+  };
+  // ====================================
+
+  // ... (Giữ nguyên các hàm handleScrollButton, Drag Events) ...
   const handleScrollButton = (direction: 'left' | 'right') => {
     if (sliderRef.current) {
       const scrollAmount = 340;
@@ -73,7 +87,6 @@ const TopRatingSection = () => {
     }
   };
 
-  // Drag Events
   const onMouseDown = (e: React.MouseEvent) => {
     if (!sliderRef.current) return;
     isDown.current = true;
@@ -102,26 +115,24 @@ const TopRatingSection = () => {
     if (Math.abs(walk) > 5) isDragging.current = true;
   };
 
-  // Modal Logic
   const handleCardClick = (res: Restaurant) => {
     if (!isDragging.current) openModal(res);
   };
   
   const openModal = (res: Restaurant) => {
     setSelectedRes(res);
-    // Khóa scroll khi mở modal
     document.body.style.overflow = 'hidden';
   };
   
   const closeModal = () => {
     setSelectedRes(null);
-    // Mở khóa scroll khi đóng modal
     document.body.style.overflow = 'unset';
   };
 
   return (
     <section className="top-rating-section">
       <div className="container">
+        {/* ... (Header Section giữ nguyên) ... */}
         <div className="section-header-row">
           <div>
             <h2 className="section-title">Top Rated Restaurants</h2>
@@ -190,12 +201,22 @@ const TopRatingSection = () => {
                     className="modal-main-img"
                     unoptimized={true}
                   />
+                  
+                  {/* === [CẬP NHẬT] PHẦN HIỂN THỊ ĐIỂM SỐ DYNAMIC === */}
                   <div className="modal-rating-overlay">
-                    <span className="big-score">{selectedRes.diemTrungBinh ? selectedRes.diemTrungBinh.toFixed(1) : "N/A"}</span>
-                    <span className="score-label">Rất tốt</span>
+                    <span className="big-score">
+                        {selectedRes.diemTrungBinh ? selectedRes.diemTrungBinh.toFixed(1) : "N/A"}
+                    </span>
+                    {/* Thay thế text cứng "Rất tốt" bằng hàm getRatingLabel */}
+                    <span className="score-label">
+                        {getRatingLabel(selectedRes.diemTrungBinh)}
+                    </span>
                   </div>
+                  {/* ================================================= */}
+
                 </div>
 
+                {/* ... (Phần thông tin chi tiết giữ nguyên) ... */}
                 <div className="modal-info-col">
                   <h2 className="modal-title">{selectedRes.tenQuan}</h2>
                   <p className="modal-address"><MapPinIcon /> {selectedRes.diaChi}</p>
@@ -216,13 +237,12 @@ const TopRatingSection = () => {
                     <RatingRow label="Giá cả" score={selectedRes.diemGiaCa} />
                   </div>
 
-                  {/* [FIX 2] Mở khóa scroll ngay khi bấm link chuyển trang */}
                   <Link 
                     href={`/restaurants/${selectedRes._id}`} 
                     className="btn-go-detail"
                     onClick={(e) => {
                       e.stopPropagation();
-                      document.body.style.overflow = 'unset'; // MỞ KHÓA SCROLL
+                      document.body.style.overflow = 'unset';
                     }}
                   >
                     Xem chi tiết đầy đủ

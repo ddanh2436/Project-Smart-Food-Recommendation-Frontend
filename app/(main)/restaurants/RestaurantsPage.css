@@ -1,12 +1,12 @@
 /* app/(main)/restaurants/RestaurantsPage.css */
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Nunito:wght@400;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Nunito:wght@400;600;700&display=swap");
 
 .restaurants-page-wrapper {
   background-color: #050505;
   min-height: 100vh;
   padding: 100px 2rem 4rem 2rem; /* Padding top lớn để tránh Header */
-  font-family: 'Nunito', sans-serif;
+  font-family: "Nunito", sans-serif;
   color: #fff;
 }
 
@@ -22,7 +22,7 @@
 }
 
 .page-title {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: "Cormorant Garamond", serif;
   font-size: 3.5rem;
   color: #e9a004;
   margin-bottom: 0.5rem;
@@ -68,136 +68,308 @@
 }
 
 .card-image {
-  width: 100%; height: 100%; object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .rating-badge {
   position: absolute;
-  top: 10px; right: 10px;
-  background-color: #e9a004; color: #000;
-  font-weight: 800; width: 36px; height: 36px;
+  top: 10px;
+  right: 10px;
+  background-color: #e9a004;
+  color: #000;
+  font-weight: 800;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 0.9rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
 .card-content {
   padding: 1.2rem;
-  display: flex; flex-direction: column; gap: 0.5rem; flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-grow: 1;
 }
 
 .restaurant-name {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.4rem; color: #fff; font-weight: 700; line-height: 1.2;
-  white-space: normal; display: -webkit-box;
-  -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-  overflow: hidden; text-overflow: ellipsis;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.4rem;
+  color: #fff;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
   height: 3.4rem;
 }
 
 .restaurant-address {
-  font-size: 0.9rem; color: #aaa;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  display: flex; align-items: center; gap: 6px;
+  font-size: 0.9rem;
+  color: #aaa;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
-.restaurant-address svg { color: #888; min-width: 14px; }
+.restaurant-address svg {
+  color: #888;
+  min-width: 14px;
+}
 
 .card-meta-row {
-  display: flex; flex-direction: column; align-items: flex-start;
-  gap: 0.6rem; margin-top: auto; padding-top: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-top: auto;
+  padding-top: 0.8rem;
   border-top: 1px dashed rgba(255, 255, 255, 0.15);
   width: 100%;
 }
 
 .meta-item {
-  display: flex; align-items: center; gap: 10px;
-  font-size: 0.9rem; color: #ccc; width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: #ccc;
+  width: 100%;
 }
-.meta-item svg { color: #e9a004; min-width: 16px; height: 16px; }
-.meta-item.price { font-weight: 600; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.meta-item.hours { font-size: 0.85rem; color: #aaa; }
+.meta-item svg {
+  color: #e9a004;
+  min-width: 16px;
+  height: 16px;
+}
+.meta-item.price {
+  font-weight: 600;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.meta-item.hours {
+  font-size: 0.85rem;
+  color: #aaa;
+}
 
 /* --- MODAL STYLES (Copy từ bản nâng cấp) --- */
 .modal-overlay {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background-color: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(8px);
   z-index: 9999;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 20px;
   animation: fadeIn 0.3s ease;
 }
 
 .modal-panel {
   background-color: #1a1a1a;
-  width: 95%; max-width: 1200px; /* Bản to */
+  width: 95%;
+  max-width: 1200px; /* Bản to */
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-  position: relative; overflow: hidden;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+  position: relative;
+  overflow: hidden;
   animation: scaleIn 0.3s ease;
-  display: flex; flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-close-btn {
-  position: absolute; top: 15px; right: 15px;
-  background: rgba(0,0,0,0.5); border: none; color: #fff;
-  border-radius: 50%; width: 36px; height: 36px;
-  cursor: pointer; z-index: 10;
-  display: flex; align-items: center; justify-content: center;
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: #fff;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.2s;
 }
-.modal-close-btn:hover { background: #e9a004; color: #000; }
+.modal-close-btn:hover {
+  background: #e9a004;
+  color: #000;
+}
 
 .modal-layout {
-  display: grid; grid-template-columns: 1.4fr 1fr; height: 650px;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  height: 650px;
 }
 
-.modal-image-col { position: relative; height: 100%; background: #000; }
-.modal-main-img { width: 100%; height: 100%; object-fit: cover; }
-.modal-rating-overlay {
-  position: absolute; bottom: 20px; left: 20px;
-  background: rgba(233, 160, 4, 0.95);
-  padding: 10px 20px; border-radius: 12px;
-  color: #000; display: flex; flex-direction: column; align-items: center;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+.modal-image-col {
+  position: relative;
+  height: 100%;
+  background: #000;
 }
-.big-score { font-size: 2rem; font-weight: 800; line-height: 1; }
-.score-label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; }
+.modal-main-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.modal-rating-overlay {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: rgba(233, 160, 4, 0.95);
+  padding: 10px 20px;
+  border-radius: 12px;
+  color: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+.big-score {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.score-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
 
 .modal-info-col {
-  padding: 40px 30px; color: #fff;
-  display: flex; flex-direction: column; overflow-y: auto;
+  padding: 40px 30px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }
 .modal-title {
-  font-family: 'Cormorant Garamond', serif; font-size: 2.5rem;
-  color: #e9a004; margin: 0 0 10px 0; line-height: 1.1;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 2.5rem;
+  color: #e9a004;
+  margin: 0 0 10px 0;
+  line-height: 1.1;
 }
-.modal-address { color: #ccc; font-size: 1rem; display: flex; align-items: flex-start; gap: 8px; margin-bottom: 20px; }
-.modal-address svg { color: #888; margin-top: 3px; }
+.modal-address {
+  color: #ccc;
+  font-size: 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.modal-address svg {
+  color: #888;
+  margin-top: 3px;
+}
 
-.modal-meta-grid { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
-.modal-meta-item { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; color: #ddd; }
-.modal-meta-item.highlight { color: #fff; font-weight: 600; }
-.modal-meta-item svg { color: #e9a004; }
+.modal-meta-grid {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.modal-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: #ddd;
+}
+.modal-meta-item.highlight {
+  color: #fff;
+  font-weight: 600;
+}
+.modal-meta-item svg {
+  color: #e9a004;
+}
 
-.modal-divider { border: 0; border-top: 1px dashed rgba(255,255,255,0.15); margin: 10px 0 20px 0; width: 100%; }
+.modal-divider {
+  border: 0;
+  border-top: 1px dashed rgba(255, 255, 255, 0.15);
+  margin: 10px 0 20px 0;
+  width: 100%;
+}
 
-.detail-rating-heading { font-size: 1.1rem; color: #fff; margin-bottom: 15px; font-weight: 600; }
-.rating-bars { display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px; }
-.rating-row { display: flex; align-items: center; gap: 15px; }
-.rating-label { width: 90px; font-size: 0.9rem; color: #aaa; }
-.rating-bar-bg { flex-grow: 1; height: 6px; background: #333; border-radius: 3px; overflow: hidden; }
-.rating-bar-fill { height: 100%; background: #e9a004; border-radius: 3px; }
-.rating-value { width: 30px; text-align: right; font-weight: 700; color: #e9a004; }
+.detail-rating-heading {
+  font-size: 1.1rem;
+  color: #fff;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+.rating-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 30px;
+}
+.rating-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.rating-label {
+  width: 90px;
+  font-size: 0.9rem;
+  color: #aaa;
+}
+.rating-bar-bg {
+  flex-grow: 1;
+  height: 6px;
+  background: #333;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.rating-bar-fill {
+  height: 100%;
+  background: #e9a004;
+  border-radius: 3px;
+}
+.rating-value {
+  width: 30px;
+  text-align: right;
+  font-weight: 700;
+  color: #e9a004;
+}
 
 .btn-go-detail {
-  margin-top: auto; text-align: center; background: transparent;
-  border: 1px solid #e9a004; color: #e9a004; padding: 12px;
-  border-radius: 8px; text-decoration: none; font-weight: 700; transition: all 0.3s;
+  margin-top: auto;
+  text-align: center;
+  background: transparent;
+  border: 1px solid #e9a004;
+  color: #e9a004;
+  padding: 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 700;
+  transition: all 0.3s;
 }
-.btn-go-detail:hover { background: #e9a004; color: #000; }
+.btn-go-detail:hover {
+  background: #e9a004;
+  color: #000;
+}
 
 .pagination-wrapper {
   display: flex;
@@ -235,7 +407,7 @@
 .page-numbers {
   font-size: 1.1rem;
   color: #fff;
-  font-family: 'Cormorant Garamond', serif;
+  font-family: "Cormorant Garamond", serif;
 }
 
 /* --- BACK TO TOP BUTTON --- */
@@ -255,7 +427,7 @@
   cursor: pointer;
   box-shadow: 0 4px 15px rgba(233, 160, 4, 0.4);
   z-index: 1000;
-  
+
   /* Hiệu ứng ẩn hiện */
   opacity: 0;
   visibility: hidden;
@@ -294,26 +466,447 @@
   animation: spin 1s linear infinite;
 }
 
+.filter-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.05); /* Nền mờ nhẹ */
+  color: #fff;
+  font-family: "Nunito", sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 12px 24px;
+  border-radius: 50px; /* Bo tròn hoàn toàn */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+}
+
+.filter-toggle-btn:hover {
+  background: rgba(233, 160, 4, 0.15);
+  border-color: #e9a004;
+  color: #e9a004;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.filter-toggle-btn.active {
+  background: #e9a004;
+  color: #000;
+  border-color: #e9a004;
+  box-shadow: 0 0 20px rgba(233, 160, 4, 0.4);
+}
+
+/* Icon xoay khi mở */
+.filter-toggle-btn svg {
+  transition: transform 0.4s ease;
+}
+.filter-toggle-btn.active svg.chevron-icon {
+  transform: rotate(180deg);
+}
+
+/* --- 2. Panel Bộ Lọc (The Glass Panel) --- */
+.advanced-filter-panel {
+  background: rgba(20, 20, 20, 0.85); /* Nền đen trong suốt */
+  backdrop-filter: blur(16px); /* Hiệu ứng làm mờ nền sau */
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 20px;
+  padding: 30px;
+  margin-bottom: 3rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+
+  /* Animation mở ra */
+  animation: slideOpen 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: top center;
+  overflow: hidden;
+}
+
+@keyframes slideOpen {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    max-height: 500px;
+  }
+}
+
+/* --- 3. Các dòng trong bộ lọc --- */
+.filter-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 25px;
+  position: relative;
+}
+
+/* Đường kẻ mờ ngăn cách các dòng */
+.filter-row::after {
+  content: "";
+  position: absolute;
+  bottom: -12px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+}
+.filter-row:last-of-type::after {
+  display: none;
+} /* Bỏ dòng kẻ cuối */
+
+.filter-label {
+  min-width: 130px;
+  font-weight: 800;
+  color: #888;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex: 1;
+}
+
+/* --- 4. Filter Chips (Các nút chọn) --- */
+.filter-chip {
+  position: relative;
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ccc;
+  padding: 8px 20px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  overflow: hidden;
+  display: inline-flex;       /* Dùng Flexbox nội dòng */
+  align-items: center;        /* Căn giữa theo chiều dọc */
+  justify-content: center;    /* Căn giữa theo chiều ngang */
+  gap: 8px;                   /* Khoảng cách giữa Icon và Chữ */
+  white-space: nowrap;        /* Ngăn chữ bị xuống dòng */
+}
+
+/* Hiệu ứng hover: Sáng lên và nổi nhẹ */
+.filter-chip:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+}
+
+/* Hiệu ứng Active: Màu vàng, phát sáng (Glow) */
+.filter-chip.active {
+  background: #e9a004;
+  color: #000;
+  border-color: #e9a004;
+  font-weight: 800;
+  box-shadow: 0 4px 15px rgba(233, 160, 4, 0.4); /* Glow effect */
+  transform: translateY(-2px) scale(1.05);
+}
+
+/* Hiệu ứng click active (Nhấn xuống) */
+.filter-chip:active {
+  transform: scale(0.95);
+}
+
+/* --- 5. Action Buttons (Footer của Panel) --- */
+.filter-actions {
+  display: flex;
+  justify-content: flex-end; /* Đẩy nút sang phải cho hiện đại */
+  margin-top: 30px;
+  gap: 15px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-apply-filter {
+  background: linear-gradient(135deg, #e9a004, #b87e00);
+  color: #fff;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 30px;
+  font-weight: 800;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 10px 20px rgba(233, 160, 4, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-apply-filter:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(233, 160, 4, 0.5);
+  filter: brightness(1.1);
+}
+
+.btn-reset-filter {
+  background: transparent;
+  color: #aaa;
+  border: 1px dashed rgba(255, 255, 255, 0.3);
+  padding: 10px 24px;
+  border-radius: 30px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-reset-filter:hover {
+  color: #fff;
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+filter-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 30px;
+  gap: 10px; /* Giảm gap chút để vừa 3 nút */
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Style cho nút Đóng mới */
+.btn-close-filter {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ccc;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-close-filter:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+/* --- KHU VỰC HIỂN THỊ INDICATOR (CHỈ SỐ ĐANG CHỌN) --- */
+.active-filters-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 2rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.active-filters-label {
+  color: #888;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.active-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(233, 160, 4, 0.15); /* Màu nền vàng nhạt */
+  border: 1px solid #e9a004;
+  color: #e9a004;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: "Nunito", sans-serif;
+}
+
+.active-tag svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Nút xóa tất cả (Clear All) nhỏ bên cạnh */
+.btn-clear-all {
+  background: transparent;
+  border: none;
+  color: #666;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+.btn-clear-all:hover {
+  color: #ccc;
+}
+
+.order-options {
+  display: flex;
+  gap: 15px;
+}
+
+.order-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.order-chip svg {
+  width: 16px;
+  height: 16px;
+}
+
+.empty-state-container {
+  grid-column: 1 / -1; /* Chiếm toàn bộ chiều ngang lưới */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+  
+  /* Tạo khung mờ nhẹ */
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 20px;
+  border: 2px dashed rgba(255, 255, 255, 0.1);
+  margin-top: 2rem;
+  animation: fadeIn 0.5s ease;
+}
+
+.empty-state-icon {
+  color: rgba(255, 255, 255, 0.1); /* Màu rất mờ */
+  margin-bottom: 20px;
+}
+
+.empty-state-icon svg {
+  width: 80px;
+  height: 80px;
+}
+
+.empty-state-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #e9a004; /* Màu vàng thương hiệu */
+  margin-bottom: 10px;
+}
+
+.empty-state-desc {
+  color: #888;
+  font-size: 1.05rem;
+  margin-bottom: 30px;
+  max-width: 450px;
+  line-height: 1.6;
+}
+
+.btn-empty-reset {
+  background: transparent;
+  border: 1px solid #e9a004;
+  color: #e9a004;
+  padding: 12px 30px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-empty-reset:hover {
+  background: #e9a004;
+  color: #000;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(233, 160, 4, 0.25);
+}
+
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 768px) {
   .back-to-top {
     bottom: 20px;
     right: 20px;
-    width: 40px; height: 40px;
+    width: 40px;
+    height: 40px;
   }
 }
 
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 /* Loading */
-.loading-container { display: flex; justify-content: center; padding: 100px; color: #888; font-size: 1.2rem; }
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 100px;
+  color: #888;
+  font-size: 1.2rem;
+}
 
 @media (max-width: 768px) {
-  .modal-layout { grid-template-columns: 1fr; height: auto; }
-  .modal-image-col { height: 300px; }
-  .modal-info-col { padding: 20px; }
+  .modal-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  .modal-image-col {
+    height: 300px;
+  }
+  .modal-info-col {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .filter-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .filter-actions {
+    justify-content: center;
+    width: 100%;
+  }
+  .btn-apply-filter {
+    width: 100%;
+    justify-content: center;
+  }
 }
