@@ -159,7 +159,7 @@
 
 /* Tên nhà hàng (xuống dòng tối đa 2 dòng) */
 .restaurant-name {
-  font-family: "Cormorant Garamond", serif;
+  font-family: 'Times New Roman', serif;
   font-size: 1.4rem;
   color: #fff;
   margin: 0;
