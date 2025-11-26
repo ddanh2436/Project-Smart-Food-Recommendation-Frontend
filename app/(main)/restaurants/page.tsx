@@ -105,28 +105,32 @@ export default function RestaurantsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [showBackToTop, setShowBackToTop] = useState(false);
 
-  // [1. FIX GPS] Thêm state userLocation
-  const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
+
+  //const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>({
+    lat: 10.748017595600404, 
+    lon: 106.6767808260947
+  });
 
   const LIMIT = 32; 
 
   // [2. FIX GPS] Tự động lấy GPS ngay khi vào trang
-  useEffect(() => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          console.log("Frontend: Đã lấy được tọa độ", position.coords);
-          setUserLocation({
-            lat: position.coords.latitude,
-            lon: position.coords.longitude
-          });
-        },
-        (error) => {
-          console.warn("Frontend: Không thể lấy vị trí", error.message);
-        }
-      );
-    }
-  }, []);
+  // useEffect(() => {
+  //   if ("geolocation" in navigator) {
+  //     navigator.geolocation.getCurrentPosition(
+  //       (position) => {
+  //         console.log("Frontend: Đã lấy được tọa độ", position.coords);
+  //         setUserLocation({
+  //           lat: position.coords.latitude,
+  //           lon: position.coords.longitude
+  //         });
+  //       },
+  //       (error) => {
+  //         console.warn("Frontend: Không thể lấy vị trí", error.message);
+  //       }
+  //     );
+  //   }
+  // }, []);
 
   // [3. FIX SORT] Tự động chuyển 'asc' khi chọn Distance/Price
   const handleSelectSort = (sortId: string) => {
@@ -179,7 +183,6 @@ export default function RestaurantsPage() {
         default: dbSortBy = 'diemTrungBinh';
       }
 
-      // [5. FIX GPS] LUÔN GỬI tọa độ nếu có (để AI dùng), không cần check sort='distance'
       let latStr = '';
       let lonStr = '';
       if (userLocation) {
@@ -204,7 +207,6 @@ export default function RestaurantsPage() {
     fetchData();
   }, [searchParams, userLocation]); // Reload khi URL đổi HOẶC khi lấy được GPS
 
-  // --- HANDLERS (Giữ nguyên) ---
   const updateURL = (newParams: any) => {
     const params = new URLSearchParams(searchParams.toString());
     Object.entries(newParams).forEach(([key, value]) => {
