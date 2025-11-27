@@ -2,13 +2,14 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import axios from 'axios';
+// [FIX] Import api từ lib thay vì dùng axios trực tiếp để đảm bảo BaseURL đúng (3001)
+import api from '@/app/lib/api'; 
 import { useRouter } from 'next/navigation';
 
 // === TỪ ĐIỂN SONG NGỮ ĐƯỢC NHÚNG TRỰC TIẾP ===
 const embeddedTranslations = {
-  vn: { // <--- FIX: Đã đổi 'vi' thành 'vn'
-    // Các từ dùng chung
+  vn: {
+    // ... (Giữ nguyên phần từ điển của bạn)
     common: {
       loading: "Đang tải...",
       viewAll: "Xem tất cả",
@@ -21,7 +22,6 @@ const embeddedTranslations = {
       confirm: "Xác nhận",
       cancel: "Hủy bỏ",
     },
-    // Trang chủ (Home)
     home: {
       heroTitle: "Khám phá ẩm thực Việt",
       heroSubtitle: "Tìm kiếm hương vị yêu thích của bạn",
@@ -39,7 +39,6 @@ const embeddedTranslations = {
       locationTitle: "Vị Trí Đắc Địa",
       locationSub: "Dễ dàng di chuyển, trung tâm và thuận tiện",
     },
-    // Trang nhà hàng
     restaurantPage: {
       filterRating: "Đánh giá chi tiết",
       labels: {
@@ -56,7 +55,6 @@ const embeddedTranslations = {
         bad: "Cần cải thiện",
       }
     },
-    // Header/Nav
     nav: {
         home: "Trang chủ",
         restaurants: "Nhà hàng",
@@ -78,6 +76,7 @@ const embeddedTranslations = {
     },
   },
   en: {
+    // ... (Giữ nguyên phần tiếng Anh của bạn)
     common: {
       loading: "Loading...",
       viewAll: "View All",
@@ -146,7 +145,6 @@ const embeddedTranslations = {
 };
 // === KẾT THÚC KHỐI TỪ ĐIỂN ===
 
-
 interface User {
   id: string;
   email: string;
@@ -154,46 +152,39 @@ interface User {
   picture?: string;
 }
 
-type Lang = 'en' | 'vn'; // Kiểu Lang đã chính xác là 'en' | 'vn'
-type Translations = typeof embeddedTranslations.vn; // <--- FIX: Đã đổi '.vi' thành '.vn'
+type Lang = 'en' | 'vn';
+type Translations = typeof embeddedTranslations.vn;
 
 interface AuthContextType {
   user: User | null;
   setUser: (user: User | null) => void;
   isLoading: boolean;
-  
-  // === THÊM DỮ LIỆU NGÔN NGỮ VÀO AUTH CONTEXT ===
   currentLang: Lang; 
   setLang: (lang: Lang) => void;
-  T: Translations; // Đối tượng từ điển hiện tại
-  // ============================
+  T: Translations;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
   const [currentLang, setCurrentLang] = useState<Lang>('vn');
-  
-
   const router = useRouter();
 
   const loadUser = async () => {
     const token = localStorage.getItem('accessToken');
     
     if (!token) {
-        setIsLoading(false); // Nếu KHÔNG có token, phải tắt loading ngay
+        setIsLoading(false);
         return;
     }
     
     try {
-      const response = await axios.get(`${API_BASE_URL}/users/profile`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // [FIX] Sử dụng 'api' instance thay vì axios trực tiếp.
+      // [FIX] Đổi endpoint từ '/users/profile' thành '/auth/profile'
+      // api đã có sẵn header Authorization nhờ interceptor trong lib/api.ts
+      const response = await api.get('/auth/profile');
       setUser(response.data);
     } catch (error) {
       console.error('Token invalid or expired:', error);
@@ -201,7 +192,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       localStorage.removeItem('refreshToken');
       setUser(null);
     } finally {
-        // RẤT QUAN TRỌNG: Luôn đảm bảo loading state là FALSE
         setIsLoading(false); 
     }
   };
@@ -212,7 +202,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setCurrentLang(savedLang);
     }
     
-    loadUser(); // Gọi hàm loadUser
+    loadUser();
   }, []);
 
   const setLang = (lang: Lang) => {
@@ -220,7 +210,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('appLang', lang);
   };
   
-  // FIX: TypeScript hiện tại đã chấp nhận key 'vn'
   const T = embeddedTranslations[currentLang]; 
 
   return (
