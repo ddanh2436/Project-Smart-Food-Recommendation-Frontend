@@ -233,3 +233,118 @@
   color: #fff;
   box-shadow: 0 4px 12px rgba(233, 160, 4, 0.4);
 }
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4); /* Màu tối nhẹ */
+    backdrop-filter: blur(8px); /* Hiệu ứng mờ nền thời thượng */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000; /* Đảm bảo nằm trên cùng */
+    animation: fadeInOverlay 0.3s ease-out;
+}
+
+.modal-content {
+    background: #ffffff;
+    padding: 32px;
+    border-radius: 24px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    transform: scale(0.9);
+    animation: popInModal 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.modal-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    background-color: #fff3e0; /* Màu cam nhạt */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px auto; /* Căn giữa */
+}
+
+.modal-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #333;
+    margin: 0 0 8px 0;
+}
+
+.modal-message {
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    color: #666;
+    margin: 0 0 32px 0;
+    line-height: 1.5;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+}
+
+.btn-cancel-logout,
+.btn-confirm-logout {
+    flex: 1;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+/* Nút Hủy */
+.btn-cancel-logout {
+    background-color: #f3f4f6;
+    color: #4b5563;
+}
+
+.btn-cancel-logout:hover {
+    background-color: #e5e7eb;
+    transform: translateY(-2px);
+}
+
+/* Nút Đăng xuất */
+.btn-confirm-logout {
+    background: linear-gradient(135deg, #f57c00 0%, #e9a004 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(245, 124, 0, 0.3);
+}
+
+.btn-confirm-logout:hover {
+    box-shadow: 0 6px 16px rgba(245, 124, 0, 0.4);
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+/* Animations */
+@keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes popInModal {
+    from { 
+        opacity: 0; 
+        transform: scale(0.8) translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: scale(1) translateY(0); 
+    }
+}
