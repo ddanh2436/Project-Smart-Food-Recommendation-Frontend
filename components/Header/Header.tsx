@@ -35,14 +35,31 @@ const VNFlag = () => (
     <Image src="/assets/image/flags/vn.png" alt="VN Flag" width={20} height={20} className="flag-icon" />
 );
 
+const LogoutModalIcon = () => (
+  <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"></circle>
+    <path d="M16 16s-1.5-2-4-2-4 2-4 2"></path>
+    <line x1="9" y1="9" x2="9.01" y2="9"></line>
+    <line x1="15" y1="9" x2="15.01" y2="9"></line>
+  </svg>
+);
+
 const LogoutModal: React.FC<any> = ({ T, onConfirm, onCancel }) => (
     <div className="modal-overlay" onClick={onCancel}>
         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2>{T.auth.logoutConfirmTitle}</h2>
-            <p>{T.auth.logoutConfirmMsg}</p>
+            <div className="modal-icon-wrapper">
+                <LogoutModalIcon />
+            </div>
+            <h2 className="modal-title">{T.auth.logoutConfirmTitle}</h2>
+            <p className="modal-message">{T.auth.logoutConfirmMsg}</p>
+            
             <div className="modal-actions">
-                <button className="btn-confirm-logout" onClick={onConfirm}>{T.auth.logoutYes}</button>
-                <button className="btn-cancel-logout" onClick={onCancel}>{T.auth.logoutCancel}</button>
+                <button className="btn-cancel-logout" onClick={onCancel}>
+                    {T.auth.logoutCancel}
+                </button>
+                <button className="btn-confirm-logout" onClick={onConfirm}>
+                    {T.auth.logoutYes}
+                </button>
             </div>
         </div>
     </div>

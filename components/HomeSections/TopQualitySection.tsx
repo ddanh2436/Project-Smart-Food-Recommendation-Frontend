@@ -3,23 +3,57 @@
 import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link"; 
-import { getTopQualityRestaurants } from "@/app/lib/api"; // Import hàm vừa tạo
-import "./TopRatingSection.css"; // Dùng lại CSS cũ cho đồng bộ
+import { getTopQualityRestaurants } from "@/app/lib/api"; 
+import "./TopRatingSection.css"; 
 import { useAuth } from "@/app/contexts/AuthContext";
 
-// Các Icon (Giữ nguyên)
+// Các Icon
 const ChevronLeft = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>;
 const ChevronRight = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>;
 const ClockIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>;
 const MoneyIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>;
 const MapPinIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>;
+const XIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
+
+interface Restaurant {
+  _id: string;
+  tenQuan: string;
+  diaChi: string;
+  gioMoCua: string;
+  giaCa: string;
+  diemTrungBinh: number;
+  avatarUrl: string;
+  diemKhongGian: number;
+  diemViTri: number;
+  diemChatLuong: number;
+  diemPhucVu: number;
+  diemGiaCa: number;
+}
+
+  const getRatingLabel = (score: number) => {
+  if (!score) return "";
+  if (score >= 9.0) return "Xuất sắc";
+  if (score >= 8.0) return "Rất tốt"; // Hoặc "Giỏi"
+  if (score >= 7.0) return "Tốt";
+  if (score >= 5.0) return "T.Bình";
+  return "Kém";
+  };
 
 const TopQualitySection = () => {
   const { T } = useAuth();
-  const [restaurants, setRestaurants] = useState<any[]>([]);
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedRes, setSelectedRes] = useState<Restaurant | null>(null);
   
   const sliderRef = useRef<HTMLDivElement>(null);
+  const isDown = useRef(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
+  const isDragging = useRef(false);
+
+  useEffect(() => {
+    return () => { document.body.style.overflow = 'unset'; };
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,10 +76,19 @@ const TopQualitySection = () => {
     }
   };
 
+  // Drag logic
+  const onMouseDown = (e: React.MouseEvent) => { if (!sliderRef.current) return; isDown.current = true; isDragging.current = false; sliderRef.current.classList.add('active'); startX.current = e.pageX - sliderRef.current.offsetLeft; scrollLeft.current = sliderRef.current.scrollLeft; };
+  const onMouseLeave = () => { if (!sliderRef.current) return; isDown.current = false; sliderRef.current.classList.remove('active'); };
+  const onMouseUp = () => { if (!sliderRef.current) return; isDown.current = false; sliderRef.current.classList.remove('active'); setTimeout(() => { isDragging.current = false; }, 0); };
+  const onMouseMove = (e: React.MouseEvent) => { if (!isDown.current || !sliderRef.current) return; e.preventDefault(); const x = e.pageX - sliderRef.current.offsetLeft; const walk = (x - startX.current) * 2; sliderRef.current.scrollLeft = scrollLeft.current - walk; if (Math.abs(walk) > 5) isDragging.current = true; };
+
+  const handleCardClick = (res: Restaurant) => { if (!isDragging.current) openModal(res); };
+  const openModal = (res: Restaurant) => { setSelectedRes(res); document.body.style.overflow = 'hidden'; };
+  const closeModal = () => { setSelectedRes(null); document.body.style.overflow = 'unset'; };
+
   return (
     <section className="top-rating-section">
       <div className="container">
-        {/* === TIÊU ĐỀ RIÊNG BIỆT: Quality === */}
         <div className="section-header-row">
           <div>
             <h2 className="section-title">{T.home.qualityTitle}</h2>
@@ -56,13 +99,16 @@ const TopQualitySection = () => {
 
         <div className="slider-wrapper">
           <button className="nav-btn prev-btn" onClick={() => handleScrollButton('left')}><ChevronLeft /></button>
-          <div className="rating-slider" ref={sliderRef}>
+          <div 
+            className="rating-slider" 
+            ref={sliderRef}
+            onMouseDown={onMouseDown} onMouseLeave={onMouseLeave} onMouseUp={onMouseUp} onMouseMove={onMouseMove}
+          >
             {loading ? (
                [...Array(5)].map((_, i) => <div key={i} className="skeleton-card"></div>)
             ) : (
               restaurants.map((res) => (
-                <Link href={`/restaurants/${res._id}`} key={res._id} className="rating-card-link">
-                  <div className="rating-card">
+                <div key={res._id} className="rating-card clickable" onClick={() => handleCardClick(res)}>
                     <div className="card-image-wrapper">
                       <Image
                         src={res.avatarUrl || "/assets/image/pho.png"} 
@@ -70,12 +116,11 @@ const TopQualitySection = () => {
                         width={400} height={300}
                         className="card-image"
                         unoptimized={true}
+                        draggable={false}
                       />
-                      {/* Badge màu Cam Đỏ cho Chất lượng */}
                       <div className="rating-badge" style={{ backgroundColor: '#e17055' }}>
                         {res.diemChatLuong ? res.diemChatLuong.toFixed(1) : "N/A"}
                       </div>
-                      {/* Nhãn nhỏ đè lên ảnh để người dùng biết đây là điểm gì */}
                       <div style={{
                           position: 'absolute', bottom: 10, left: 10, 
                           background: 'rgba(225, 112, 85, 0.9)', color: 'white', 
@@ -93,15 +138,70 @@ const TopQualitySection = () => {
                       </div>
                     </div>
                   </div>
-                </Link>
               ))
             )}
           </div>
           <button className="nav-btn next-btn" onClick={() => handleScrollButton('right')}><ChevronRight /></button>
         </div>
+
+        {/* === MODAL PANEL === */}
+        {selectedRes && (
+          <div className="modal-overlay" onClick={closeModal}>
+            <div className="modal-panel" onClick={(e) => e.stopPropagation()}>
+              <button className="modal-close-btn" onClick={closeModal}><XIcon /></button>
+              
+              <div className="modal-layout">
+                <div className="modal-image-col">
+                  <Image src={selectedRes.avatarUrl || "/assets/image/pho.png"} alt={selectedRes.tenQuan} width={900} height={700} className="modal-main-img" unoptimized={true} />
+                  <div className="modal-rating-overlay" style={{background: 'rgba(225, 112, 85, 0.9)'}}>
+                    <span className="big-score">
+                        {selectedRes.diemChatLuong ? selectedRes.diemChatLuong.toFixed(1) : "N/A"}
+                    </span>
+                    <span className="score-label">{T.restaurantPage.labels.quality}</span>
+                  </div>
+                </div>
+
+                <div className="modal-info-col">
+                  <h2 className="modal-title">{selectedRes.tenQuan}</h2>
+                  <p className="modal-address"><MapPinIcon /> {selectedRes.diaChi}</p>
+                  
+                  <div className="modal-meta-grid">
+                    <div className="modal-meta-item"><ClockIcon /> {selectedRes.gioMoCua || "Đang cập nhật"}</div>
+                    <div className="modal-meta-item highlight"><MoneyIcon /> {selectedRes.giaCa || "Đang cập nhật"}</div>
+                  </div>
+
+                  <hr className="modal-divider" />
+
+                  <h4 className="detail-rating-heading">{T.restaurantPage.filterRating}</h4>
+                  <div className="rating-bars">
+                    <RatingRow label={T.restaurantPage.labels.quality} score={selectedRes.diemChatLuong} highlight={true} color="#e17055"/>
+                    <RatingRow label={T.restaurantPage.labels.space} score={selectedRes.diemKhongGian} />
+                    <RatingRow label={T.restaurantPage.labels.location} score={selectedRes.diemViTri} />
+                    <RatingRow label={T.restaurantPage.labels.service} score={selectedRes.diemPhucVu} />
+                    <RatingRow label={T.restaurantPage.labels.price} score={selectedRes.diemGiaCa} />
+                  </div>
+
+                  <Link href={`/restaurants/${selectedRes._id}`} className="btn-go-detail" onClick={(e) => { e.stopPropagation(); document.body.style.overflow = 'unset'; }}>
+                    {T.common.details}
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
 };
+
+const RatingRow = ({ label, score, highlight, color }: { label: string, score: number, highlight?: boolean, color?: string }) => (
+  <div className="rating-row">
+    <span className={`rating-label ${highlight ? 'font-bold' : ''}`} style={{color: highlight ? color : ''}}>{label}</span>
+    <div className="rating-bar-bg">
+        <div className="rating-bar-fill" style={{ width: `${(score || 0) * 10}%`, backgroundColor: highlight ? color : undefined }}></div>
+    </div>
+    <span className="rating-value">{score ? score.toFixed(1) : "-"}</span>
+  </div>
+);
 
 export default TopQualitySection;

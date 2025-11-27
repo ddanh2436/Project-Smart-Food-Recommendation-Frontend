@@ -126,6 +126,13 @@ const TopSpaceSection = () => {
                     <div className="rating-badge" style={{backgroundColor: '#00b894'}}>
                         {res.diemKhongGian ? res.diemKhongGian.toFixed(1) : "N/A"}
                     </div>
+                      <div style={{
+                          position: 'absolute', bottom: 10, left: 10, 
+                          background: 'rgba(0, 184, 148, 0.9)', color: 'white', 
+                          padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold'
+                      }}>
+                          Không gian
+                      </div>
                   </div>
                   <div className="card-content">
                     <h3 className="restaurant-name">{res.tenQuan}</h3>
@@ -163,7 +170,9 @@ const TopSpaceSection = () => {
                     <span className="big-score">
                         {selectedRes.diemKhongGian ? selectedRes.diemKhongGian.toFixed(1) : "N/A"}
                     </span>
-                    <span className="score-label">Không gian</span>
+                    <span className="score-label">
+                      {getRatingLabel(selectedRes.diemKhongGian)}
+                    </span>
                   </div>
                 </div>
 

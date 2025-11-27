@@ -354,9 +354,13 @@
   line-height: 1;
 }
 .score-label {
-  font-size: 0.8rem;
+  display: block;
+  font-size: 1rem;
   font-weight: 600;
   text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.9); /* Màu trắng hơi mờ */
+  margin-top: 5px;
 }
 
 .modal-info-col {
