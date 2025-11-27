@@ -88,6 +88,49 @@
   justify-content: center;
   font-size: 0.9rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  z-index: 2;
+  transition: background-color 0.3s ease;
+}
+
+.rating-badge.default {
+  background-color: #e9a004;
+  color: #000;
+  box-shadow: 0 0 10px rgba(233, 160, 4, 0.4);
+}
+
+/* 2. Chất lượng món ăn: Màu Đỏ cam (Ngon miệng) */
+.rating-badge.quality {
+  background-color: #ff6b6b;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(255, 107, 107, 0.4);
+}
+
+/* 3. Không gian: Màu Tím (Chill, sang trọng) */
+.rating-badge.space {
+  background-color: #a29bfe;
+  color: #000;
+  box-shadow: 0 0 10px rgba(162, 155, 254, 0.4);
+}
+
+/* 4. Vị trí: Màu Xanh dương (Bản đồ/Tin cậy) */
+.rating-badge.location {
+  background-color: #0984e3;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(9, 132, 227, 0.4);
+}
+
+/* 5. Phục vụ: Màu Xanh ngọc (Thân thiện) */
+.rating-badge.service {
+  background-color: #00cec9;
+  color: #000;
+  box-shadow: 0 0 10px rgba(0, 206, 201, 0.4);
+}
+
+/* 6. Giá cả: Màu Xanh lá (Tiền bạc/Tiết kiệm) */
+.rating-badge.price {
+  background-color: #00b894;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(0, 184, 148, 0.4);
 }
 
 .card-content {
