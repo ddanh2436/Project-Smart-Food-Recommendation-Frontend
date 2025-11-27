@@ -105,8 +105,6 @@ export default function RestaurantsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [showBackToTop, setShowBackToTop] = useState(false);
 
-
-  //const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>({
     lat: 10.748017595600404, 
     lon: 106.6767808260947
@@ -114,23 +112,28 @@ export default function RestaurantsPage() {
 
   const LIMIT = 32; 
 
-  // [2. FIX GPS] Tự động lấy GPS ngay khi vào trang
-  // useEffect(() => {
-  //   if ("geolocation" in navigator) {
-  //     navigator.geolocation.getCurrentPosition(
-  //       (position) => {
-  //         console.log("Frontend: Đã lấy được tọa độ", position.coords);
-  //         setUserLocation({
-  //           lat: position.coords.latitude,
-  //           lon: position.coords.longitude
-  //         });
-  //       },
-  //       (error) => {
-  //         console.warn("Frontend: Không thể lấy vị trí", error.message);
-  //       }
-  //     );
-  //   }
-  // }, []);
+  // Hàm xác định điểm số cần hiển thị dựa trên tiêu chí sort hiện tại
+  const getDisplayScore = (res: Restaurant) => {
+    switch (activeSort) {
+      case 'quality': return res.diemChatLuong; // Chất lượng món ăn
+      case 'space': return res.diemKhongGian;   // Không gian
+      case 'location': return res.diemViTri;    // Vị trí
+      case 'service': return res.diemPhucVu;    // Phục vụ
+      case 'price': return res.diemGiaCa;       // Giá cả
+      default: return res.diemTrungBinh;        // Mặc định hoặc Distance
+    }
+  };
+
+  const getCategoryClass = () => {
+    switch (activeSort) {
+      case 'quality': return 'quality';   // Màu Đỏ
+      case 'space': return 'space';       // Màu Tím
+      case 'location': return 'location'; // Màu Xanh dương
+      case 'service': return 'service';   // Màu Xanh ngọc
+      case 'price': return 'price';       // Màu Xanh lá
+      default: return 'default';          // Màu Cam (Mặc định)
+    }
+  };
 
   // [3. FIX SORT] Tự động chuyển 'asc' khi chọn Distance/Price
   const handleSelectSort = (sortId: string) => {
@@ -205,7 +208,7 @@ export default function RestaurantsPage() {
     };
 
     fetchData();
-  }, [searchParams, userLocation]); // Reload khi URL đổi HOẶC khi lấy được GPS
+  }, [searchParams, userLocation]);
 
   const updateURL = (newParams: any) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -349,22 +352,31 @@ export default function RestaurantsPage() {
           <>
             <div className="restaurants-grid">
               {restaurants.length > 0 ? (
-                restaurants.map((res) => (
-                  <div key={res._id} className="rating-card clickable" onClick={() => openModal(res)}>
-                    <div className="card-image-wrapper">
-                      <Image src={res.avatarUrl || "/assets/image/pho.png"} alt={res.tenQuan} width={400} height={300} className="card-image" unoptimized={true} />
-                      <div className="rating-badge">{res.diemTrungBinh ? res.diemTrungBinh.toFixed(1) : "N/A"}</div>
-                    </div>
-                    <div className="card-content">
-                      <h3 className="restaurant-name">{res.tenQuan}</h3>
-                      <p className="restaurant-address"><MapPinIcon /> {res.diaChi}</p>
-                      <div className="card-meta-row">
-                          <div className="meta-item price"><MoneyIcon /><span>{res.giaCa || "Đang cập nhật"}</span></div>
-                          <div className="meta-item hours"><ClockIcon /><span>{res.gioMoCua || "Đang cập nhật"}</span></div>
+                // SỬA: Thêm logic displayScore vào vòng lặp
+                restaurants.map((res) => {
+                  const displayScore = getDisplayScore(res);
+                  const categoryClass = getCategoryClass();
+                  return (
+                    <div key={res._id} className="rating-card clickable" onClick={() => openModal(res)}>
+                      <div className="card-image-wrapper">
+                        <Image src={res.avatarUrl || "/assets/image/pho.png"} alt={res.tenQuan} width={400} height={300} className="card-image" unoptimized={true} />
+                        
+                        {/* SỬA: Hiển thị displayScore */}
+                        <div className={`rating-badge ${categoryClass}`}>
+                          {displayScore ? displayScore.toFixed(1) : "N/A"}
+                          </div>
+                      </div>
+                      <div className="card-content">
+                        <h3 className="restaurant-name">{res.tenQuan}</h3>
+                        <p className="restaurant-address"><MapPinIcon /> {res.diaChi}</p>
+                        <div className="card-meta-row">
+                            <div className="meta-item price"><MoneyIcon /><span>{res.giaCa || "Đang cập nhật"}</span></div>
+                            <div className="meta-item hours"><ClockIcon /><span>{res.gioMoCua || "Đang cập nhật"}</span></div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="empty-state-container">
                 <div className="empty-state-icon"><SadSearchIcon /></div>
