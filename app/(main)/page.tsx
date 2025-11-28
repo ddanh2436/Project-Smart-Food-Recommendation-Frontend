@@ -10,8 +10,6 @@ import TopLocationSection from "@/components/HomeSections/TopLocationSection";
 export default function Home() {
   return (
     <main>
-      {/* Header đã được file layout.tsx xử lý,
-          không cần gọi ở đây nữa */}
       <HeroSection />
       <TopRatingSection />
       <TopSpaceSection />
@@ -19,7 +17,6 @@ export default function Home() {
       <TopServiceSection />
       <TopPriceSection />
       <TopLocationSection />
-      {/* ... các section khác ... */}
     </main>
   );
 }
