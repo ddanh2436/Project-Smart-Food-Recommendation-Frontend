@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef } from "react";
 import "./HeroSection.css";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import { searchRestaurantsByImage } from "@/app/lib/api"; // [MỚI]
+import Image from "next/image"; // [MỚI]
 
 // === DỮ LIỆU NGÔN NGỮ ===
 const langData = {
@@ -16,8 +18,8 @@ const langData = {
     or: "Or",
     headers: ["Top Dishes", "Must-Try Drinks", "Best Restaurants"],
     trendingLabel: "🔥 Trending:",
-    panelTitle: "Customize your search:", // [MỚI]
-    categories: { // [MỚI]
+    panelTitle: "Customize your search:", 
+    categories: { 
       region: "Region",
       dish: "Dish Type",
       space: "Ambience"
@@ -32,8 +34,8 @@ const langData = {
     or: "Hoặc",
     headers: ["Món ngon nổi bật", "Thức uống phải thử", "Nhà hàng tiêu biểu"],
     trendingLabel: "🔥 Xu hướng:",
-    panelTitle: "Tùy chọn tìm kiếm:", // [MỚI]
-    categories: { // [MỚI]
+    panelTitle: "Tùy chọn tìm kiếm:", 
+    categories: { 
       region: "Vùng miền",
       dish: "Loại món",
       space: "Không gian"
@@ -47,7 +49,6 @@ const topDrinks = ["Cà Phê Trứng", "Trà Sen Vàng", "Nước Mía Sầu Ri�
 const topRestaurants = ["Phở Thìn Lò Đúc", "Bếp Của Ngoại", "Cục Gạch Quán", "Pizza 4P's", "The Deck Saigon"];
 const TRENDING_KEYWORDS = ["Phở", "Bún đậu", "Bún bò", "Hủ tiếu", "Bánh mì"];
 
-// --- [MỚI] DỮ LIỆU CHO PANEL KHÁM PHÁ ---
 const DISCOVER_OPTIONS = {
   region: ["Miền Bắc", "Miền Trung", "Miền Nam"],
   dish: ["Bún Bò", "Phở", "Cơm Tấm", "Hủ Tiếu", "Lẩu"],
@@ -61,23 +62,29 @@ const SearchIcon = () => (
 const ArrowRightIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
 );
-// Icon đóng panel
 const CloseIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+);
+// [MỚI] Icon Camera
+const CameraIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
 );
 
 const HeroSection: React.FC = () => {
   const [searchValue, setSearchValue] = useState("");
-  // [MỚI] State quản lý panel và các tag đã chọn
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   
+  // [MỚI] State cho tìm kiếm hình ảnh
+  const [isUploading, setIsUploading] = useState(false);
+  const [imageResult, setImageResult] = useState<any>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const { currentLang } = useAuth();
   const T = langData[currentLang]; 
   const router = useRouter(); 
   const panelRef = useRef<HTMLDivElement>(null);
 
-  // [MỚI] Sync tags vào searchValue khi selectedTags thay đổi
   useEffect(() => {
     if (selectedTags.length > 0) {
       setSearchValue(selectedTags.join(", "));
@@ -97,29 +104,45 @@ const HeroSection: React.FC = () => {
     }
   };
 
-  // [MỚI] Xử lý khi click nút "Khám phá" -> Mở Panel
   const handleDiscoverClick = () => {
     setIsPanelOpen(!isPanelOpen);
   };
 
-  // [MỚI] Xử lý chọn/bỏ chọn tag
   const toggleTag = (tag: string) => {
     setSelectedTags(prev => {
       if (prev.includes(tag)) {
-        return prev.filter(t => t !== tag); // Bỏ chọn
+        return prev.filter(t => t !== tag); 
       } else {
-        return [...prev, tag]; // Chọn thêm
+        return [...prev, tag]; 
       }
     });
   };
 
-  // [MỚI] Click ra ngoài để đóng panel
+  // [MỚI] Xử lý khi chọn file ảnh
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const data = await searchRestaurantsByImage(file);
+      if (data && data.data) {
+        setImageResult(data); 
+      } else {
+        alert("Không nhận diện được món ăn hoặc không tìm thấy quán!");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Có lỗi xảy ra khi xử lý ảnh.");
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
-        // Chỉ đóng nếu click ra ngoài panel VÀ không phải click vào các tag/button liên quan
-        // (Ở đây ta xử lý đơn giản là click ra ngoài panel thì đóng)
-         // setIsPanelOpen(false); // Bạn có thể uncomment dòng này nếu muốn auto đóng
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -131,6 +154,9 @@ const HeroSection: React.FC = () => {
     <section className="hero-section">
       <div className="hero-bg-ken-burns"></div>
       <div className="hero-overlay-gradient"></div>
+
+      {/* [MỚI] Lớp mờ (Backdrop) khi Modal hiện ra */}
+      {imageResult && <div className="hero-blur-backdrop" onClick={() => setImageResult(null)}></div>}
 
       <div className="hero-main-wrapper">
         <div className="hero-content-left">
@@ -151,17 +177,30 @@ const HeroSection: React.FC = () => {
                   value={searchValue}
                   onChange={(e) => {
                     setSearchValue(e.target.value);
-                    // Nếu user tự gõ, có thể clear selectedTags để tránh conflict logic (tuỳ chọn)
                     if(selectedTags.length > 0 && e.target.value !== selectedTags.join(", ")) {
                         setSelectedTags([]);
                     }
                   }}
                   onKeyDown={handleKeyDown}
                 />
+                {/* [MỚI] Nút Camera */}
+                <button 
+                  className="camera-btn"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                >
+                   {isUploading ? "..." : <CameraIcon />}
+                </button>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  hidden 
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                />
               </div>
             </div>
 
-            {/* [MỚI] PANEL KHÁM PHÁ */}
             {isPanelOpen && (
               <div className="discovery-panel">
                 <div className="panel-header">
@@ -170,7 +209,6 @@ const HeroSection: React.FC = () => {
                 </div>
                 
                 <div className="panel-body">
-                  {/* Nhóm Vùng miền */}
                   <div className="panel-category-group">
                     <span className="category-label">{T.categories.region}</span>
                     <div className="category-tags">
@@ -186,7 +224,6 @@ const HeroSection: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Nhóm Món ăn */}
                   <div className="panel-category-group">
                     <span className="category-label">{T.categories.dish}</span>
                     <div className="category-tags">
@@ -202,7 +239,6 @@ const HeroSection: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Nhóm Không gian */}
                   <div className="panel-category-group">
                     <span className="category-label">{T.categories.space}</span>
                     <div className="category-tags">
@@ -219,14 +255,12 @@ const HeroSection: React.FC = () => {
                   </div>
                 </div>
                 
-                {/* Nút tìm kiếm trong panel */}
                 <button className="panel-search-btn" onClick={() => handleSearch()}>
                   Tìm kiếm ngay ({selectedTags.length})
                 </button>
               </div>
             )}
 
-            {/* Trending Keywords (Giữ nguyên) */}
             {!isPanelOpen && (
                 <div className="hero-trending">
                 <span className="trending-label">{T.trendingLabel}</span>
@@ -239,7 +273,6 @@ const HeroSection: React.FC = () => {
             )}
           </div>
 
-          {/* Nút Discover - Giờ sẽ mở Panel */}
           <div className="hero-actions">
             <span className="hero-divider">{T.or}</span>
             <button 
@@ -252,7 +285,6 @@ const HeroSection: React.FC = () => {
           </div>
         </div>
 
-        {/* CỘT PHẢI (Giữ nguyên) */}
         <div className="hero-featured-right">
           <div className="glass-panel">
             <div className="slider-viewport">
@@ -267,6 +299,40 @@ const HeroSection: React.FC = () => {
         </div>
 
       </div>
+
+      {/* [MỚI] MODAL KẾT QUẢ TÌM KIẾM ẢNH */}
+      {imageResult && (
+        <div className="image-result-modal">
+          <div className="modal-header">
+            <h3>Món ăn nhận diện: <span style={{color: '#e9a004'}}>{imageResult.detectedFood}</span></h3>
+            <button className="close-btn" onClick={() => setImageResult(null)}>✕</button>
+          </div>
+
+          <div className="modal-body">
+            {imageResult.data.length === 0 ? (
+               <p style={{textAlign: 'center', color: '#666', marginTop: 20}}>Không tìm thấy quán nào bán món này.</p>
+            ) : (
+              imageResult.data.map((res: any) => (
+                <div key={res._id} className="mini-res-card" onClick={() => router.push(`/restaurants/${res._id}`)}>
+                  <div className="res-img-box">
+                    <Image 
+                      src={res.avatarUrl || "/assets/image/pho.png"} 
+                      alt={res.tenQuan}
+                      width={60} height={60}
+                      unoptimized={true}
+                    />
+                  </div>
+                  <div className="res-info">
+                    <h4>{res.tenQuan}</h4>
+                    <p>⭐ {res.diemTrungBinh} • {res.giaCa}</p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
     </section>
   );
 };

@@ -29,7 +29,24 @@ export const getTopRatedRestaurants = async (limit: number = 10) => {
   }
 };
 
-// [CẬP NHẬT QUAN TRỌNG] Thêm tham số search vào cuối cùng
+// [MỚI] Hàm upload ảnh
+export const searchRestaurantsByImage = async (file: File) => {
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const res = await api.post('/restaurants/search-by-image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error searching by image:", error);
+    return null;
+  }
+};
+
 export const getAllRestaurants = async (
   page: number = 1, 
   limit: number = 32,
@@ -39,7 +56,7 @@ export const getAllRestaurants = async (
   openNow: string = 'false',
   userLat: string = '', 
   userLon: string = '',
-  search: string = '' // <--- Thêm tham số này để AI hoạt động
+  search: string = '' 
 ) => {
   try {
     const res = await api.get(`/restaurants?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&rating=${rating}&openNow=${openNow}&userLat=${userLat}&userLon=${userLon}&search=${encodeURIComponent(search)}`);
@@ -60,10 +77,8 @@ export const getRestaurantById = async (id: string) => {
   }
 };
 
-// Thêm hàm này vào file api.ts
 export const getTopSpaceRestaurants = async (limit: number = 10) => {
   try {
-    // Gọi API với tham số sortBy=diemKhongGian
     const response = await api.get(`/restaurants?limit=${limit}&sortBy=diemKhongGian&order=desc`);
     return response.data.data;
   } catch (error) {
@@ -72,10 +87,8 @@ export const getTopSpaceRestaurants = async (limit: number = 10) => {
   }
 };
 
-// Thêm vào cuối file
 export const getTopQualityRestaurants = async (limit: number = 10) => {
   try {
-    // sortBy=diemChatLuong: Sắp xếp theo điểm chất lượng món ăn
     const response = await api.get(`/restaurants?limit=${limit}&sortBy=diemChatLuong&order=desc`);
     return response.data.data;
   } catch (error) {
@@ -84,10 +97,8 @@ export const getTopQualityRestaurants = async (limit: number = 10) => {
   }
 };
 
-// Thêm vào cuối file
 export const getTopServiceRestaurants = async (limit: number = 10) => {
   try {
-    // sortBy=diemPhucVu: Sắp xếp theo điểm phục vụ
     const response = await api.get(`/restaurants?limit=${limit}&sortBy=diemPhucVu&order=desc`);
     return response.data.data;
   } catch (error) {
@@ -96,10 +107,8 @@ export const getTopServiceRestaurants = async (limit: number = 10) => {
   }
 };
 
-// Thêm vào cuối file
 export const getTopPriceRestaurants = async (limit: number = 10) => {
   try {
-    // sortBy=diemGiaCa: Sắp xếp theo điểm giá cả hợp lý
     const response = await api.get(`/restaurants?limit=${limit}&sortBy=diemGiaCa&order=desc`);
     return response.data.data;
   } catch (error) {
@@ -108,10 +117,8 @@ export const getTopPriceRestaurants = async (limit: number = 10) => {
   }
 };
 
-// Thêm vào cuối file
 export const getTopLocationRestaurants = async (limit: number = 10) => {
   try {
-    // sortBy=diemViTri: Sắp xếp theo điểm vị trí
     const response = await api.get(`/restaurants?limit=${limit}&sortBy=diemViTri&order=desc`);
     return response.data.data;
   } catch (error) {
