@@ -70,7 +70,7 @@ footer {
 }
 
 .hero-score {
-  background: #f97316; /* Cam (Orange-500) - Nổi bật nhưng ấm áp */
+  background: #e9a004; /* Cam (Orange-500) - Nổi bật nhưng ấm áp */
   color: #fff;
   font-weight: 800;
   font-size: 1.5rem;
@@ -96,7 +96,7 @@ footer {
 }
 
 .hero-address svg {
-  color: #f97316;
+  color: #e9a004;
 }
 
 /* --- CONTENT GRID --- */
@@ -127,7 +127,7 @@ footer {
   color: #fff;
   margin-bottom: 1.5rem;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid #f97316; /* Gạch chân màu cam */
+  border-bottom: 2px solid #e9a004; /* Gạch chân màu cam */
   display: inline-block;
 }
 
@@ -148,7 +148,7 @@ footer {
   align-items: center;
   justify-content: center;
   margin-right: 15px;
-  color: #f97316; /* Icon cam */
+  color: #e9a004; /* Icon cam */
 }
 
 .info-label {
@@ -192,7 +192,7 @@ footer {
 
 .r-score {
   font-weight: 700;
-  color: #f97316;
+  color: #e9a004;
 }
 
 .progress-bg {
@@ -205,7 +205,7 @@ footer {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #f97316, #fb923c); /* Gradient Cam */
+  background: linear-gradient(90deg, #e9a004, #facc15); /* Gradient Cam */
   border-radius: 4px;
 }
 
@@ -215,7 +215,7 @@ footer {
   justify-content: center; 
   gap: 10px; 
   width: 100%;
-  background: #f97316;
+  background: #e9a004;
   color: #fff;
   font-weight: 700;
   text-decoration: none;
@@ -254,7 +254,7 @@ footer {
 
 .review-card:hover {
   transform: translateY(-4px);
-  border-color: #f97316;
+  border-color: #e9a004;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
 }
 
@@ -297,7 +297,7 @@ footer {
   align-items: center;
   gap: 4px;
   background-color: rgba(249, 115, 22, 0.2); /* Cam trong suốt */
-  color: #fb923c; /* Cam sáng */
+  color: #e9a004; /* Cam sáng */
   padding: 4px 10px;
   border-radius: 6px;
   font-size: 0.85rem;
@@ -327,7 +327,8 @@ footer {
   white-space: pre-line;
   
   display: -webkit-box;
-  -webkit-line-clamp: 4; /* Hiển thị tối đa 4 dòng */
+  -webkit-line-clamp: 5; /* Hiển thị tối đa 4 dòng */
+  line-clamp: 5;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -336,7 +337,7 @@ footer {
 .btn-read-more {
   background: none;
   border: none;
-  color: #f97316; /* Màu cam */
+  color: #e9a004; /* Màu cam */
   font-weight: 700;
   font-size: 0.9rem;
   cursor: pointer;
@@ -348,7 +349,7 @@ footer {
 }
 
 .btn-read-more:hover {
-  color: #fb923c;
+  color: #e9a004;
   text-decoration: underline;
 }
 
@@ -368,7 +369,7 @@ footer {
   align-items: center;
   justify-content: center;
   background: #18181b;
-  color: #f97316;
+  color: #e9a004;
   font-size: 1.5rem;
 }
 

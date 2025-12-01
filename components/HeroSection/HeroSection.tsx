@@ -4,8 +4,8 @@ import React, { useState, useEffect, useRef } from "react";
 import "./HeroSection.css";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import { searchRestaurantsByImage } from "@/app/lib/api"; // [MỚI]
-import Image from "next/image"; // [MỚI]
+import { searchRestaurantsByImage } from "@/app/lib/api"; 
+import Image from "next/image"; 
 
 // === DỮ LIỆU NGÔN NGỮ ===
 const langData = {
@@ -65,7 +65,7 @@ const ArrowRightIcon = () => (
 const CloseIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
 );
-// [MỚI] Icon Camera
+// Icon Camera
 const CameraIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
 );
@@ -75,7 +75,7 @@ const HeroSection: React.FC = () => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   
-  // [MỚI] State cho tìm kiếm hình ảnh
+  // State cho tìm kiếm hình ảnh
   const [isUploading, setIsUploading] = useState(false);
   const [imageResult, setImageResult] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -118,7 +118,7 @@ const HeroSection: React.FC = () => {
     });
   };
 
-  // [MỚI] Xử lý khi chọn file ảnh
+  // Xử lý khi chọn file ảnh
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -143,6 +143,7 @@ const HeroSection: React.FC = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
+        // Có thể thêm logic đóng panel nếu muốn
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -155,7 +156,7 @@ const HeroSection: React.FC = () => {
       <div className="hero-bg-ken-burns"></div>
       <div className="hero-overlay-gradient"></div>
 
-      {/* [MỚI] Lớp mờ (Backdrop) khi Modal hiện ra */}
+      {/* Lớp mờ (Backdrop) khi Modal hiện ra */}
       {imageResult && <div className="hero-blur-backdrop" onClick={() => setImageResult(null)}></div>}
 
       <div className="hero-main-wrapper">
@@ -183,13 +184,13 @@ const HeroSection: React.FC = () => {
                   }}
                   onKeyDown={handleKeyDown}
                 />
-                {/* [MỚI] Nút Camera */}
+                {/* [ĐÃ SỬA] Thêm class 'camera-ai-btn' vào đây để nhận CSS hiệu ứng */}
                 <button 
-                  className="camera-btn"
+                  className="camera-btn camera-ai-btn"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploading}
                 >
-                   {isUploading ? "..." : <CameraIcon />}
+                    {isUploading ? "..." : <CameraIcon />}
                 </button>
                 <input 
                   type="file" 
@@ -300,7 +301,7 @@ const HeroSection: React.FC = () => {
 
       </div>
 
-      {/* [MỚI] MODAL KẾT QUẢ TÌM KIẾM ẢNH */}
+      {/* MODAL KẾT QUẢ TÌM KIẾM ẢNH */}
       {imageResult && (
         <div className="image-result-modal">
           <div className="modal-header">
