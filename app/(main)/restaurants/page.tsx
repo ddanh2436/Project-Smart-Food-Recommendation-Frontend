@@ -105,12 +105,30 @@ export default function RestaurantsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [showBackToTop, setShowBackToTop] = useState(false);
 
+   //const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>({
     lat: 10.748017595600404, 
     lon: 106.6767808260947
   });
 
   const LIMIT = 32; 
+
+  // useEffect(() => {
+  //   if ("geolocation" in navigator) {
+  //     navigator.geolocation.getCurrentPosition(
+  //       (position) => {
+  //         console.log("Frontend: Đã lấy được tọa độ", position.coords);
+  //         setUserLocation({
+  //           lat: position.coords.latitude,
+  //           lon: position.coords.longitude
+  //         });
+  //       },
+  //       (error) => {
+  //         console.warn("Frontend: Không thể lấy vị trí", error.message);
+  //       }
+  //     );
+  //   }
+  // }, []);
 
   // Hàm xác định điểm số cần hiển thị dựa trên tiêu chí sort hiện tại
   const getDisplayScore = (res: Restaurant) => {

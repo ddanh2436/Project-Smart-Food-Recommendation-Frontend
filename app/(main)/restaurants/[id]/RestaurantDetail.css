@@ -1,12 +1,11 @@
-/* app/(main)/restaurants/[id]/RestaurantDetail.css */
-
 @import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Nunito:wght@400;600;700&display=swap");
 
+/* --- GLOBAL SETTINGS (MODERN SOFT DARK THEME) --- */
 .detail-page-wrapper {
-  background-color: #050505;
+  background-color: #18181b; /* Nền Xám Than (Zinc-950) - Dễ chịu hơn đen tuyền */
   min-height: 100vh;
-  color: #fff;
-  padding-top: 80px; /* Tránh header */
+  color: #e4e4e7; /* Chữ trắng xám (Zinc-200) - Chống lóa */
+  padding-top: 80px;
   padding-bottom: 4rem;
   font-family: "Nunito", sans-serif;
 }
@@ -17,6 +16,12 @@
   padding: 0 20px;
 }
 
+/* Ẩn Footer */
+body:has(.detail-page-wrapper) .footer-wrapper,
+footer {
+  display: none !important;
+}
+
 /* --- HERO BANNER --- */
 .detail-hero {
   position: relative;
@@ -25,13 +30,15 @@
   border-radius: 20px;
   overflow: hidden;
   margin-bottom: 3rem;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
 }
 
 .detail-hero-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* Làm tối ảnh một chút để chữ nổi bật hơn */
+  filter: brightness(0.85);
 }
 
 .hero-overlay {
@@ -39,8 +46,9 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 60%;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+  height: 70%;
+  /* Gradient mềm mại hơn */
+  background: linear-gradient(to top, #18181b 10%, rgba(24, 24, 27, 0.8) 50%, transparent);
   display: flex;
   align-items: flex-end;
   padding: 40px;
@@ -49,10 +57,10 @@
 .hero-content h1 {
   font-family: "Cormorant Garamond", serif;
   font-size: 4rem;
-  color: #e9a004;
-  margin: 0 0 10px 0;
-  line-height: 1;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  color: #fff; /* Tiêu đề màu trắng để dễ đọc nhất */
+  margin: 0 0 15px 0;
+  line-height: 1.1;
+  text-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
 }
 
 .hero-rating {
@@ -62,42 +70,53 @@
 }
 
 .hero-score {
-  background: #e9a004;
-  color: #000;
+  background: #f97316; /* Cam (Orange-500) - Nổi bật nhưng ấm áp */
+  color: #fff;
   font-weight: 800;
   font-size: 1.5rem;
   width: 60px;
   height: 60px;
-  border-radius: 50%;
+  border-radius: 16px; /* Bo góc vuông mềm mại hiện đại hơn tròn */
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 15px rgba(233, 160, 4, 0.4);
+  box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
 }
 
 .hero-address {
-  font-size: 1.2rem;
-  color: #ddd;
+  font-size: 1.15rem;
+  color: #d4d4d8; /* Zinc-300 */
   display: flex;
   align-items: center;
   gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px 16px;
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
 }
+
 .hero-address svg {
-  color: #e9a004;
+  color: #f97316;
 }
 
 /* --- CONTENT GRID --- */
 .detail-content {
   display: grid;
-  grid-template-columns: 2fr 1fr; /* Cột trái lớn gấp đôi cột phải */
-  gap: 4rem;
+  grid-template-columns: 2fr 1fr;
+  gap: 3rem;
+  margin-bottom: 3rem;
+}
+
+/* Card Style Chung (Màu nền thẻ sáng hơn nền trang) */
+.info-box, .rating-box, .review-card {
+  background: #27272a; /* Zinc-800 */
+  border: 1px solid #3f3f46; /* Viền rất nhẹ */
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
 }
 
 /* Left Column */
 .info-box {
-  background: #121212;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
   padding: 2rem;
   margin-bottom: 2rem;
 }
@@ -107,131 +126,265 @@
   font-size: 2rem;
   color: #fff;
   margin-bottom: 1.5rem;
-  border-bottom: 1px dashed rgba(255, 255, 255, 0.15);
   padding-bottom: 0.5rem;
+  border-bottom: 2px solid #f97316; /* Gạch chân màu cam */
+  display: inline-block;
 }
 
-/* Info Rows (Giá, Giờ, Tọa độ) */
 .info-row {
   display: flex;
   align-items: center;
-  margin-bottom: 1.2rem;
+  margin-bottom: 1.5rem;
   font-size: 1.1rem;
-  color: #ccc;
+  color: #e4e4e7;
 }
+
 .info-icon {
-  width: 40px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  background: rgba(249, 115, 22, 0.15); /* Cam nhạt trong suốt */
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-right: 15px;
-  color: #e9a004;
+  color: #f97316; /* Icon cam */
 }
+
 .info-label {
   font-weight: 700;
-  color: #fff;
-  margin-right: 10px;
+  color: #a1a1aa; /* Zinc-400 - Màu nhãn nhạt hơn */
+  margin-right: 8px;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 /* Right Column (Rating Bars) */
 .rating-box {
-  background: #1a1a1a;
-  border: 1px solid #e9a004;
-  border-radius: 16px;
   padding: 2rem;
   position: sticky;
-  top: 100px; /* Dính khi cuộn */
+  top: 100px;
 }
 
 .rating-box h3 {
   text-align: center;
   font-family: "Cormorant Garamond", serif;
-  font-size: 2rem;
-  margin-bottom: 2rem;
-  color: #e9a004;
+  font-size: 1.75rem;
+  margin-bottom: 1.5rem;
+  color: #fff;
 }
 
 .rating-bar-item {
-  margin-bottom: 1.2rem;
+  margin-bottom: 1.25rem;
 }
+
 .rating-bar-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
 }
+
 .r-label {
   font-size: 1rem;
-  color: #ccc;
+  color: #d4d4d8;
 }
+
 .r-score {
   font-weight: 700;
-  color: #e9a004;
+  color: #f97316;
 }
 
 .progress-bg {
   width: 100%;
   height: 8px;
-  background: #333;
+  background: #3f3f46; /* Nền thanh progress tối */
   border-radius: 4px;
   overflow: hidden;
 }
+
 .progress-fill {
   height: 100%;
-  background: #e9a004;
+  background: linear-gradient(90deg, #f97316, #fb923c); /* Gradient Cam */
   border-radius: 4px;
 }
 
 .btn-foody {
-  /* --- CẬP NHẬT QUAN TRỌNG --- */
-  display: flex; /* Chuyển sang Flexbox để căn ngang */
-  align-items: center; /* Căn giữa theo chiều dọc */
-  justify-content: center; /* Căn giữa theo chiều ngang */
-  gap: 10px; /* Khoảng cách giữa chữ và icon */
-  /* --------------------------- */
-
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  gap: 10px; 
   width: 100%;
-  background: #e9a004;
-  color: #000;
-  font-weight: 800;
+  background: #f97316;
+  color: #fff;
+  font-weight: 700;
   text-decoration: none;
-  padding: 15px;
-  border-radius: 8px;
+  padding: 16px;
+  border-radius: 12px;
   margin-top: 2rem;
-  transition: transform 0.2s;
+  transition: all 0.2s;
+  font-size: 1.1rem;
 }
+
 .btn-foody:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 5px 20px rgba(233, 160, 4, 0.3);
+  background: #ea580c; /* Cam đậm hơn khi hover */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.4);
 }
+
+/* --- REVIEWS SECTION --- */
+.reviews-container {
+  margin-top: 4rem;
+}
+
+/* Grid Layout cho Review */
+.reviews-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.review-card {
+  padding: 1.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Đảm bảo các card bằng nhau */
+}
+
+.review-card:hover {
+  transform: translateY(-4px);
+  border-color: #f97316;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #3f3f46;
+}
+
+/* [AVATAR FACEBOOK STYLE] */
+.review-avatar {
+  background: #3a3b3c; /* Màu xám đặc trưng của Facebook Dark Mode */
+  color: #b0b3b8; /* Màu icon xám nhạt */
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.review-meta {
+  flex: 1;
+}
+
+.review-author {
+  display: block;
+  font-weight: 700;
+  color: #fff;
+  font-size: 1.05rem;
+  margin-bottom: 4px;
+}
+
+.review-score-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: rgba(249, 115, 22, 0.2); /* Cam trong suốt */
+  color: #fb923c; /* Cam sáng */
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.review-body {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* [LOGIC HIỂN THỊ TEXT] */
+/* 1. Mặc định hiển thị full (cho đoạn ngắn) */
+.review-text-full {
+  color: #d4d4d8; /* Màu chữ dễ đọc */
+  line-height: 1.6;
+  font-size: 1rem;
+  white-space: pre-line;
+}
+
+/* 2. Khi bị thu gọn: Cắt dòng và thêm dấu ... */
+.review-text-truncated {
+  color: #d4d4d8;
+  line-height: 1.6;
+  font-size: 1rem;
+  white-space: pre-line;
+  
+  display: -webkit-box;
+  -webkit-line-clamp: 4; /* Hiển thị tối đa 4 dòng */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 3. Nút Xem thêm/Thu gọn */
+.btn-read-more {
+  background: none;
+  border: none;
+  color: #f97316; /* Màu cam */
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  text-align: left;
+  padding: 0;
+  width: fit-content;
+  transition: color 0.2s;
+}
+
+.btn-read-more:hover {
+  color: #fb923c;
+  text-decoration: underline;
+}
+
+.no-reviews {
+  text-align: center;
+  padding: 3rem;
+  background: #27272a;
+  border-radius: 16px;
+  color: #a1a1aa;
+  grid-column: 1 / -1;
+}
+
 /* Loading */
 .loading-screen {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #050505;
-  color: #e9a004;
+  background: #18181b;
+  color: #f97316;
   font-size: 1.5rem;
 }
 
+/* Responsive */
 @media (max-width: 768px) {
   .detail-hero {
-    height: 300px;
+    height: 350px;
   }
   .hero-content h1 {
     font-size: 2.5rem;
   }
   .detail-content {
     grid-template-columns: 1fr;
+    gap: 2rem;
   }
   .rating-box {
     position: static;
   }
-}
-
-body:has(.detail-page-wrapper) .footer-wrapper {
-  display: none !important;
 }
