@@ -6,6 +6,12 @@ import Image from "next/image";
 import { getRestaurantById, getReviewsByUrl } from "@/app/lib/api";
 import "./RestaurantDetail.css";
 
+// [IMPORT] Component hiển thị nhãn cảm xúc từng bình luận
+import SentimentBadge from "@/components/SentimentBadge/SentimentBadge"; 
+
+// [IMPORT MỚI] Component hiển thị biểu đồ tổng quan đánh giá
+import ReviewOverview from "@/components/ReviewOverview/ReviewOverview";
+
 // --- ICONS ---
 const MapIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>;
 const ClockIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>;
@@ -45,6 +51,10 @@ interface Review {
   urlGoc: string;
   diemReview: number;
   noiDung: string;
+  
+  // Trường dữ liệu AI trả về
+  aiSentimentLabel?: string; 
+  aiSentimentScore?: number;
 }
 
 export default function RestaurantDetailPage() {
@@ -160,9 +170,11 @@ export default function RestaurantDetailPage() {
             Đánh giá từ cộng đồng ({reviews.length})
           </h3>
 
+          {/* [THÊM MỚI] Hiển thị biểu đồ đánh giá tổng quan */}
+          <ReviewOverview reviews={reviews} />
+
           <div className="reviews-list">
             {reviews.length > 0 ? (
-              // [UPDATE] Sử dụng ReviewItem thay vì render trực tiếp
               reviews.map((review, index) => (
                 <ReviewItem key={index} review={review} />
               ))
@@ -195,11 +207,9 @@ const RatingBar = ({ label, score }: { label: string, score: number }) => (
   </div>
 );
 
-// [MỚI] Component xử lý việc Xem thêm / Thu gọn
 const ReviewItem = ({ review }: { review: Review }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   
-  // Ngưỡng ký tự để cắt bớt. Ví dụ: dài hơn 150 ký tự thì cắt.
   const CHARACTER_LIMIT = 150;
   const isLongText = review.noiDung && review.noiDung.length > CHARACTER_LIMIT;
 
@@ -211,18 +221,26 @@ const ReviewItem = ({ review }: { review: Review }) => {
         </div>
         <div className="review-meta">
           <span className="review-author">Thực khách Foody</span>
-          <div className="review-score-badge">
-            <span>{review.diemReview}</span> <StarIcon filled />
+          
+          <div className="review-rating-row" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+             <div className="review-score-badge">
+                <span>{review.diemReview}</span> <StarIcon filled />
+             </div>
+
+             {/* Hiển thị Badge Cảm Xúc từ AI */}
+             <SentimentBadge 
+                label={review.aiSentimentLabel || ''} 
+                score={review.aiSentimentScore} 
+             />
           </div>
+
         </div>
       </div>
       <div className="review-body">
-        {/* Logic hiển thị text */}
         <p className={!isExpanded && isLongText ? "review-text-truncated" : "review-text-full"}>
           "{review.noiDung}"
         </p>
         
-        {/* Nút Xem thêm / Thu gọn */}
         {isLongText && (
           <button 
             className="btn-read-more" 
