@@ -1,0 +1,272 @@
+/* CONTAINER */
+.review-overview-card {
+  position: relative;
+  background: rgba(20, 20, 20, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 24px;
+  margin-bottom: 32px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  color: #fff;
+}
+
+.card-bg-glow {
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  width: 60%;
+  height: 60%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+  filter: blur(50px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* HEADER */
+.overview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 2;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 16px;
+}
+
+.overview-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  background: linear-gradient(90deg, #fff, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.ai-badge {
+  background: rgba(16, 185, 129, 0.1);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  font-size: 10px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
+  animation: pulseBadge 2s infinite;
+}
+
+@keyframes pulseBadge {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+  70% { box-shadow: 0 0 0 5px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* DASHBOARD GRID */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 32px;
+  position: relative;
+  z-index: 2;
+}
+
+/* CHART COLUMN */
+.chart-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.circular-chart {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.circle-svg {
+  transform: rotate(-90deg);
+  width: 100%;
+  height: 100%;
+}
+
+.circle-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.05);
+  stroke-width: 8;
+}
+
+.circle-progress {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1.5s ease-out;
+}
+
+/* [UPDATED] Tăng cường độ Glow cho vòng tròn */
+.circle-progress.pos { 
+  stroke: #10b981; 
+  filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.8)); 
+}
+.circle-progress.neu { 
+  stroke: #f59e0b; 
+  filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.8)); 
+}
+.circle-progress.neg { 
+  stroke: #ef4444; 
+  filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.8)); 
+}
+
+.circle-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.big-percent {
+  display: block;
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+.label-text {
+  font-size: 10px;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.dominant-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.dominant-badge .emoji { font-size: 18px; }
+.dominant-badge .text { font-size: 12px; font-weight: 700; }
+.dominant-badge.pos .text { color: #34d399; }
+.dominant-badge.neu .text { color: #fbbf24; }
+.dominant-badge.neg .text { color: #f87171; }
+
+
+/* DETAILS COLUMN */
+.details-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+}
+
+.summary-bubble {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 12px 16px;
+  border-radius: 12px;
+  border-left: 3px solid #6366f1;
+}
+
+.summary-bubble p {
+  margin: 0;
+  font-size: 14px;
+  font-style: italic;
+  color: #e2e8f0;
+  line-height: 1.5;
+}
+
+.sentiment-bars-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bar-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.b-label { color: #94a3b8; }
+.b-val.pos { color: #34d399; }
+.b-val.neu { color: #fbbf24; }
+.b-val.neg { color: #f87171; }
+
+.track {
+  height: 8px; /* Dày hơn xíu cho dễ nhìn shimmer */
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.fill {
+  height: 100%;
+  border-radius: 8px;
+  position: relative; /* Quan trọng */
+  transition: width 1s ease-out;
+  overflow: hidden; /* Cắt phần sáng bị lòi ra ngoài */
+}
+
+.fill.pos { background: linear-gradient(90deg, #059669, #34d399); }
+.fill.neu { background: linear-gradient(90deg, #d97706, #fbbf24); }
+.fill.neg { background: linear-gradient(90deg, #b91c1c, #ef4444); }
+
+/* [MỚI] Hiệu ứng Shimmer (Lấp lánh) */
+.shimmer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 100%; /* Chiều rộng luồng sáng */
+  
+  /* Gradient trắng mạnh hơn: Tăng độ mờ từ 0.4 lên 0.7 */
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.7) 40%, /* Điểm sáng nhất */
+    rgba(255, 255, 255, 0) 100%
+  );
+  
+  /* Nghiêng và đẩy ra ngoài khung hình để bắt đầu chạy */
+  transform: skewX(-25deg) translateX(-150%);
+  
+  /* Chạy vô tận, mỗi vòng 1.5 giây (nhanh hơn cũ) */
+  animation: shimmerMove 1.5s infinite ease-in-out;
+  
+  z-index: 10; /* Đảm bảo nằm đè lên màu nền */
+  pointer-events: none;
+}
+
+@keyframes shimmerMove {
+  0% { transform: skewX(-20deg) translateX(-150%); }
+  100% { transform: skewX(-20deg) translateX(150%); }
+}
+
+@media (max-width: 600px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .chart-column {
+    flex-direction: row;
+    justify-content: space-around;
+  }
+}

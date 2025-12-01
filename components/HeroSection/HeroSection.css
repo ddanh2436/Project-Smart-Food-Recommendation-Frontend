@@ -327,7 +327,7 @@
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  justify_content: center;
+  justify-content: center;
   border-radius: 50%; /* Làm tròn nút nếu chưa tròn */
   padding: 8px; /* Tăng vùng tương tác */
 }
