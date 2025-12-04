@@ -3,13 +3,15 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
-import { getRestaurantById, getReviewsByUrl } from "@/app/lib/api";
+// [UPDATE] Import thêm hàm createNewReview
+import { getRestaurantById, getReviewsByUrl, createNewReview } from "@/app/lib/api";
 import "./RestaurantDetail.css";
+import toast from "react-hot-toast";
 
 // [IMPORT] Component hiển thị nhãn cảm xúc từng bình luận
 import SentimentBadge from "@/components/SentimentBadge/SentimentBadge"; 
 
-// [IMPORT MỚI] Component hiển thị biểu đồ tổng quan đánh giá
+// [IMPORT] Component hiển thị biểu đồ tổng quan đánh giá
 import ReviewOverview from "@/components/ReviewOverview/ReviewOverview";
 
 // --- ICONS ---
@@ -26,6 +28,26 @@ const UserIcon = () => (
     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
   </svg>
 );
+
+// [THÊM MỚI] Component chọn sao (Star Rating Input)
+const StarRatingInput = ({ rating, setRating }: { rating: number, setRating: (r: number) => void }) => {
+  return (
+    <div className="star-input-wrapper">
+      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
+        <button
+          key={star}
+          type="button"
+          className={`star-btn ${star <= rating ? "active" : ""}`}
+          onClick={() => setRating(star)}
+          title={`${star} điểm`}
+        >
+          ★
+        </button>
+      ))}
+      <span className="rating-text-value">{rating}/10</span>
+    </div>
+  );
+};
 
 interface RestaurantDetail {
   _id: string;
@@ -51,8 +73,6 @@ interface Review {
   urlGoc: string;
   diemReview: number;
   noiDung: string;
-  
-  // Trường dữ liệu AI trả về
   aiSentimentLabel?: string; 
   aiSentimentScore?: number;
 }
@@ -62,6 +82,11 @@ export default function RestaurantDetailPage() {
   const [res, setRes] = useState<RestaurantDetail | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // [THÊM STATE CHO FORM BÌNH LUẬN]
+  const [userComment, setUserComment] = useState("");
+  const [userRating, setUserRating] = useState(10);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -85,6 +110,44 @@ export default function RestaurantDetailPage() {
 
     fetchData();
   }, [id]);
+
+  // [THÊM HÀM XỬ LÝ GỬI BÌNH LUẬN]
+  const handleSubmitReview = async () => {
+    if (!userComment.trim()) {
+      toast.error("Vui lòng nhập nội dung bình luận!");
+      return;
+    }
+    if (!res || !res.urlGoc) {
+      toast.error("Dữ liệu nhà hàng bị thiếu URL gốc, không thể lưu bình luận.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // 1. Gọi API tạo review (Hàm này đã được thêm vào api.ts ở bước trước)
+      const newReview = await createNewReview({
+        tenQuan: res.tenQuan,
+        urlGoc: res.urlGoc,
+        diemReview: userRating,
+        noiDung: userComment,
+      });
+
+      // 2. Cập nhật UI ngay lập tức: Thêm review mới vào đầu danh sách
+      // Backend trả về review đã có kết quả AI phân tích (aiSentimentLabel)
+      setReviews([newReview, ...reviews]);
+
+      // 3. Reset form
+      setUserComment("");
+      setUserRating(10);
+      toast.success("Cảm ơn bạn! Bình luận đã được ghi nhận.");
+      
+    } catch (error) {
+      console.error(error);
+      toast.error("Có lỗi xảy ra khi gửi bình luận. Vui lòng thử lại.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (loading) return <div className="loading-screen">Đang tải dữ liệu nhà hàng...</div>;
   if (!res) return <div className="loading-screen">Không tìm thấy nhà hàng này.</div>;
@@ -170,7 +233,37 @@ export default function RestaurantDetailPage() {
             Đánh giá từ cộng đồng ({reviews.length})
           </h3>
 
-          {/* [THÊM MỚI] Hiển thị biểu đồ đánh giá tổng quan */}
+          {/* [THÊM MỚI] KHU VỰC NHẬP BÌNH LUẬN */}
+          <div className="write-review-box">
+            <h4>Viết đánh giá của bạn</h4>
+            <div className="review-inputs">
+              <div className="rating-select-row">
+                <span>Chấm điểm:</span>
+                <StarRatingInput rating={userRating} setRating={setUserRating} />
+              </div>
+              
+              <textarea
+                className="review-textarea"
+                placeholder="Chia sẻ trải nghiệm của bạn về món ăn, không gian, phục vụ..."
+                rows={4}
+                value={userComment}
+                onChange={(e) => setUserComment(e.target.value)}
+              />
+              
+              <div className="review-actions">
+                <button 
+                  className="btn-submit-review" 
+                  onClick={handleSubmitReview}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Đang gửi..." : "Gửi đánh giá"}
+                </button>
+              </div>
+            </div>
+          </div>
+          {/* ---------------------------------- */}
+
+          {/* Hiển thị biểu đồ đánh giá tổng quan */}
           <ReviewOverview reviews={reviews} />
 
           <div className="reviews-list">

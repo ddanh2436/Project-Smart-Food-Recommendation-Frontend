@@ -160,4 +160,19 @@ export async function getReviewsByUrl(urlGoc: string) {
   }
   return res.json();
 }
+
+export const createNewReview = async (reviewData: {
+  tenQuan: string;
+  urlGoc: string;
+  diemReview: number;
+  noiDung: string;
+}) => {
+  try {
+    const res = await api.post("/reviews", reviewData);
+    return res.data;
+  } catch (error) {
+    console.error("Error creating review:", error);
+    throw error;
+  }
+};
 export default api;
