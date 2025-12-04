@@ -68,8 +68,6 @@ const LogoutModal: React.FC<any> = ({ T, onConfirm, onCancel }) => (
 const navItems = [
     { key: "home", href: "/" },
     { key: "restaurants", href: "/restaurants" },
-    { key: "nearMe", href: "/near-me" },
-    { key: "foodsDrinks", href: "/foods-and-drinks"  },
     { key: "aboutUs", href: "/about-us" },
 ];
 
