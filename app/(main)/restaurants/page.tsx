@@ -7,8 +7,15 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getAllRestaurants } from "@/app/lib/api";
 import "./RestaurantsPage.css";
+import dynamic from "next/dynamic";
 
-// ... (Giữ nguyên toàn bộ phần Icons và Interface Restaurant) ...
+// Import component bản đồ (Dynamic để tránh lỗi SSR)
+const RoutingMap = dynamic(() => import("@/components/RoutingMap/RoutingMap"), {
+  ssr: false,
+  loading: () => <div style={{ padding: '20px', textAlign: 'center', background: '#f5f5f5', borderRadius: '8px' }}>Đang tải bản đồ chỉ đường...</div>,
+});
+
+// ... (Giữ nguyên các Icons) ...
 const FilterIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>;
 const CheckIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>;
 const ChevronDownIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="chevron-icon"><path d="M6 9l6 6 6-6"/></svg>;
@@ -44,6 +51,8 @@ interface Restaurant {
   diemPhucVu: number;
   diemGiaCa: number;
   urlGoc: string;
+  lat?: number; // Đã thêm
+  lon?: number; // Đã thêm
 }
 
 const getRatingLabel = (score: number) => {
@@ -104,56 +113,40 @@ export default function RestaurantsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [showMap, setShowMap] = useState(false); // State bật tắt map
 
-   //const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
+  // GIỮ NGUYÊN GPS CỨNG NHƯ YÊU CẦU
+  //const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>({
     lat: 10.748017595600404, 
     lon: 106.6767808260947
   });
 
   const LIMIT = 32; 
+  // useEffect(() => { //   if ("geolocation" in navigator) { //     navigator.geolocation.getCurrentPosition( //       (position) => { //         console.log("Frontend: Đã lấy được tọa độ", position.coords); //         setUserLocation({ //           lat: position.coords.latitude, //           lon: position.coords.longitude //         }); //       }, //       (error) => { //         console.warn("Frontend: Không thể lấy vị trí", error.message); //       } //     ); //   } // }, []);
 
-  // useEffect(() => {
-  //   if ("geolocation" in navigator) {
-  //     navigator.geolocation.getCurrentPosition(
-  //       (position) => {
-  //         console.log("Frontend: Đã lấy được tọa độ", position.coords);
-  //         setUserLocation({
-  //           lat: position.coords.latitude,
-  //           lon: position.coords.longitude
-  //         });
-  //       },
-  //       (error) => {
-  //         console.warn("Frontend: Không thể lấy vị trí", error.message);
-  //       }
-  //     );
-  //   }
-  // }, []);
-
-  // Hàm xác định điểm số cần hiển thị dựa trên tiêu chí sort hiện tại
   const getDisplayScore = (res: Restaurant) => {
     switch (activeSort) {
-      case 'quality': return res.diemChatLuong; // Chất lượng món ăn
-      case 'space': return res.diemKhongGian;   // Không gian
-      case 'location': return res.diemViTri;    // Vị trí
-      case 'service': return res.diemPhucVu;    // Phục vụ
-      case 'price': return res.diemGiaCa;       // Giá cả
-      default: return res.diemTrungBinh;        // Mặc định hoặc Distance
+      case 'quality': return res.diemChatLuong; 
+      case 'space': return res.diemKhongGian;   
+      case 'location': return res.diemViTri;    
+      case 'service': return res.diemPhucVu;    
+      case 'price': return res.diemGiaCa;       
+      default: return res.diemTrungBinh;        
     }
   };
 
   const getCategoryClass = () => {
     switch (activeSort) {
-      case 'quality': return 'quality';   // Màu Đỏ
-      case 'space': return 'space';       // Màu Tím
-      case 'location': return 'location'; // Màu Xanh dương
-      case 'service': return 'service';   // Màu Xanh ngọc
-      case 'price': return 'price';       // Màu Xanh lá
-      default: return 'default';          // Màu Cam (Mặc định)
+      case 'quality': return 'quality';   
+      case 'space': return 'space';       
+      case 'location': return 'location'; 
+      case 'service': return 'service';   
+      case 'price': return 'price';       
+      default: return 'default';          
     }
   };
 
-  // [3. FIX SORT] Tự động chuyển 'asc' khi chọn Distance/Price
   const handleSelectSort = (sortId: string) => {
     setSelectedSort(sortId);
     if (sortId === 'distance' || sortId === 'price') {
@@ -168,11 +161,10 @@ export default function RestaurantsPage() {
     const page = Number(searchParams.get('page')) || 1;
     const sort = searchParams.get('sort') || 'default';
     const rating = searchParams.get('rating') || 'all';
-    let order = searchParams.get('order'); // Để let để có thể sửa
+    let order = searchParams.get('order'); 
     const open = searchParams.get('openNow') === 'true'; 
     const search = searchParams.get('search') || ''; 
 
-    // [4. FIX SORT] Nếu URL chưa có order, tự động set default dựa vào sort
     if (!order) {
       if (sort === 'distance' || sort === 'price') order = 'asc';
       else order = 'desc';
@@ -274,7 +266,8 @@ export default function RestaurantsPage() {
   }, []);
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
-  const openModal = (res: Restaurant) => { setSelectedRes(res); document.body.style.overflow = 'hidden'; };
+  // Reset trạng thái showMap khi mở Modal mới
+  const openModal = (res: Restaurant) => { setSelectedRes(res); setShowMap(false); document.body.style.overflow = 'hidden'; };
   const closeModal = () => { setSelectedRes(null); document.body.style.overflow = 'unset'; };
 
   return (
@@ -370,7 +363,6 @@ export default function RestaurantsPage() {
           <>
             <div className="restaurants-grid">
               {restaurants.length > 0 ? (
-                // SỬA: Thêm logic displayScore vào vòng lặp
                 restaurants.map((res) => {
                   const displayScore = getDisplayScore(res);
                   const categoryClass = getCategoryClass();
@@ -379,7 +371,6 @@ export default function RestaurantsPage() {
                       <div className="card-image-wrapper">
                         <Image src={res.avatarUrl || "/assets/image/pho.png"} alt={res.tenQuan} width={400} height={300} className="card-image" unoptimized={true} />
                         
-                        {/* SỬA: Hiển thị displayScore */}
                         <div className={`rating-badge ${categoryClass}`}>
                           {displayScore ? displayScore.toFixed(1) : "N/A"}
                           </div>
@@ -414,6 +405,7 @@ export default function RestaurantsPage() {
           </>
         )}
 
+        {/* MODAL CHI TIẾT */}
         {selectedRes && (
           <div className="modal-overlay" onClick={closeModal}>
             <div className="modal-panel" onClick={(e) => e.stopPropagation()}>
@@ -426,12 +418,54 @@ export default function RestaurantsPage() {
                     <span className="score-label">{getRatingLabel(selectedRes.diemTrungBinh)}</span>
                   </div>
                 </div>
+                
                 <div className="modal-info-col">
                   <h2 className="modal-title">{selectedRes.tenQuan}</h2>
                    <div className="modal-meta-grid">
                       <div className="modal-meta-item"><ClockIcon /> {selectedRes.gioMoCua || "Đang cập nhật"}</div>
                       <div className="modal-meta-item highlight"><MoneyIcon /> {selectedRes.giaCa || "Đang cập nhật"}</div>
                    </div>
+
+                   {/* --- KHU VỰC BẢN ĐỒ (MỚI THÊM) --- */}
+                   <div className="map-section" style={{ marginTop: '20px', marginBottom: '15px' }}>
+                     <button 
+                        className="btn-show-map"
+                        onClick={() => setShowMap(!showMap)}
+                        style={{ 
+                            padding: '10px 15px', 
+                            backgroundColor: '#f0f2f5', 
+                            border: '1px solid #e0e0e0', 
+                            borderRadius: '8px', 
+                            cursor: 'pointer',
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            fontWeight: '600',
+                            color: '#333'
+                        }}
+                     >
+                        <MapPinIcon /> {showMap ? "Ẩn bản đồ chỉ đường" : "Xem đường đi đến quán"}
+                     </button>
+
+                     {showMap && selectedRes.lat && selectedRes.lon && (
+                        <div style={{ height: '350px', width: '100%', marginTop: '15px', borderRadius: '10px', overflow: 'hidden', border: '1px solid #ddd' }}>
+                            <RoutingMap 
+                                userLocation={userLocation} 
+                                restaurantLocation={{ lat: selectedRes.lat, lon: selectedRes.lon }} 
+                            />
+                        </div>
+                     )}
+                     
+                     {showMap && (!selectedRes.lat || !selectedRes.lon) && (
+                        <p style={{color: '#d32f2f', fontSize: '14px', marginTop: '10px', textAlign: 'center'}}>
+                            Rất tiếc, quán này chưa có dữ liệu tọa độ để chỉ đường.
+                        </p>
+                     )}
+                   </div>
+                   {/* ---------------------------------- */}
+
                    <hr className="modal-divider" />
                    <h4 className="detail-rating-heading">Đánh giá chi tiết</h4>
                    <div className="rating-bars">
