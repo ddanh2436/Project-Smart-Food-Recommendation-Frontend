@@ -7,18 +7,18 @@ import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 import "leaflet-routing-machine";
 import L from "leaflet";
 
-// --- Custom Icons ---
+// --- 1. CONFIG ICONS ---
 const userIcon = L.divIcon({
   className: 'custom-icon-user',
-  html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#1e88e5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0px 3px 3px rgba(0,0,0,0.4)); width: 36px; height: 36px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`,
-  iconSize: [36, 36],
-  iconAnchor: [18, 36],
-  popupAnchor: [0, -32],
+  html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#2979FF" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); width: 32px; height: 32px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`,
+  iconSize: [32, 32],
+  iconAnchor: [16, 16],
+  popupAnchor: [0, -20],
 });
 
 const restaurantIcon = L.divIcon({
   className: 'custom-icon-res',
-  html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#e53935" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0px 3px 3px rgba(0,0,0,0.4)); width: 40px; height: 40px;"><path d="M3 21h18v-8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8z"></path><path d="M12 3L2 11h20L12 3z"></path><rect x="9" y="14" width="6" height="7"></rect></svg>`,
+  html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFC107" stroke="#3E2723" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4)); width: 40px; height: 40px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`,
   iconSize: [40, 40],
   iconAnchor: [20, 38],
   popupAnchor: [0, -34],
@@ -29,7 +29,14 @@ interface RoutingMapProps {
   restaurantLocation: { lat: number; lon: number };
 }
 
-const RoutingControl = ({ userLocation, restaurantLocation }: RoutingMapProps) => {
+interface RouteInfo {
+    totalDistance: number;
+    totalTime: number;
+    steps: any[];
+}
+
+// --- 2. CONTROL COMPONENT ---
+const RoutingControl = ({ userLocation, restaurantLocation, onRouteFound }: any) => {
   const map = useMap();
   const routingControlRef = useRef<any>(null);
 
@@ -37,7 +44,6 @@ const RoutingControl = ({ userLocation, restaurantLocation }: RoutingMapProps) =
     if (!map || !userLocation) return;
     const L_Any = L as any;
 
-    // 1. Tạo control
     const routingControl = L_Any.Routing.control({
       waypoints: [
         L.latLng(userLocation.lat, userLocation.lon),
@@ -46,70 +52,54 @@ const RoutingControl = ({ userLocation, restaurantLocation }: RoutingMapProps) =
       routeWhileDragging: false,
       showAlternatives: false,
       fitSelectedRoutes: true,
-      show: false, 
+      show: false, // Ẩn UI mặc định xấu xí
       collapsible: true,
       router: L_Any.Routing.osrmv1({
         serviceUrl: "https://router.project-osrm.org/route/v1",
         profile: "driving",
+        language: 'vi',
         requestParameters: {
             overview: "simplified",
-            steps: false,
+            steps: true,
             geometries: "polyline",
         }
       }),
       lineOptions: {
-        styles: [{ color: '#2979FF', opacity: 0.8, weight: 6 }], 
-        extendToWaypoints: true,
-        missingRouteTolerance: 0,
+        styles: [{ color: '#FFC107', opacity: 1, weight: 6 }] // Line màu vàng rực
       },
-      createMarker: function() { return null; } 
+      createMarker: () => null 
     });
 
-    // --- FIX QUAN TRỌNG NHẤT: MONKEY PATCH ---
-    // Ghi đè hàm _clearLines của instance này.
-    // Nguyên nhân lỗi: Hàm này cố gọi this._map.removeLayer khi map đã null.
+    // Bắt sự kiện tìm thấy đường
+    routingControl.on('routesfound', function(e: any) {
+        const r = e.routes[0];
+        if (r) {
+            console.log("Route found:", r); // Debug log
+            onRouteFound({
+                totalDistance: r.summary.totalDistance,
+                totalTime: r.summary.totalTime,
+                steps: r.instructions
+            });
+        }
+    });
+
+    // Fix lỗi crash
     const originalClearLines = routingControl._clearLines;
     routingControl._clearLines = function() {
-        // Kiểm tra an toàn: Nếu không có map, hoặc map đã bị hủy -> Dừng ngay.
-        if (!this._map || (this._map as any)._leaflet_id === null) {
-            return;
-        }
-        // Nếu map an toàn, gọi hàm gốc của thư viện
+        if (!this._map) return;
         return originalClearLines.apply(this, arguments);
     };
-    // -----------------------------------------
-
-    // Xử lý lỗi từ server OSRM để không crash UI
-    routingControl.on('routingerror', function(e: any) {
-      console.warn("Routing OSRM Error (Ignored):", e);
-    });
 
     try {
         routingControl.addTo(map);
         routingControlRef.current = routingControl;
-        
-        // Ẩn bảng chỉ dẫn
         const container = routingControl.getContainer();
         if(container) container.style.display = 'none';
-    } catch (e) {
-        console.error("Error adding control:", e);
-    }
+    } catch(e) {}
 
-    // CLEANUP
     return () => {
-      // Khi component unmount, ta set một cờ để hàm _clearLines biết mà dừng lại
-      if (routingControlRef.current) {
-        try {
-          // Xóa các event listener trước
-          routingControlRef.current.getPlan().setWaypoints([]); 
-          
-          if(map) {
-             map.removeControl(routingControlRef.current);
-          }
-        } catch (error) {
-           // Bắt lỗi phút chót nếu có
-        }
-        routingControlRef.current = null;
+      if (routingControlRef.current && map) {
+        try { map.removeControl(routingControlRef.current); } catch (e) {}
       }
     };
   }, [map, userLocation, restaurantLocation]);
@@ -117,66 +107,137 @@ const RoutingControl = ({ userLocation, restaurantLocation }: RoutingMapProps) =
   return null;
 };
 
+// --- 3. MAIN COMPONENT ---
 export default function RoutingMap({ userLocation, restaurantLocation }: RoutingMapProps) {
   const [isReady, setIsReady] = useState(false);
+  const [routeInfo, setRouteInfo] = useState<RouteInfo | null>(null);
+  const [showSteps, setShowSteps] = useState(false); // State để bật tắt list chỉ dẫn
 
   useEffect(() => {
-    // Delay render lâu hơn một chút (500ms) để đảm bảo Modal ổn định hẳn
-    const timer = setTimeout(() => setIsReady(true), 500);
+    const timer = setTimeout(() => setIsReady(true), 300);
     return () => clearTimeout(timer);
   }, []);
 
-  const centerLat = userLocation 
-    ? (userLocation.lat + restaurantLocation.lat) / 2 
-    : restaurantLocation.lat;
-  const centerLon = userLocation 
-    ? (userLocation.lon + restaurantLocation.lon) / 2 
-    : restaurantLocation.lon;
+  const centerLat = userLocation ? (userLocation.lat + restaurantLocation.lat) / 2 : restaurantLocation.lat;
+  const centerLon = userLocation ? (userLocation.lon + restaurantLocation.lon) / 2 : restaurantLocation.lon;
 
-  if(!restaurantLocation.lat || !restaurantLocation.lon) return null;
+  const formatDist = (m: number) => m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`;
+  const formatTime = (s: number) => `${Math.round(s / 60)} phút`;
 
-  if (!isReady) {
-      return (
-          <div style={{ 
-              height: "400px", width: "100%", borderRadius: "16px", 
-              background: "#f5f5f5", display: "flex", alignItems: "center", justifyContent: "center",
-              color: "#999", flexDirection: "column", gap: "10px"
-          }}>
-              <div className="spinner" style={{ border: "3px solid #ddd", borderTop: "3px solid #333", borderRadius: "50%", width: "24px", height: "24px", animation: "spin 0.8s linear infinite" }}></div>
-              <span style={{fontSize: '14px'}}>Đang tải bản đồ...</span>
-              <style>{`@keyframes spin {0% {transform: rotate(0deg);} 100% {transform: rotate(360deg);}}`}</style>
-          </div>
-      );
-  }
+  // Helper dịch tiếng Việt
+  const translateInstruction = (text: string) => {
+    let t = text;
+    t = t.replace(/Head/g, "Đi về hướng");
+    t = t.replace(/Turn left/g, "Rẽ trái");
+    t = t.replace(/Turn right/g, "Rẽ phải");
+    t = t.replace(/Make a U-turn/g, "Quay đầu");
+    t = t.replace(/Continue/g, "Tiếp tục");
+    t = t.replace(/onto/g, "vào");
+    t = t.replace(/Destination/g, "Điểm đến");
+    return t;
+  };
+
+  if (!isReady || !restaurantLocation.lat) return <div style={{height: 350, background: '#111', color: '#666', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>Đang tải bản đồ...</div>;
 
   return (
-    <div style={{ height: "400px", width: "100%", borderRadius: "16px", overflow: "hidden", zIndex: 1, position: 'relative' }}>
-      <MapContainer
-        center={[centerLat, centerLon]}
-        zoom={13}
-        style={{ height: "100%", width: "100%" }}
-        scrollWheelZoom={true}
-        zoomControl={false}
-      >
-        <TileLayer
-          attribution='&copy; CartoDB'
-          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-        />
+    <div style={{ position: 'relative', width: "100%", height: "450px", borderRadius: "12px", overflow: "hidden", border: "1px solid #333" }}>
+        
+        {/* MAP */}
+        <MapContainer
+            center={[centerLat, centerLon]}
+            zoom={13}
+            style={{ height: "100%", width: "100%" }}
+            zoomControl={false}
+        >
+            <TileLayer attribution='&copy; CartoDB' url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"/>
+            
+            {userLocation && <Marker position={[userLocation.lat, userLocation.lon]} icon={userIcon} />}
+            <Marker position={[restaurantLocation.lat, restaurantLocation.lon]} icon={restaurantIcon} />
+            
+            {userLocation && (
+                <RoutingControl 
+                    userLocation={userLocation} 
+                    restaurantLocation={restaurantLocation} 
+                    onRouteFound={setRouteInfo} 
+                />
+            )}
+        </MapContainer>
 
-        {userLocation && (
-            <Marker position={[userLocation.lat, userLocation.lon]} icon={userIcon}>
-                <Popup>Bạn</Popup>
-            </Marker>
+        {/* --- 4. FLOATING INFO CARD (Thẻ thông tin nổi - Đảm bảo luôn hiện) --- */}
+        {routeInfo ? (
+            <div style={{
+                position: 'absolute',
+                bottom: 20,
+                left: 20,
+                right: 20,
+                backgroundColor: 'rgba(20, 20, 20, 0.95)',
+                backdropFilter: 'blur(10px)',
+                padding: '15px',
+                borderRadius: '12px',
+                border: '1px solid #FFC107',
+                zIndex: 1000, // Đè lên map
+                color: 'white',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '10px'
+            }}>
+                {/* Dòng 1: Khoảng cách & Thời gian */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{display: 'flex', gap: '15px', alignItems: 'center'}}>
+                        <div style={{textAlign: 'center'}}>
+                            <div style={{fontSize: '11px', color: '#aaa', textTransform: 'uppercase'}}>Khoảng cách</div>
+                            <div style={{fontSize: '20px', fontWeight: 'bold', color: '#FFC107'}}>{formatDist(routeInfo.totalDistance)}</div>
+                        </div>
+                        <div style={{width: 1, height: 30, background: '#444'}}></div>
+                        <div style={{textAlign: 'center'}}>
+                            <div style={{fontSize: '11px', color: '#aaa', textTransform: 'uppercase'}}>Thời gian</div>
+                            <div style={{fontSize: '20px', fontWeight: 'bold', color: 'white'}}>{formatTime(routeInfo.totalTime)}</div>
+                        </div>
+                    </div>
+                    
+                    {/* Nút xem chi tiết */}
+                    <button 
+                        onClick={() => setShowSteps(!showSteps)}
+                        style={{
+                            background: '#333', border: '1px solid #555', color: 'white', 
+                            padding: '8px 15px', borderRadius: '20px', cursor: 'pointer', fontSize: '13px'
+                        }}
+                    >
+                        {showSteps ? "Ẩn chỉ dẫn ▲" : "Xem đường đi ▼"}
+                    </button>
+                </div>
+
+                {/* Dòng 2: List chỉ dẫn (Hiện khi bấm nút) */}
+                {showSteps && (
+                    <div style={{
+                        marginTop: '10px', maxHeight: '150px', overflowY: 'auto', 
+                        borderTop: '1px solid #333', paddingTop: '10px'
+                    }}>
+                        {routeInfo.steps.map((step: any, i: number) => (
+                            <div key={i} style={{display: 'flex', gap: '10px', marginBottom: '8px', fontSize: '13px', color: '#ddd'}}>
+                                <span style={{color: '#FFC107', fontWeight: 'bold'}}>{i+1}.</span>
+                                <div>
+                                    {translateInstruction(step.text)} 
+                                    <span style={{color: '#888', marginLeft: '5px'}}>({formatDist(step.distance)})</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        ) : (
+            // Loading State (Khi đang tính toán)
+            <div style={{
+                position: 'absolute', bottom: 20, left: 20, zIndex: 1000,
+                background: 'rgba(0,0,0,0.8)', color: 'white', padding: '10px 20px', borderRadius: '20px',
+                display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid #444'
+            }}>
+                <div className="spinner" style={{width: 15, height: 15, border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite'}}></div>
+                <span style={{fontSize: '13px'}}>Đang tìm đường...</span>
+                <style>{`@keyframes spin {to{transform: rotate(360deg)}}`}</style>
+            </div>
         )}
-
-        <Marker position={[restaurantLocation.lat, restaurantLocation.lon]} icon={restaurantIcon}>
-             <Popup>Nhà hàng</Popup>
-        </Marker>
-
-        {userLocation && (
-            <RoutingControl userLocation={userLocation} restaurantLocation={restaurantLocation} />
-        )}
-      </MapContainer>
     </div>
   );
 }
