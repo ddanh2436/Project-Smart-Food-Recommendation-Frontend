@@ -442,6 +442,10 @@ export default function RestaurantsPage() {
                 
                 <div className="modal-info-col">
                   <h2 className="modal-title">{selectedRes.tenQuan}</h2>
+                  <div className="modal-address">
+    <MapPinIcon />
+    <span>{selectedRes.diaChi}</span>
+  </div>
                    <div className="modal-meta-grid">
                       <div className="modal-meta-item"><ClockIcon /> {selectedRes.gioMoCua || "Đang cập nhật"}</div>
                       <div className="modal-meta-item highlight"><MoneyIcon /> {selectedRes.giaCa || "Đang cập nhật"}</div>
@@ -452,20 +456,6 @@ export default function RestaurantsPage() {
                      <button 
                         className="btn-show-map"
                         onClick={() => setShowMap(!showMap)}
-                        style={{ 
-                            padding: '10px 15px', 
-                            backgroundColor: '#f0f2f5', 
-                            border: '1px solid #e0e0e0', 
-                            borderRadius: '8px', 
-                            cursor: 'pointer',
-                            width: '100%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '8px',
-                            fontWeight: '600',
-                            color: '#333'
-                        }}
                      >
                         <MapPinIcon /> {showMap ? "Ẩn bản đồ chỉ đường" : "Xem đường đi đến quán"}
                      </button>

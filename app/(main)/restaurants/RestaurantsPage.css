@@ -1065,6 +1065,60 @@ filter-actions {
   font-weight: 600;
 }
 
+/* --- THÊM VÀO CUỐI FILE --- */
+
+/* 1. Style cho dòng địa chỉ trong Modal */
+.modal-address {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: #ccc;
+  font-size: 1rem;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+.modal-address svg {
+  color: #e9a004; /* Icon màu cam */
+  flex-shrink: 0;
+  margin-top: 4px;
+  width: 16px;
+  height: 16px;
+}
+
+/* 2. Style cho nút Routing (Đồng bộ màu cam web chính) */
+.btn-show-map {
+  width: 100%;
+  padding: 12px 15px;
+  /* Dùng màu cam giống btn-apply-filter */
+  background: linear-gradient(135deg, #e9a004, #b87e00);
+  color: #000; /* Chữ đen cho dễ đọc trên nền cam */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 700; /* In đậm */
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(233, 160, 4, 0.3);
+}
+
+.btn-show-map:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(233, 160, 4, 0.5);
+  filter: brightness(1.1);
+  color: #fff; /* Hover chuyển chữ trắng cho nổi */
+}
+
+.btn-show-map svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.5;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
