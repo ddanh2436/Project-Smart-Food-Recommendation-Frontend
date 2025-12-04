@@ -115,6 +115,12 @@ export default function RestaurantsPage() {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [showMap, setShowMap] = useState(false); // State bật tắt map
 
+  const DirectionIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+  </svg>
+);
+
   // GIỮ NGUYÊN GPS CỨNG NHƯ YÊU CẦU
   //const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>({
@@ -267,7 +273,12 @@ export default function RestaurantsPage() {
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
   // Reset trạng thái showMap khi mở Modal mới
-  const openModal = (res: Restaurant) => { setSelectedRes(res); setShowMap(false); document.body.style.overflow = 'hidden'; };
+  const openModal = (res: Restaurant, autoShowMap: boolean = false) => { 
+    setSelectedRes(res); 
+    // Nếu bấm nút chỉ đường thì bật map luôn (true), còn bấm card thường thì tắt (false)
+    setShowMap(autoShowMap); 
+    document.body.style.overflow = 'hidden'; 
+};
   const closeModal = () => { setSelectedRes(null); document.body.style.overflow = 'unset'; };
 
   return (
@@ -381,6 +392,16 @@ export default function RestaurantsPage() {
                         <div className="card-meta-row">
                             <div className="meta-item price"><MoneyIcon /><span>{res.giaCa || "Đang cập nhật"}</span></div>
                             <div className="meta-item hours"><ClockIcon /><span>{res.gioMoCua || "Đang cập nhật"}</span></div>
+                              <button 
+        className="btn-quick-route-icon"
+        onClick={(e) => {
+            e.stopPropagation();
+            openModal(res, true);
+        }}
+        data-tooltip="Chỉ đường tới quán"
+      >
+        <DirectionIcon /> 
+      </button>
                         </div>
                       </div>
                     </div>
