@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css"; //
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@/app/contexts/AuthContext"; // Import
-
+import ChatWidget from "@/components/ChatWidget/ChatWidget";
 // === 1. IMPORT HEADER VÀ CSS CỦA NÓ ===
 import Header from "@/components/Header/Header";
 import "@/components/Header/Header.css"; 
@@ -41,7 +41,7 @@ export default function RootLayout({
           
           {/* children là các file page.tsx của bạn */}
           {children}
-
+          <ChatWidget /> {/* Thêm ChatWidget */}
         </AuthProvider>
       </body>
     </html>
