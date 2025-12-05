@@ -175,4 +175,18 @@ export const createNewReview = async (reviewData: {
     throw error;
   }
 };
+
+export const chatWithBot = async (message: string, userLat: string = "", userLon: string = "") => {
+  try {
+    const res = await api.post("/restaurants/chat", {
+      message,
+      userLat,
+      userLon
+    });
+    return res.data; // { reply_text: string, data: [] }
+  } catch (error) {
+    console.error("Error chatting with bot:", error);
+    return null;
+  }
+};
 export default api;
