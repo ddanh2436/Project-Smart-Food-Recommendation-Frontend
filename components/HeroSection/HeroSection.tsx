@@ -23,7 +23,8 @@ const langData = {
       region: "Region",
       dish: "Dish Type",
       space: "Ambience"
-    }
+    },
+    historyTitle: "Recent Searches"
   },
   vn: {
     line1: "Khởi đầu hành trình vị giác với",
@@ -39,7 +40,8 @@ const langData = {
       region: "Vùng miền",
       dish: "Loại món",
       space: "Không gian"
-    }
+    },
+    historyTitle: "Lịch sử tìm kiếm"
   }
 };
 
@@ -65,9 +67,16 @@ const ArrowRightIcon = () => (
 const CloseIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
 );
-// Icon Camera
 const CameraIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+);
+// Icon đồng hồ cho lịch sử
+const ClockIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+);
+// Icon xóa lịch sử
+const XIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
 );
 
 const HeroSection: React.FC = () => {
@@ -80,11 +89,43 @@ const HeroSection: React.FC = () => {
   const [imageResult, setImageResult] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // --- STATE LỊCH SỬ TÌM KIẾM ---
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
+
   const { currentLang } = useAuth();
   const T = langData[currentLang]; 
   const router = useRouter(); 
-  const panelRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null); // Ref bao quanh khu vực search
 
+  // --- LOGIC LỊCH SỬ ---
+  // 1. Load lịch sử từ sessionStorage khi component mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = sessionStorage.getItem("searchHistory");
+      if (saved) {
+        setSearchHistory(JSON.parse(saved));
+      }
+    }
+  }, []);
+
+  // 2. Lưu từ khóa vào lịch sử
+  const addToHistory = (keyword: string) => {
+    if (!keyword.trim()) return;
+    const newHistory = [keyword, ...searchHistory.filter(item => item !== keyword)].slice(0, 6); // Giữ tối đa 6 mục
+    setSearchHistory(newHistory);
+    sessionStorage.setItem("searchHistory", JSON.stringify(newHistory));
+  };
+
+  // 3. Xóa một mục lịch sử
+  const removeHistoryItem = (e: React.MouseEvent, keyword: string) => {
+    e.stopPropagation();
+    const newHistory = searchHistory.filter(item => item !== keyword);
+    setSearchHistory(newHistory);
+    sessionStorage.setItem("searchHistory", JSON.stringify(newHistory));
+  };
+
+  // --- LOGIC SEARCH & TAGS ---
   useEffect(() => {
     if (selectedTags.length > 0) {
       setSearchValue(selectedTags.join(", "));
@@ -94,6 +135,8 @@ const HeroSection: React.FC = () => {
   const handleSearch = (term?: string) => {
     const query = term || searchValue;
     if (query.trim()) {
+      addToHistory(query.trim()); // Lưu vào lịch sử khi tìm
+      setShowHistory(false);
       router.push(`/restaurants?search=${encodeURIComponent(query)}`);
     }
   };
@@ -104,8 +147,17 @@ const HeroSection: React.FC = () => {
     }
   };
 
+  // Click vào item lịch sử -> Tìm luôn
+  const handleHistoryClick = (keyword: string) => {
+    setSearchValue(keyword);
+    addToHistory(keyword);
+    setShowHistory(false);
+    router.push(`/restaurants?search=${encodeURIComponent(keyword)}`);
+  };
+
   const handleDiscoverClick = () => {
     setIsPanelOpen(!isPanelOpen);
+    setShowHistory(false); // Đóng lịch sử nếu mở panel
   };
 
   const toggleTag = (tag: string) => {
@@ -140,10 +192,12 @@ const HeroSection: React.FC = () => {
     }
   };
 
+  // Click outside để đóng Panel và History
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
-        // Có thể thêm logic đóng panel nếu muốn
+        setIsPanelOpen(false); // Đóng Discover Panel
+        setShowHistory(false); // Đóng History
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -183,14 +237,19 @@ const HeroSection: React.FC = () => {
                     }
                   }}
                   onKeyDown={handleKeyDown}
+                  onFocus={() => {
+                    if(searchHistory.length > 0) setShowHistory(true);
+                    setIsPanelOpen(false); // Đóng panel nếu đang mở
+                  }}
                 />
-                {/* [ĐÃ SỬA] Thêm class 'camera-ai-btn' vào đây để nhận CSS hiệu ứng */}
+                
                 <button 
                   className="camera-btn camera-ai-btn"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploading}
+                  title="Tìm kiếm bằng hình ảnh (AI)"
                 >
-                    {isUploading ? "..." : <CameraIcon />}
+                  {isUploading ? "..." : <CameraIcon />}
                 </button>
                 <input 
                   type="file" 
@@ -202,6 +261,31 @@ const HeroSection: React.FC = () => {
               </div>
             </div>
 
+            {/* --- PANEL LỊCH SỬ TÌM KIẾM --- */}
+            {showHistory && searchHistory.length > 0 && !isPanelOpen && (
+              <div className="search-history-dropdown">
+                <div className="history-header">{T.historyTitle}</div>
+                <ul className="history-list">
+                  {searchHistory.map((item, index) => (
+                    <li key={index} className="history-item" onClick={() => handleHistoryClick(item)}>
+                      <div className="history-content">
+                        <ClockIcon />
+                        <span className="history-text">{item}</span>
+                      </div>
+                      <button 
+                        className="btn-remove-history" 
+                        onClick={(e) => removeHistoryItem(e, item)}
+                        title="Xóa"
+                      >
+                        <XIcon />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* --- PANEL BỘ SƯU TẬP (DISCOVER) --- */}
             {isPanelOpen && (
               <div className="discovery-panel">
                 <div className="panel-header">
@@ -262,7 +346,7 @@ const HeroSection: React.FC = () => {
               </div>
             )}
 
-            {!isPanelOpen && (
+            {!isPanelOpen && !showHistory && (
                 <div className="hero-trending">
                 <span className="trending-label">{T.trendingLabel}</span>
                 {TRENDING_KEYWORDS.map((keyword, index) => (
