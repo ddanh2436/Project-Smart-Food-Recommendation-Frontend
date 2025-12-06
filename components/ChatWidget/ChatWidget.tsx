@@ -1,15 +1,17 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { chatWithBot } from "@/app/lib/api";
+import { chatWithBot, searchRestaurantsByImage } from "@/app/lib/api";
 import Link from "next/link";
-import { FaPaperPlane, FaComments, FaTimes, FaRobot, FaMapMarkerAlt, FaStar, FaStore } from "react-icons/fa";
+import { FaPaperPlane, FaComments, FaTimes, FaRobot, FaMapMarkerAlt, FaStar, FaStore, FaImage, FaSpinner, FaChevronDown } from "react-icons/fa";
 
 interface Message {
   id: number;
   sender: "user" | "bot";
   text: string;
   results?: any[];
+  isImage?: boolean;
+  imageUrl?: string;
 }
 
 export default function ChatWidget() {
@@ -18,14 +20,15 @@ export default function ChatWidget() {
   const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 1. Random câu chào
   useEffect(() => {
     const greetings = [
-      "Xin chào! 👋 VietNomNom (Golden Edition) đây. Bạn muốn ăn gì?",
-      "Hello! 🤖 Màu vàng may mắn! Bạn đang thèm món gì nào?",
-      "Chào bạn! 🍜 Phở, cơm, hay lẩu? Mình cân được hết!",
-      "Hi there! 👋 Hôm nay ăn gì nhỉ? Gõ tên món vào đây nhé!",
+      "Chào bạn! 👋 Hôm nay chúng ta sẽ khám phá món ngon nào đây?",
+      "Hello! 🥘 Đang đói bụng phải không? Gửi ảnh hoặc tên món để mình tìm nhé!",
+      "VietNomNom xin chào! 🍜 Phở, cơm, hay lẩu? Mình cân được hết!",
+      "Hi there! ✨ Cần tìm quán ăn không gian đẹp hay đồ ăn ngon? Hỏi mình ngay!",
     ];
     
     if (messages.length === 0) {
@@ -41,6 +44,7 @@ export default function ChatWidget() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isOpen, loading]);
 
+  // --- XỬ LÝ GỬI TEXT ---
   const handleSend = async () => {
     if (!input.trim()) return;
 
@@ -68,116 +72,163 @@ export default function ChatWidget() {
     }
   };
 
+  // --- XỬ LÝ GỬI ẢNH ---
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const imageUrl = URL.createObjectURL(file);
+    const userMsg: Message = { 
+      id: Date.now(), 
+      sender: "user", 
+      text: "Đã gửi ảnh...", 
+      isImage: true,
+      imageUrl: imageUrl 
+    };
+    setMessages(prev => [...prev, userMsg]);
+    setLoading(true);
+
+    try {
+      const res = await searchRestaurantsByImage(file);
+      setLoading(false);
+
+      if (res && res.detectedFood) {
+        const detectedName = res.detectedFood;
+        const restaurants = res.data || [];
+        
+        const botMsg: Message = {
+          id: Date.now() + 1,
+          sender: "bot",
+          text: `Mình đoán đây là món **"${detectedName}"**. 😋 Dưới đây là các quán ngon nhất:`,
+          results: restaurants
+        };
+        setMessages(prev => [...prev, botMsg]);
+      } else {
+        setMessages(prev => [...prev, { id: Date.now() + 1, sender: "bot", text: "Hmm... Ảnh khó nhận diện quá. Bạn thử chụp rõ hơn hoặc nhập tên món nhé! 🤔" }]);
+      }
+    } catch (error) {
+      setLoading(false);
+      setMessages(prev => [...prev, { id: Date.now(), sender: "bot", text: "Lỗi xử lý ảnh rồi. Thử lại sau nha!" }]);
+    }
+
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   return (
     <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end font-sans">
       
-      {/* --- NÚT MỞ CHAT (Tông Vàng) --- */}
-      <div className={`transition-all duration-300 ${isOpen ? 'opacity-0 translate-y-10 pointer-events-none' : 'opacity-100 translate-y-0'}`}>
+      {/* --- NÚT MỞ CHAT (Floating) --- */}
+      <div className={`transition-all duration-500 ease-in-out ${isOpen ? 'opacity-0 translate-y-10 pointer-events-none scale-0' : 'opacity-100 translate-y-0 scale-100'}`}>
         <button 
           onClick={() => setIsOpen(true)}
-          // Gradient Vàng rực rỡ
-          className="group relative flex items-center justify-center w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-600 text-white rounded-full shadow-xl shadow-yellow-500/40 hover:shadow-yellow-400/60 transition-all duration-300 hover:scale-110 active:scale-95 border-2 border-white/20"
+          className="group relative flex items-center justify-center w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-700 text-white rounded-full shadow-2xl shadow-orange-900/50 hover:shadow-orange-600/70 transition-all duration-300 hover:scale-110 active:scale-95 border border-white/20"
         >
-          <FaComments size={28} className="animate-bounce-slow drop-shadow-md text-white" />
+          {/* Icon Chat */}
+          <FaComments size={30} className="animate-bounce-slow drop-shadow-md" />
           
           {/* Tooltip */}
-          <span className="absolute right-20 bg-gray-900 text-yellow-400 text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-gray-700">
-            Chat ngay!
+          <span className="absolute right-20 bg-slate-900 text-amber-400 text-xs font-bold px-3 py-1.5 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-slate-700">
+            Tìm quán ngon ngay!
           </span>
           
-          {/* Ping effect (Màu vàng) */}
+          {/* Ping Effect */}
           <span className="absolute top-0 right-0 -mt-1 -mr-1 flex h-4 w-4">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-4 w-4 bg-yellow-500 border-2 border-white"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-4 w-4 bg-orange-500 border-2 border-white"></span>
           </span>
         </button>
       </div>
 
-      {/* --- KHUNG CHAT CHÍNH (Glassmorphism + Vàng) --- */}
+      {/* --- KHUNG CHAT (Midnight Amber) --- */}
       <div 
-        className={`fixed bottom-6 right-6 w-[380px] h-[600px] bg-gray-900/95 backdrop-blur-md rounded-2xl shadow-2xl shadow-black/50 border border-gray-700 flex flex-col overflow-hidden transition-all duration-300 origin-bottom-right ${
-          isOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'
+        className={`fixed bottom-6 right-6 w-[380px] h-[600px] bg-slate-950/95 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/60 border border-slate-800 flex flex-col overflow-hidden transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) origin-bottom-right ${
+          isOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-75 opacity-0 translate-y-10 pointer-events-none'
         }`}
       >
         
-        {/* HEADER: Gradient Vàng Kim */}
-        <div className="bg-gradient-to-r from-yellow-500 via-yellow-600 to-yellow-700 p-4 flex justify-between items-center shadow-lg shrink-0 relative overflow-hidden">
-          {/* Decorative Circles */}
-          <div className="absolute top-0 left-0 w-20 h-20 bg-white/20 rounded-full blur-2xl -translate-x-1/2 -translate-y-1/2"></div>
-          <div className="absolute bottom-0 right-0 w-32 h-32 bg-yellow-300/20 rounded-full blur-3xl translate-x-1/3 translate-y-1/3"></div>
+        {/* HEADER */}
+        <div className="bg-slate-900/80 p-4 flex justify-between items-center shadow-lg shrink-0 border-b border-white/5 relative overflow-hidden">
+          {/* Decor background */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
           <div className="flex items-center gap-3 relative z-10">
-            <div className="bg-white/20 p-2 rounded-full backdrop-blur-sm border border-white/20 shadow-inner">
-              <FaRobot size={22} className="text-white" />
+            <div className="relative">
+               <div className="absolute -inset-1 bg-gradient-to-r from-amber-500 to-orange-600 rounded-full blur opacity-40"></div>
+               <div className="relative w-10 h-10 bg-slate-900 rounded-full flex items-center justify-center border border-white/10">
+                 <FaRobot size={20} className="text-amber-400" />
+               </div>
             </div>
             <div>
-              <h3 className="font-bold text-lg text-white tracking-wide drop-shadow-sm">VietNomNom AI</h3>
-              <p className="text-[11px] text-yellow-100 flex items-center gap-1.5 font-medium">
+              <h3 className="font-bold text-lg text-white tracking-wide">NomNom Assistant</h3>
+              <p className="text-[11px] text-slate-400 flex items-center gap-1.5 font-medium">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                Sẵn sàng hỗ trợ
+                Online
               </p>
             </div>
           </div>
-          <button 
-            onClick={() => setIsOpen(false)} 
-            className="relative z-10 hover:bg-white/20 p-2 rounded-full transition-colors text-white/90 hover:text-white"
-          >
-            <FaTimes size={18} />
-          </button>
+          <div className="flex items-center gap-2 relative z-10">
+             <button 
+              onClick={() => setIsOpen(false)} 
+              className="hover:bg-white/10 p-2 rounded-full transition-colors text-slate-400 hover:text-white"
+            >
+              <FaChevronDown size={16} />
+            </button>
+          </div>
         </div>
 
         {/* BODY */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-5 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent bg-gradient-to-b from-gray-900 to-gray-950">
+        <div className="flex-1 overflow-y-auto p-4 space-y-5 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent bg-slate-950">
           {messages.map((msg) => (
-            <div key={msg.id} className={`flex w-full ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div key={msg.id} className={`flex w-full ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
               
               {/* Avatar Bot */}
               {msg.sender === 'bot' && (
-                <div className="w-8 h-8 bg-gradient-to-br from-gray-700 to-gray-800 rounded-full flex items-center justify-center text-yellow-500 text-xs mr-2 shadow-md shrink-0 mt-1 border border-gray-600">
+                <div className="w-8 h-8 bg-slate-900 rounded-full flex items-center justify-center text-amber-500 text-xs mr-2 shadow-md shrink-0 mt-1 border border-slate-700">
                   <FaRobot />
                 </div>
               )}
 
               <div className={`flex flex-col max-w-[85%] ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
                 
-                {/* Text Bubble */}
-                <div className={`px-4 py-2.5 text-[14px] leading-relaxed shadow-md backdrop-blur-sm ${
+                {/* Ảnh user gửi */}
+                {msg.isImage && msg.imageUrl && (
+                    <div className="mb-2 rounded-xl overflow-hidden border border-amber-500/30 shadow-md">
+                        <img src={msg.imageUrl} alt="Food" className="w-32 h-32 object-cover" />
+                    </div>
+                )}
+
+                {/* Bong bóng Chat */}
+                <div className={`px-4 py-3 text-[14px] leading-relaxed shadow-sm relative ${
                   msg.sender === 'user' 
-                    ? 'bg-gradient-to-br from-yellow-500 to-yellow-600 text-white font-medium rounded-2xl rounded-tr-sm shadow-yellow-900/20 border border-white/10' // User: Vàng
-                    : 'bg-gray-800/80 border border-gray-700 text-gray-200 rounded-2xl rounded-tl-sm' // Bot: Xám
+                    ? 'bg-gradient-to-br from-amber-500 to-orange-700 text-white rounded-2xl rounded-tr-sm shadow-orange-900/20' 
+                    : 'bg-slate-900 border border-slate-800 text-slate-200 rounded-2xl rounded-tl-sm'
                 }`}>
-                  {msg.text}
+                  {msg.text.split("**").map((part, i) => i % 2 === 1 ? <strong key={i} className="text-amber-400">{part}</strong> : part)}
                 </div>
 
-                {/* --- CARD KẾT QUẢ TÌM KIẾM --- */}
+                {/* --- KẾT QUẢ TÌM KIẾM --- */}
                 {msg.results && msg.results.length > 0 && (
                   <div className="mt-3 w-full space-y-2.5 pl-1">
                     {msg.results.map((item: any) => (
                       <Link href={`/restaurants/${item._id}`} key={item._id} className="block group">
-                        <div className="bg-gray-800/60 hover:bg-gray-800 rounded-xl border border-gray-700/50 hover:border-yellow-500/50 shadow-sm hover:shadow-lg hover:shadow-yellow-500/10 transition-all duration-300 flex overflow-hidden cursor-pointer h-[88px] relative group">
+                        <div className="bg-slate-900/60 hover:bg-slate-900 rounded-xl border border-slate-800 hover:border-amber-500/30 shadow-sm hover:shadow-amber-500/10 transition-all duration-300 flex overflow-hidden cursor-pointer h-[80px] relative">
                           
-                          {/* Dải màu hover bên trái (Vàng) */}
-                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-yellow-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-
                           {/* Hình ảnh */}
-                          <div className="relative w-[88px] h-full shrink-0">
+                          <div className="relative w-[80px] h-full shrink-0">
                             <img
                               src={item.avatarUrl || "/assets/image/pho.png"}
                               alt={item.tenQuan}
                               referrerPolicy="no-referrer"
-                              className="object-cover w-full h-full opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-transform duration-500"
+                              className="object-cover w-full h-full opacity-90 group-hover:scale-110 transition-transform duration-500"
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement;
-                                if (!target.src.includes("/assets/image/pho.png")) {
-                                   target.src = "/assets/image/pho.png";
-                                }
+                                if (!target.src.includes("/assets/image/pho.png")) target.src = "/assets/image/pho.png";
                               }}
                             />
-                            {/* Rating Badge Overlay */}
-                            <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-sm text-yellow-400 text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                            <div className="absolute top-1 right-1 bg-black/70 backdrop-blur-sm text-yellow-400 text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5">
                                <FaStar size={8} /> {item.diemTrungBinh ? item.diemTrungBinh.toFixed(1) : "N/A"}
                             </div>
                           </div>
@@ -185,26 +236,18 @@ export default function ChatWidget() {
                           {/* Thông tin */}
                           <div className="p-2.5 flex flex-col justify-between flex-1 min-w-0">
                             <div>
-                              {/* Tên quán hover màu vàng */}
-                              <h4 className="font-bold text-[13px] text-gray-100 truncate group-hover:text-yellow-400 transition-colors leading-tight">
+                              <h4 className="font-bold text-[13px] text-slate-100 truncate group-hover:text-amber-400 transition-colors">
                                 {item.tenQuan}
                               </h4>
-                              {/* Icon map màu vàng */}
-                              <p className="text-[10px] text-gray-400 flex items-center gap-1 mt-1 truncate">
-                                <FaMapMarkerAlt className="text-gray-500 group-hover:text-yellow-500 transition-colors shrink-0" size={10} /> 
+                              <p className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5 truncate">
+                                <FaMapMarkerAlt className="text-slate-500 shrink-0" /> 
                                 {item.diaChi}
                               </p>
                             </div>
-                            
-                            <div className="flex justify-between items-center mt-1">
-                              {/* Giá tiền viền vàng */}
-                              <span className="text-[10px] font-medium text-yellow-500 bg-yellow-950/30 px-2 py-0.5 rounded border border-yellow-500/20">
-                                {item.giaCa ? item.giaCa : "Đang cập nhật"}
+                            <div className="flex justify-between items-center">
+                              <span className="text-[10px] text-amber-500 bg-amber-950/30 px-1.5 py-0.5 rounded border border-amber-500/20">
+                                {item.giaCa || "Menu"}
                               </span>
-                              
-                              <div className="bg-gray-700/50 p-1 rounded-full group-hover:bg-yellow-500 group-hover:text-white transition-colors text-gray-400">
-                                 <FaStore size={10} />
-                              </div>
                             </div>
                           </div>
                         </div>
@@ -216,16 +259,16 @@ export default function ChatWidget() {
             </div>
           ))}
           
-          {/* Typing Animation */}
+          {/* Loading */}
           {loading && (
             <div className="flex justify-start w-full animate-fade-in">
-              <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center text-yellow-500 text-xs mr-2 mt-1 border border-gray-700">
+              <div className="w-8 h-8 bg-slate-900 rounded-full flex items-center justify-center text-amber-500 text-xs mr-2 mt-1 border border-slate-700">
                  <FaRobot />
               </div>
-              <div className="bg-gray-800 border border-gray-700 px-3 py-2.5 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-1">
-                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></span>
+              <div className="bg-slate-900 border border-slate-800 px-3 py-2.5 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-1">
+                <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></span>
               </div>
             </div>
           )}
@@ -233,27 +276,33 @@ export default function ChatWidget() {
         </div>
 
         {/* INPUT AREA */}
-        <div className="p-3 bg-gray-900 border-t border-gray-800 shrink-0 relative z-20">
-          <div className="flex items-center gap-2 bg-gray-950 rounded-full px-1.5 py-1.5 border border-gray-800 focus-within:border-yellow-500/50 focus-within:bg-black focus-within:shadow-[0_0_15px_rgba(250,204,21,0.15)] transition-all duration-300">
+        <div className="p-3 bg-slate-900 border-t border-slate-800 shrink-0 relative z-20">
+          <div className="flex items-center gap-2 bg-black/40 rounded-xl px-2 py-2 border border-slate-700 focus-within:border-amber-500/50 focus-within:shadow-[0_0_15px_rgba(245,158,11,0.1)] transition-all duration-300">
+            
+            {/* Nút Upload Ảnh */}
+            <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
+            <button onClick={() => fileInputRef.current?.click()} className="p-2 text-slate-400 hover:text-amber-400 transition-colors" title="Gửi ảnh">
+                <FaImage size={18} />
+            </button>
+
+            <div className="h-5 w-[1px] bg-slate-700 mx-1"></div>
+
             <input
               type="text"
-              className="flex-1 bg-transparent border-none outline-none text-sm px-4 text-gray-200 placeholder-gray-500 caret-yellow-500 h-9"
-              placeholder="Hôm nay ăn gì?..."
+              className="flex-1 bg-transparent border-none outline-none text-sm px-2 text-slate-200 placeholder-slate-500 caret-amber-500"
+              placeholder="Nhập tên món..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             />
+            
             <button 
               onClick={handleSend}
               disabled={loading || !input.trim()}
-              // Nút gửi Gradient Vàng
-              className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-white w-9 h-9 rounded-full flex items-center justify-center disabled:opacity-50 disabled:grayscale transition-all shadow-md hover:shadow-yellow-500/30 hover:scale-105 active:scale-95"
+              className="bg-gradient-to-r from-amber-500 to-orange-600 text-white w-8 h-8 rounded-lg flex items-center justify-center disabled:opacity-50 disabled:grayscale transition-all shadow-md hover:shadow-orange-500/20 active:scale-95"
             >
-              <FaPaperPlane size={13} className="-ml-0.5 mt-0.5" />
+              {loading && input.trim() ? <FaSpinner className="animate-spin" /> : <FaPaperPlane size={12} />}
             </button>
-          </div>
-          <div className="text-center mt-1">
-             <span className="text-[9px] text-gray-600">Powered by AI &bull; Kết quả có thể thay đổi</span>
           </div>
         </div>
       </div>
