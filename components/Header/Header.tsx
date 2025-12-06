@@ -76,10 +76,9 @@ const Header: React.FC = () => {
   const { user, setUser, isLoading, currentLang, setLang, T } = useAuth(); 
   
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
-  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false); // State cho User Dropdown
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false); 
   const [showLogoutModal, setShowLogoutModal] = useState(false); 
 
-  // Ref để xử lý click outside (click ra ngoài thì đóng menu)
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const langDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -147,6 +146,26 @@ const Header: React.FC = () => {
                   </Link>
                 </li>
               ))}
+              
+              {/* [MỚI] Thêm nút Chatbot AI */}
+              <li>
+                <Link 
+                  href="/chatbot" 
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '6px',
+                    color: '#facc15', // Màu vàng sáng (Yellow-400) nổi bật
+                    fontWeight: 600,
+                    textShadow: '0 0 10px rgba(250, 204, 21, 0.2)'
+                  }}
+                  className="hover:opacity-80 transition-opacity"
+                >
+                  <span style={{ fontSize: '1.2rem' }}>🤖</span> 
+                  Chatbot AI
+                </Link>
+              </li>
+
             </ul>
           </nav>
 

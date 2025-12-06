@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { chatWithBot } from "@/app/lib/api";
 import Link from "next/link";
-import { FaPaperPlane, FaComments, FaTimes, FaRobot, FaMapMarkerAlt, FaStar } from "react-icons/fa";
+import { FaPaperPlane, FaComments, FaTimes, FaRobot, FaMapMarkerAlt, FaStar, FaStore } from "react-icons/fa";
 
 interface Message {
   id: number;
@@ -16,19 +16,16 @@ export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  
   const [messages, setMessages] = useState<Message[]>([]);
-  
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // 1. Random câu chào
   useEffect(() => {
     const greetings = [
-      "Xin chào! 👋 Trợ lý VietNomNom (Golden Mode) đây. Bạn muốn ăn gì?",
-      "Hello! 🤖 Năng lượng tràn trề! Bạn đang thèm món gì nào?",
+      "Xin chào! 👋 VietNomNom (Golden Edition) đây. Bạn muốn ăn gì?",
+      "Hello! 🤖 Màu vàng may mắn! Bạn đang thèm món gì nào?",
       "Chào bạn! 🍜 Phở, cơm, hay lẩu? Mình cân được hết!",
-      "Hi there! 👋 Đang đói bụng hả? Nói cho mình biết đi!",
-      "Chào đồng chí! 🫡 Sẵn sàng tìm quán ngon 'nhức nách' cho bạn!"
+      "Hi there! 👋 Hôm nay ăn gì nhỉ? Gõ tên món vào đây nhé!",
     ];
     
     if (messages.length === 0) {
@@ -67,172 +64,199 @@ export default function ChatWidget() {
       };
       setMessages(prev => [...prev, botMsg]);
     } else {
-      setMessages(prev => [...prev, { id: Date.now(), sender: "bot", text: "Xin lỗi, mình đang mất kết nối. Thử lại sau nhé! 😓" }]);
+      setMessages(prev => [...prev, { id: Date.now(), sender: "bot", text: "Hệ thống đang bận, bạn thử lại sau nhé! 😓" }]);
     }
   };
 
   return (
     <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end font-sans">
       
-      {/* --- NÚT MỞ CHAT (Tông Vàng Kim) --- */}
-      {!isOpen && (
+      {/* --- NÚT MỞ CHAT (Tông Vàng) --- */}
+      <div className={`transition-all duration-300 ${isOpen ? 'opacity-0 translate-y-10 pointer-events-none' : 'opacity-100 translate-y-0'}`}>
         <button 
           onClick={() => setIsOpen(true)}
-          // [THAY ĐỔI MÀU Ở ĐÂY] Gradient từ vàng sáng đến vàng đậm
-          className="group relative flex items-center justify-center w-14 h-14 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white rounded-full shadow-lg shadow-yellow-500/40 hover:shadow-yellow-400/60 transition-all duration-300 hover:scale-110 active:scale-95 border border-yellow-300/30"
+          // Gradient Vàng rực rỡ
+          className="group relative flex items-center justify-center w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-600 text-white rounded-full shadow-xl shadow-yellow-500/40 hover:shadow-yellow-400/60 transition-all duration-300 hover:scale-110 active:scale-95 border-2 border-white/20"
         >
-          <FaComments size={24} className="animate-bounce-slow" />
-          <span className="absolute right-16 bg-gray-900 text-yellow-400 text-xs font-bold px-2 py-1 rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-yellow-500/30">
+          <FaComments size={28} className="animate-bounce-slow drop-shadow-md text-white" />
+          
+          {/* Tooltip */}
+          <span className="absolute right-20 bg-gray-900 text-yellow-400 text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-gray-700">
             Chat ngay!
           </span>
-        </button>
-      )}
-
-      {/* --- KHUNG CHAT CHÍNH --- */}
-      {isOpen && (
-        <div className="bg-gray-900 w-[380px] h-[600px] rounded-2xl shadow-2xl shadow-black/60 border border-gray-700 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-10 duration-300">
           
-          {/* HEADER: Gradient Vàng Kim */}
-          <div className="bg-gradient-to-r from-yellow-500 to-yellow-700 p-4 text-white flex justify-between items-center shadow-md shrink-0 border-b border-yellow-600/20">
-            <div className="flex items-center gap-2">
-              <div className="bg-black/20 p-2 rounded-full backdrop-blur-sm border border-yellow-400/10">
-                <FaRobot size={20} className="text-yellow-100" />
-              </div>
-              <div>
-                {/* [ĐỒNG BỘ MÀU TIÊU ĐỀ TẠI ĐÂY] */}
-                <h3 className="font-bold text-base tracking-wide text-white">VietNomNom AI</h3>
-                <p className="text-xs text-yellow-200 flex items-center gap-1">
-                  <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]"></span>
-                  Sẵn sàng hỗ trợ
-                </p>
-              </div>
+          {/* Ping effect (Màu vàng) */}
+          <span className="absolute top-0 right-0 -mt-1 -mr-1 flex h-4 w-4">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-4 w-4 bg-yellow-500 border-2 border-white"></span>
+          </span>
+        </button>
+      </div>
+
+      {/* --- KHUNG CHAT CHÍNH (Glassmorphism + Vàng) --- */}
+      <div 
+        className={`fixed bottom-6 right-6 w-[380px] h-[600px] bg-gray-900/95 backdrop-blur-md rounded-2xl shadow-2xl shadow-black/50 border border-gray-700 flex flex-col overflow-hidden transition-all duration-300 origin-bottom-right ${
+          isOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'
+        }`}
+      >
+        
+        {/* HEADER: Gradient Vàng Kim */}
+        <div className="bg-gradient-to-r from-yellow-500 via-yellow-600 to-yellow-700 p-4 flex justify-between items-center shadow-lg shrink-0 relative overflow-hidden">
+          {/* Decorative Circles */}
+          <div className="absolute top-0 left-0 w-20 h-20 bg-white/20 rounded-full blur-2xl -translate-x-1/2 -translate-y-1/2"></div>
+          <div className="absolute bottom-0 right-0 w-32 h-32 bg-yellow-300/20 rounded-full blur-3xl translate-x-1/3 translate-y-1/3"></div>
+
+          <div className="flex items-center gap-3 relative z-10">
+            <div className="bg-white/20 p-2 rounded-full backdrop-blur-sm border border-white/20 shadow-inner">
+              <FaRobot size={22} className="text-white" />
             </div>
-            <button 
-              onClick={() => setIsOpen(false)} 
-              className="hover:bg-black/20 p-2 rounded-full transition-colors text-yellow-100 hover:text-white"
-            >
-              <FaTimes />
-            </button>
+            <div>
+              <h3 className="font-bold text-lg text-white tracking-wide drop-shadow-sm">VietNomNom AI</h3>
+              <p className="text-[11px] text-yellow-100 flex items-center gap-1.5 font-medium">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                Sẵn sàng hỗ trợ
+              </p>
+            </div>
           </div>
+          <button 
+            onClick={() => setIsOpen(false)} 
+            className="relative z-10 hover:bg-white/20 p-2 rounded-full transition-colors text-white/90 hover:text-white"
+          >
+            <FaTimes size={18} />
+          </button>
+        </div>
 
-          {/* BODY: Nền tối */}
-          <div className="flex-1 overflow-y-auto p-4 bg-[#0f0f10] space-y-5 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
-            {messages.map((msg) => (
-              <div key={msg.id} className={`flex w-full ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+        {/* BODY */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-5 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent bg-gradient-to-b from-gray-900 to-gray-950">
+          {messages.map((msg) => (
+            <div key={msg.id} className={`flex w-full ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+              
+              {/* Avatar Bot */}
+              {msg.sender === 'bot' && (
+                <div className="w-8 h-8 bg-gradient-to-br from-gray-700 to-gray-800 rounded-full flex items-center justify-center text-yellow-500 text-xs mr-2 shadow-md shrink-0 mt-1 border border-gray-600">
+                  <FaRobot />
+                </div>
+              )}
+
+              <div className={`flex flex-col max-w-[85%] ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
                 
-                {/* Avatar Bot */}
-                {msg.sender === 'bot' && (
-                  <div className="w-8 h-8 bg-gradient-to-br from-yellow-500 to-yellow-700 rounded-full flex items-center justify-center text-white text-xs mr-2 shadow-sm shrink-0 mt-1 border border-yellow-500/20">
-                    <FaRobot />
-                  </div>
-                )}
+                {/* Text Bubble */}
+                <div className={`px-4 py-2.5 text-[14px] leading-relaxed shadow-md backdrop-blur-sm ${
+                  msg.sender === 'user' 
+                    ? 'bg-gradient-to-br from-yellow-500 to-yellow-600 text-white font-medium rounded-2xl rounded-tr-sm shadow-yellow-900/20 border border-white/10' // User: Vàng
+                    : 'bg-gray-800/80 border border-gray-700 text-gray-200 rounded-2xl rounded-tl-sm' // Bot: Xám
+                }`}>
+                  {msg.text}
+                </div>
 
-                <div className={`flex flex-col max-w-[85%] ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
-                  
-                  {/* Bong bóng Chat */}
-                  <div className={`px-4 py-3 text-sm shadow-md relative ${
-                    msg.sender === 'user' 
-                      ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-medium rounded-2xl rounded-tr-none shadow-yellow-900/20 border border-yellow-400/10' // User: Vàng Kim
-                      : 'bg-gray-800 border border-gray-700 text-gray-200 rounded-2xl rounded-tl-none' // Bot: Xám đậm
-                  }`}>
-                    {msg.text}
-                  </div>
+                {/* --- CARD KẾT QUẢ TÌM KIẾM --- */}
+                {msg.results && msg.results.length > 0 && (
+                  <div className="mt-3 w-full space-y-2.5 pl-1">
+                    {msg.results.map((item: any) => (
+                      <Link href={`/restaurants/${item._id}`} key={item._id} className="block group">
+                        <div className="bg-gray-800/60 hover:bg-gray-800 rounded-xl border border-gray-700/50 hover:border-yellow-500/50 shadow-sm hover:shadow-lg hover:shadow-yellow-500/10 transition-all duration-300 flex overflow-hidden cursor-pointer h-[88px] relative group">
+                          
+                          {/* Dải màu hover bên trái (Vàng) */}
+                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-yellow-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
-                  {/* KẾT QUẢ TÌM KIẾM (Card) */}
-                  {msg.results && msg.results.length > 0 && (
-                    <div className="mt-3 w-full space-y-3 pl-1">
-                      {msg.results.map((item: any) => (
-                        <Link href={`/restaurants/${item._id}`} key={item._id} className="block group">
-                          <div className="bg-gray-800 rounded-xl border border-gray-700 shadow-sm hover:shadow-yellow-500/20 hover:border-yellow-500/50 transition-all duration-300 overflow-hidden flex h-24 cursor-pointer transform hover:-translate-y-1">
-                            
-                            {/* Hình ảnh */}
-                            <div className="relative w-24 h-full shrink-0">
-                              <img
-                                src={item.avatarUrl || "/assets/image/pho.png"}
-                                alt={item.tenQuan}
-                                referrerPolicy="no-referrer"
-                                className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500 opacity-90 group-hover:opacity-100"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  if (!target.src.includes("/assets/image/pho.png")) {
-                                     target.src = "/assets/image/pho.png";
-                                  }
-                                }}
-                              />
+                          {/* Hình ảnh */}
+                          <div className="relative w-[88px] h-full shrink-0">
+                            <img
+                              src={item.avatarUrl || "/assets/image/pho.png"}
+                              alt={item.tenQuan}
+                              referrerPolicy="no-referrer"
+                              className="object-cover w-full h-full opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-transform duration-500"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                if (!target.src.includes("/assets/image/pho.png")) {
+                                   target.src = "/assets/image/pho.png";
+                                }
+                              }}
+                            />
+                            {/* Rating Badge Overlay */}
+                            <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-sm text-yellow-400 text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                               <FaStar size={8} /> {item.diemTrungBinh ? item.diemTrungBinh.toFixed(1) : "N/A"}
                             </div>
+                          </div>
 
-                            {/* Thông tin */}
-                            <div className="p-3 flex flex-col justify-between flex-1 min-w-0">
-                              <div>
-                                {/* Hover text màu vàng */}
-                                <h4 className="font-bold text-sm text-gray-100 truncate group-hover:text-yellow-400 transition-colors">
-                                  {item.tenQuan}
-                                </h4>
-                                {/* Icon map màu vàng */}
-                                <p className="text-[10px] text-gray-400 flex items-center gap-1 mt-1 truncate">
-                                  <FaMapMarkerAlt className="text-yellow-500" /> 
-                                  {item.diaChi}
-                                </p>
-                              </div>
+                          {/* Thông tin */}
+                          <div className="p-2.5 flex flex-col justify-between flex-1 min-w-0">
+                            <div>
+                              {/* Tên quán hover màu vàng */}
+                              <h4 className="font-bold text-[13px] text-gray-100 truncate group-hover:text-yellow-400 transition-colors leading-tight">
+                                {item.tenQuan}
+                              </h4>
+                              {/* Icon map màu vàng */}
+                              <p className="text-[10px] text-gray-400 flex items-center gap-1 mt-1 truncate">
+                                <FaMapMarkerAlt className="text-gray-500 group-hover:text-yellow-500 transition-colors shrink-0" size={10} /> 
+                                {item.diaChi}
+                              </p>
+                            </div>
+                            
+                            <div className="flex justify-between items-center mt-1">
+                              {/* Giá tiền viền vàng */}
+                              <span className="text-[10px] font-medium text-yellow-500 bg-yellow-950/30 px-2 py-0.5 rounded border border-yellow-500/20">
+                                {item.giaCa ? item.giaCa : "Đang cập nhật"}
+                              </span>
                               
-                              <div className="flex justify-between items-end">
-                                {/* Giá tiền màu vàng */}
-                                <span className="text-xs font-semibold text-yellow-500 bg-yellow-900/20 px-2 py-0.5 rounded-md border border-yellow-500/20">
-                                  {item.giaCa ? item.giaCa : "Liên hệ"}
-                                </span>
-                                <div className="flex items-center gap-1 text-xs font-bold text-yellow-400">
-                                  <FaStar /> {item.diemTrungBinh ? item.diemTrungBinh.toFixed(1) : "N/A"}
-                                </div>
+                              <div className="bg-gray-700/50 p-1 rounded-full group-hover:bg-yellow-500 group-hover:text-white transition-colors text-gray-400">
+                                 <FaStore size={10} />
                               </div>
                             </div>
                           </div>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </div>
-            ))}
-            
-            {/* Hiệu ứng Typing (Màu Vàng) */}
-            {loading && (
-              <div className="flex justify-start w-full">
-                <div className="w-8 h-8 bg-gradient-to-br from-yellow-500 to-yellow-700 rounded-full flex items-center justify-center text-white text-xs mr-2 mt-1 border border-yellow-500/10">
-                   <FaRobot />
-                </div>
-                <div className="bg-gray-800 border border-gray-700 px-4 py-3 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-1">
-                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* INPUT AREA */}
-          <div className="p-3 bg-gray-900 border-t border-gray-800 shrink-0">
-            <div className="flex items-center gap-2 bg-gray-800 rounded-full px-2 py-2 border border-gray-700 focus-within:border-yellow-500/50 focus-within:bg-gray-800 focus-within:shadow-lg focus-within:shadow-yellow-500/10 transition-all">
-              <input
-                type="text"
-                className="flex-1 bg-transparent border-none outline-none text-sm px-3 text-gray-200 placeholder-gray-500 caret-yellow-500"
-                placeholder="Hôm nay bạn muốn ăn gì?..."
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              />
-              <button 
-                onClick={handleSend}
-                disabled={loading || !input.trim()}
-                // Gradient nút gửi màu vàng
-                className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-white w-9 h-9 rounded-full flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:scale-105 active:scale-95"
-              >
-                <FaPaperPlane size={14} className="-ml-0.5 mt-0.5" />
-              </button>
             </div>
+          ))}
+          
+          {/* Typing Animation */}
+          {loading && (
+            <div className="flex justify-start w-full animate-fade-in">
+              <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center text-yellow-500 text-xs mr-2 mt-1 border border-gray-700">
+                 <FaRobot />
+              </div>
+              <div className="bg-gray-800 border border-gray-700 px-3 py-2.5 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-1">
+                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></span>
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* INPUT AREA */}
+        <div className="p-3 bg-gray-900 border-t border-gray-800 shrink-0 relative z-20">
+          <div className="flex items-center gap-2 bg-gray-950 rounded-full px-1.5 py-1.5 border border-gray-800 focus-within:border-yellow-500/50 focus-within:bg-black focus-within:shadow-[0_0_15px_rgba(250,204,21,0.15)] transition-all duration-300">
+            <input
+              type="text"
+              className="flex-1 bg-transparent border-none outline-none text-sm px-4 text-gray-200 placeholder-gray-500 caret-yellow-500 h-9"
+              placeholder="Hôm nay ăn gì?..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+            />
+            <button 
+              onClick={handleSend}
+              disabled={loading || !input.trim()}
+              // Nút gửi Gradient Vàng
+              className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-white w-9 h-9 rounded-full flex items-center justify-center disabled:opacity-50 disabled:grayscale transition-all shadow-md hover:shadow-yellow-500/30 hover:scale-105 active:scale-95"
+            >
+              <FaPaperPlane size={13} className="-ml-0.5 mt-0.5" />
+            </button>
+          </div>
+          <div className="text-center mt-1">
+             <span className="text-[9px] text-gray-600">Powered by AI &bull; Kết quả có thể thay đổi</span>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
