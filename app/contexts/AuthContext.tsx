@@ -150,6 +150,13 @@ interface User {
   email: string;
   username: string;
   picture?: string;
+  // [FIX] Thêm các trường mới vào đây để khớp với ProfilePage
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  company?: string;
+  designation?: string;
+  bio?: string;
 }
 
 type Lang = 'en' | 'vn';

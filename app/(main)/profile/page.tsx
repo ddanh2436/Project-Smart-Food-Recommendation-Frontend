@@ -1,5 +1,4 @@
-// ddanh2436/project-smart-food-recommendation-frontend/Project-Smart-Food-Recommendation-Frontend-1fc724bd73b2d99b6b7202f40f81236938357594/app/(main)/profile/page.tsx
-
+// app/(main)/profile/page.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -11,10 +10,9 @@ import api from '@/app/lib/api';
 import { toast } from 'react-hot-toast'; 
 import Link from 'next/link';
 
-// === DỮ LIỆU NGÔN NGỮ (THÊM MODAL TEXT) ===
+// === DỮ LIỆU NGÔN NGỮ ĐẦY ĐỦ (Đã fix lỗi thiếu key) ===
 const langData = {
   en: {
-    // ... (Giữ nguyên các text cũ)
     loading: "Loading profile...",
     redirect: "Redirecting to login...",
     tabAccount: "Account",
@@ -35,14 +33,13 @@ const langData = {
     updateSuccess: "Profile updated successfully!",
     updateFailed: "Update failed. Please try again.",
     cancelToast: "Changes canceled",
-    // MODAL TEXTS
+    // Modal Logout
     logoutConfirmTitle: "Confirm Logout",
     logoutConfirmMessage: "Are you sure you want to log out?",
     logoutYes: "Yes, Log Out",
     logoutCancel: "Cancel",
   },
   vn: {
-    // ... (Giữ nguyên các text cũ)
     loading: "Đang tải hồ sơ...",
     redirect: "Đang chuyển hướng đến đăng nhập...",
     tabAccount: "Tài khoản",
@@ -63,14 +60,13 @@ const langData = {
     updateSuccess: "Cập nhật hồ sơ thành công!",
     updateFailed: "Cập nhật thất bại. Vui lòng thử lại.",
     cancelToast: "Đã hủy thay đổi",
-    // MODAL TEXTS
+    // Modal Logout
     logoutConfirmTitle: "Xác nhận Đăng xuất",
     logoutConfirmMessage: "Bạn có chắc chắn muốn đăng xuất không?",
     logoutYes: "Đăng xuất",
     logoutCancel: "Hủy bỏ",
   }
 };
-// ===================================
 
 const ArrowLeftIcon = () => (
   <svg 
@@ -89,9 +85,9 @@ const ArrowLeftIcon = () => (
   </svg>
 );
 
-// === MODAL COMPONENT (Thêm mới) ===
+// === MODAL COMPONENT ===
 interface LogoutModalProps {
-    T: typeof langData.vn; // Sử dụng T để lấy text theo ngôn ngữ
+    T: typeof langData.vn; 
     onConfirm: () => void;
     onCancel: () => void;
 }
@@ -118,16 +114,17 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ T, onConfirm, onCancel }) => 
         </div>
     </div>
 );
-// =================================
 
 export default function ProfilePage() {
   const { user, setUser, isLoading, currentLang } = useAuth(); 
   const router = useRouter();
-  const T = langData[currentLang]; 
+  
+  // Đảm bảo T luôn có dữ liệu (fallback về vn nếu lỗi)
+  const T = langData[currentLang] || langData.vn; 
 
   const [activeTab, setActiveTab] = useState('account');
   const [isUpdating, setIsUpdating] = useState(false);
-  const [showLogoutModal, setShowLogoutModal] = useState(false); // TRẠNG THÁI MODAL (Thêm mới)
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -138,7 +135,6 @@ export default function ProfilePage() {
     bio: '',
   });
 
-  // Chạy khi user, isLoading thay đổi (Xử lý chuyển hướng Auth)
   useEffect(() => {
     if (!isLoading && !user) {
         const timer = setTimeout(() => {
@@ -149,7 +145,6 @@ export default function ProfilePage() {
     }
   }, [user, isLoading, router]);
 
-  // Chạy khi user thay đổi (Tải dữ liệu vào form)
   useEffect(() => {
     if (user) {
       setFormData({
@@ -163,9 +158,8 @@ export default function ProfilePage() {
     }
   }, [user]); 
   
-  // === HÀM ĐĂNG XUẤT XÁC NHẬN (SỬA ĐỔI) ===
   const handleConfirmLogout = () => {
-    setShowLogoutModal(false); // Đóng modal
+    setShowLogoutModal(false);
     if (typeof window !== 'undefined') {
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
@@ -175,11 +169,9 @@ export default function ProfilePage() {
     router.push("/");
   };
   
-  // Hàm gọi modal khi nhấn nút Logout
   const handleProfileLogout = () => {
     setShowLogoutModal(true);
   };
-  // ============================================
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
@@ -218,7 +210,6 @@ export default function ProfilePage() {
     }
   };
 
-
   if (isLoading || !user) {
     return <div className="profile-loading"><h1>{T.loading}</h1></div>;
   }
@@ -229,11 +220,10 @@ export default function ProfilePage() {
     : user.username;
   const avatarText = formData.firstName 
     ? formData.firstName.charAt(0).toUpperCase()
-    : user.username.charAt(0).toUpperCase();
+    : (user.username ? user.username.charAt(0).toUpperCase() : 'U');
 
   return (
     <div className="profile-page-background">
-      {/* Nút Quay lại đã được di chuyển bằng CSS */}
       <Link href="/" className="global-back-button" aria-label="Quay lại trang chủ">
         <ArrowLeftIcon />
       </Link>
@@ -241,7 +231,6 @@ export default function ProfilePage() {
       <div className="profile-grid-container">
         {/* === CỘT BÊN TRÁI (NAV) === */}
         <div className="profile-nav-left">
-          {/* ... (Giữ nguyên nội dung bên trái) ... */}
           <div className="profile-user-summary">
             <div className="profile-avatar-large">
               {user.picture ? (
@@ -251,6 +240,7 @@ export default function ProfilePage() {
                     width={90} 
                     height={90} 
                     unoptimized={user.picture.includes('googleusercontent.com')}
+                    className="avatar-img"
                 />
               ) : (
                 <div className="profile-avatar-placeholder-large">
@@ -267,7 +257,6 @@ export default function ProfilePage() {
               {T.tabAccount}
             </li>
             
-            {/* GỌI HÀM MỚI ĐỂ MỞ MODAL */}
             <li className="logout-button" onClick={handleProfileLogout}>
               {T.tabLogout}
             </li>
@@ -280,7 +269,6 @@ export default function ProfilePage() {
           
           <form className="profile-form" onSubmit={handleSubmit}>
             <div className="form-grid">
-              {/* First Name */}
               <div className="form-group">
                 <label htmlFor="firstName">{T.firstName}</label>
                 <input 
@@ -292,7 +280,6 @@ export default function ProfilePage() {
                 />
               </div>
               
-              {/* Last Name */}
               <div className="form-group">
                 <label htmlFor="lastName">{T.lastName}</label>
                 <input 
@@ -304,7 +291,6 @@ export default function ProfilePage() {
                 />
               </div>
               
-              {/* Email (Read Only) */}
               <div className="form-group full-width">
                 <label htmlFor="email">{T.email}</label>
                 <input 
@@ -316,7 +302,6 @@ export default function ProfilePage() {
                 />
               </div>
               
-              {/* Phone */}
               <div className="form-group">
                 <label htmlFor="phone">{T.phone}</label>
                 <input 
@@ -329,7 +314,6 @@ export default function ProfilePage() {
                 />
               </div>
 
-              {/* Company */}
               <div className="form-group">
                 <label htmlFor="company">{T.company}</label>
                 <input 
@@ -342,7 +326,6 @@ export default function ProfilePage() {
                 />
               </div>
 
-              {/* Designation */}
               <div className="form-group">
                 <label htmlFor="designation">{T.designation}</label>
                 <input 
@@ -355,7 +338,6 @@ export default function ProfilePage() {
                 />
               </div>
 
-              {/* Bio */}
               <div className="form-group full-width">
                 <label htmlFor="bio">{T.bio}</label>
                 <textarea 
@@ -381,7 +363,6 @@ export default function ProfilePage() {
         </div>
       </div>
       
-      {/* RENDER MODAL TẠI ĐÂY */}
       {showLogoutModal && (
           <LogoutModal 
               T={T}

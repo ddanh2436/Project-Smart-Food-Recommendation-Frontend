@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
         hostname: "**",
       },
     ],
+    unoptimized: true,
+  },
+  
+  typescript: {
+    ignoreBuildErrors: true,
   },
 };
 

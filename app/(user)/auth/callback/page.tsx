@@ -1,14 +1,15 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react'; // [1] Import Suspense
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
 import api from '@/app/lib/api';
 
-export default function AuthCallback() {
+// [2] Tách logic chính ra thành một component con (CallbackContent)
+function CallbackContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { setUser } = useAuth(); // Lấy hàm setUser
+  const { setUser } = useAuth();
 
   useEffect(() => {
     const accessToken = searchParams.get('accessToken');
@@ -39,5 +40,18 @@ export default function AuthCallback() {
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
       <h1>Đang đăng nhập, vui lòng chờ...</h1>
     </div>
+  );
+}
+
+// [3] Component chính (AuthCallback) chỉ nhiệm vụ bọc Suspense
+export default function AuthCallback() {
+  return (
+    <Suspense fallback={
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <h1>Loading...</h1>
+      </div>
+    }>
+      <CallbackContent />
+    </Suspense>
   );
 }
