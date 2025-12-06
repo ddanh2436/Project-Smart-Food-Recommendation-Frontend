@@ -6,6 +6,7 @@ import { useAuth } from "@/app/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { searchRestaurantsByImage } from "@/app/lib/api"; 
 import Image from "next/image"; 
+import { FaMapMarkerAlt, FaStar, FaStore, FaTimes, FaUtensils } from "react-icons/fa";
 
 // === DỮ LIỆU NGÔN NGỮ ===
 const langData = {
@@ -387,33 +388,76 @@ const HeroSection: React.FC = () => {
 
       {/* MODAL KẾT QUẢ TÌM KIẾM ẢNH */}
       {imageResult && (
-        <div className="image-result-modal">
-          <div className="modal-header">
-            <h3>Món ăn nhận diện: <span style={{color: '#e9a004'}}>{imageResult.detectedFood}</span></h3>
-            <button className="close-btn" onClick={() => setImageResult(null)}>✕</button>
-          </div>
+        <div className="image-search-overlay">
+          <div className="image-search-modal">
+            
+            {/* Header Modal */}
+            <div className="modal-header-modern">
+              <div className="modal-title-wrapper">
+                <span className="detect-label">AI Nhận diện:</span>
+                <h3 className="detected-dish-name">{imageResult.detectedFood}</h3>
+              </div>
+              <button className="modal-close-btn" onClick={() => setImageResult(null)}>
+                <FaTimes />
+              </button>
+            </div>
 
-          <div className="modal-body">
-            {imageResult.data.length === 0 ? (
-               <p style={{textAlign: 'center', color: '#666', marginTop: 20}}>Không tìm thấy quán nào bán món này.</p>
-            ) : (
-              imageResult.data.map((res: any) => (
-                <div key={res._id} className="mini-res-card" onClick={() => router.push(`/restaurants/${res._id}`)}>
-                  <div className="res-img-box">
-                    <Image 
-                      src={res.avatarUrl || "/assets/image/pho.png"} 
-                      alt={res.tenQuan}
-                      width={60} height={60}
-                      unoptimized={true}
-                    />
-                  </div>
-                  <div className="res-info">
-                    <h4>{res.tenQuan}</h4>
-                    <p>⭐ {res.diemTrungBinh} • {res.giaCa}</p>
-                  </div>
+            {/* Body Modal */}
+            <div className="modal-body-modern">
+              {imageResult.data.length === 0 ? (
+                 <div className="empty-state">
+                    <div className="empty-icon">🍽️</div>
+                    <p>Rất tiếc, chưa tìm thấy quán nào bán món này trong hệ thống.</p>
+                 </div>
+              ) : (
+                <div className="result-grid">
+                  {imageResult.data.map((res: any) => (
+                    <div 
+                      key={res._id} 
+                      className="result-card-modern" 
+                      onClick={() => router.push(`/restaurants/${res._id}`)}
+                    >
+                      {/* Hình ảnh Card */}
+                      <div className="card-image-wrapper">
+                        <img 
+                          src={res.avatarUrl || "/assets/image/pho.png"} 
+                          alt={res.tenQuan}
+                          className="card-img"
+                          referrerPolicy="no-referrer" // Quan trọng để load ảnh Foody
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = "/assets/image/pho.png";
+                          }}
+                        />
+                        <div className="card-rating-badge">
+                          <FaStar /> {res.diemTrungBinh ? res.diemTrungBinh.toFixed(1) : "N/A"}
+                        </div>
+                      </div>
+
+                      {/* Thông tin Card */}
+                      <div className="card-info-content">
+                        <h4 className="card-res-name">{res.tenQuan}</h4>
+                        
+                        <div className="card-row">
+                          <FaMapMarkerAlt className="icon-orange" />
+                          <span className="card-address">{res.diaChi}</span>
+                        </div>
+
+                        <div className="card-footer">
+                          <span className="price-tag">
+                            <FaUtensils className="icon-small" /> 
+                            {res.giaCa || "Đang cập nhật"}
+                          </span>
+                          <span className="view-btn">
+                            Xem quán <FaStore />
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))
-            )}
+              )}
+            </div>
           </div>
         </div>
       )}
