@@ -1,7 +1,6 @@
-// app/(main)/restaurants/page.tsx
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react"; // [1] Thêm Suspense
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -15,7 +14,7 @@ const RoutingMap = dynamic(() => import("@/components/RoutingMap/RoutingMap"), {
   loading: () => <div style={{ padding: '20px', textAlign: 'center', background: '#f5f5f5', borderRadius: '8px' }}>Đang tải bản đồ chỉ đường...</div>,
 });
 
-// ... (Giữ nguyên các Icons) ...
+// ... (Giữ nguyên phần khai báo các Icons: FilterIcon, CheckIcon, v.v...)
 const FilterIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>;
 const CheckIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>;
 const ChevronDownIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="chevron-icon"><path d="M6 9l6 6 6-6"/></svg>;
@@ -36,7 +35,13 @@ const SadSearchIcon = () => (
 const RefreshIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
 );
+const DirectionIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+  </svg>
+);
 
+// ... (Giữ nguyên Interface Restaurant và các biến hằng số: SORT_OPTIONS, RATING_RANGES, ORDER_OPTIONS)
 interface Restaurant {
   _id: string;
   tenQuan: string;
@@ -51,8 +56,8 @@ interface Restaurant {
   diemPhucVu: number;
   diemGiaCa: number;
   urlGoc: string;
-  lat?: number; // Đã thêm
-  lon?: number; // Đã thêm
+  lat?: number;
+  lon?: number;
 }
 
 const getRatingLabel = (score: number) => {
@@ -89,9 +94,18 @@ const ORDER_OPTIONS = [
   { id: 'asc', label: 'Thấp đến Cao (Tăng dần)', icon: <SortAscIcon /> },
 ];
 
-export default function RestaurantsPage() {
+const RatingRow = ({ label, score }: { label: string, score: number }) => (
+  <div className="rating-row">
+    <span className="rating-label">{label}</span>
+    <div className="rating-bar-bg"><div className="rating-bar-fill" style={{ width: `${(score || 0) * 10}%` }}></div></div>
+    <span className="rating-value">{score ? score.toFixed(1) : "-"}</span>
+  </div>
+);
+
+// [2] ĐỔI TÊN COMPONENT CŨ THÀNH 'RestaurantsContent' (Không export default nữa)
+function RestaurantsContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams(); // Hook này gây ra lỗi nếu không có Suspense
 
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -113,23 +127,15 @@ export default function RestaurantsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const [showMap, setShowMap] = useState(false); // State bật tắt map
-
-  const DirectionIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
-  </svg>
-);
+  const [showMap, setShowMap] = useState(false); 
 
   // GIỮ NGUYÊN GPS CỨNG NHƯ YÊU CẦU
-  //const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>({
     lat: 10.748017595600404, 
     lon: 106.6767808260947
   });
 
   const LIMIT = 32; 
-  // useEffect(() => { //   if ("geolocation" in navigator) { //     navigator.geolocation.getCurrentPosition( //       (position) => { //         console.log("Frontend: Đã lấy được tọa độ", position.coords); //         setUserLocation({ //           lat: position.coords.latitude, //           lon: position.coords.longitude //         }); //       }, //       (error) => { //         console.warn("Frontend: Không thể lấy vị trí", error.message); //       } //     ); //   } // }, []);
 
   const getDisplayScore = (res: Restaurant) => {
     switch (activeSort) {
@@ -272,13 +278,12 @@ export default function RestaurantsPage() {
   }, []);
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
-  // Reset trạng thái showMap khi mở Modal mới
+  
   const openModal = (res: Restaurant, autoShowMap: boolean = false) => { 
     setSelectedRes(res); 
-    // Nếu bấm nút chỉ đường thì bật map luôn (true), còn bấm card thường thì tắt (false)
     setShowMap(autoShowMap); 
     document.body.style.overflow = 'hidden'; 
-};
+  };
   const closeModal = () => { setSelectedRes(null); document.body.style.overflow = 'unset'; };
 
   return (
@@ -393,15 +398,15 @@ export default function RestaurantsPage() {
                             <div className="meta-item price"><MoneyIcon /><span>{res.giaCa || "Đang cập nhật"}</span></div>
                             <div className="meta-item hours"><ClockIcon /><span>{res.gioMoCua || "Đang cập nhật"}</span></div>
                               <button 
-        className="btn-quick-route-icon"
-        onClick={(e) => {
-            e.stopPropagation();
-            openModal(res, true);
-        }}
-        data-tooltip="Chỉ đường tới quán"
-      >
-        <DirectionIcon /> 
-      </button>
+                                className="btn-quick-route-icon"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    openModal(res, true);
+                                }}
+                                data-tooltip="Chỉ đường tới quán"
+                              >
+                                <DirectionIcon /> 
+                              </button>
                         </div>
                       </div>
                     </div>
@@ -443,15 +448,15 @@ export default function RestaurantsPage() {
                 <div className="modal-info-col">
                   <h2 className="modal-title">{selectedRes.tenQuan}</h2>
                   <div className="modal-address">
-    <MapPinIcon />
-    <span>{selectedRes.diaChi}</span>
-  </div>
+                    <MapPinIcon />
+                    <span>{selectedRes.diaChi}</span>
+                  </div>
                    <div className="modal-meta-grid">
                       <div className="modal-meta-item"><ClockIcon /> {selectedRes.gioMoCua || "Đang cập nhật"}</div>
                       <div className="modal-meta-item highlight"><MoneyIcon /> {selectedRes.giaCa || "Đang cập nhật"}</div>
                    </div>
 
-                   {/* --- KHU VỰC BẢN ĐỒ (MỚI THÊM) --- */}
+                   {/* --- KHU VỰC BẢN ĐỒ --- */}
                    <div className="map-section" style={{ marginTop: '20px', marginBottom: '15px' }}>
                      <button 
                         className="btn-show-map"
@@ -498,10 +503,15 @@ export default function RestaurantsPage() {
   );
 }
 
-const RatingRow = ({ label, score }: { label: string, score: number }) => (
-  <div className="rating-row">
-    <span className="rating-label">{label}</span>
-    <div className="rating-bar-bg"><div className="rating-bar-fill" style={{ width: `${(score || 0) * 10}%` }}></div></div>
-    <span className="rating-value">{score ? score.toFixed(1) : "-"}</span>
-  </div>
-);
+// [3] COMPONENT CHÍNH SẼ BỌC SUSPENSE
+export default function RestaurantsPage() {
+  return (
+    <Suspense fallback={
+      <div className="loading-container">
+        <div className="spinner"></div> Đang tải...
+      </div>
+    }>
+      <RestaurantsContent />
+    </Suspense>
+  );
+}
