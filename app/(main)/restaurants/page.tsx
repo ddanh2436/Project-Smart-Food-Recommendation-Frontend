@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, Suspense } from "react"; // [1] Thêm Suspense
+import React, { useEffect, useState, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -14,7 +14,7 @@ const RoutingMap = dynamic(() => import("@/components/RoutingMap/RoutingMap"), {
   loading: () => <div style={{ padding: '20px', textAlign: 'center', background: '#f5f5f5', borderRadius: '8px' }}>Đang tải bản đồ chỉ đường...</div>,
 });
 
-// ... (Giữ nguyên phần khai báo các Icons: FilterIcon, CheckIcon, v.v...)
+// Các Icons
 const FilterIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>;
 const CheckIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>;
 const ChevronDownIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="chevron-icon"><path d="M6 9l6 6 6-6"/></svg>;
@@ -41,7 +41,6 @@ const DirectionIcon = () => (
   </svg>
 );
 
-// ... (Giữ nguyên Interface Restaurant và các biến hằng số: SORT_OPTIONS, RATING_RANGES, ORDER_OPTIONS)
 interface Restaurant {
   _id: string;
   tenQuan: string;
@@ -102,10 +101,9 @@ const RatingRow = ({ label, score }: { label: string, score: number }) => (
   </div>
 );
 
-// [2] ĐỔI TÊN COMPONENT CŨ THÀNH 'RestaurantsContent' (Không export default nữa)
 function RestaurantsContent() {
   const router = useRouter();
-  const searchParams = useSearchParams(); // Hook này gây ra lỗi nếu không có Suspense
+  const searchParams = useSearchParams();
 
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -129,11 +127,32 @@ function RestaurantsContent() {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [showMap, setShowMap] = useState(false); 
 
-  // GIỮ NGUYÊN GPS CỨNG NHƯ YÊU CẦU
+  // --- CẬP NHẬT: LOGIC LẤY GPS NGƯỜI DÙNG ---
+  // Khởi tạo mặc định (ví dụ: trung tâm TP.HCM)
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>({
     lat: 10.748017595600404, 
     lon: 106.6767808260947
   });
+
+  // useEffect để xin quyền và lấy vị trí thực tế
+  useEffect(() => {
+    if (typeof window !== "undefined" && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error("Lỗi lấy vị trí hoặc người dùng từ chối:", error);
+          // Giữ nguyên vị trí mặc định nếu không lấy được
+        },
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+      );
+    }
+  }, []); // Chạy 1 lần khi component mount
+  // ------------------------------------------------
 
   const LIMIT = 32; 
 
@@ -230,7 +249,7 @@ function RestaurantsContent() {
     };
 
     fetchData();
-  }, [searchParams, userLocation]);
+  }, [searchParams, userLocation]); // userLocation thay đổi sẽ trigger fetch lại
 
   const updateURL = (newParams: any) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -503,7 +522,6 @@ function RestaurantsContent() {
   );
 }
 
-// [3] COMPONENT CHÍNH SẼ BỌC SUSPENSE
 export default function RestaurantsPage() {
   return (
     <Suspense fallback={
