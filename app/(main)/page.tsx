@@ -21,11 +21,12 @@ interface BackendRestaurant {
 // 2. Hàm lấy dữ liệu từ API (Server-side Fetching)
 async function getCityData(cityKey: string) {
   try {
-    // Gọi API NestJS (đã sửa logic lọc theo Regex địa chỉ)
-    // Query: city=hanoi (hoặc hcmc), limit=4, sort=diemTrungBinh desc
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+    // 2. Gọi API với URL động
     const res = await fetch(
-      `http://localhost:3001/restaurants?limit=4&sortBy=diemTrungBinh&order=desc&city=${cityKey}`,
-      { next: { revalidate: 3600 } } // Cache dữ liệu 1 tiếng để web nhanh hơn
+      `${apiUrl}/restaurants?limit=4&sortBy=diemTrungBinh&order=desc&city=${cityKey}`,
+      { next: { revalidate: 3600 } }
     );
 
     if (!res.ok) {
@@ -34,21 +35,21 @@ async function getCityData(cityKey: string) {
     }
 
     const resJson = await res.json();
+    // ... (phần xử lý data giữ nguyên)
     const data: BackendRestaurant[] = resJson.data || [];
 
-    // Map dữ liệu Tiếng Việt (DB) sang Tiếng Anh (Component Props)
     return data.map((item) => ({
       id: item._id,
       name: item.tenQuan,
       rating: item.diemTrungBinh,
       address: item.diaChi,
-      image: item.avatarUrl || '/assets/image/pho.png', // Ảnh mặc định nếu thiếu
-      dish: item.tags ? item.tags.split(',')[0] : 'Món ngon', // Lấy tag đầu tiên làm tên món
-      dishEn: 'Specialty', // Tạm thời để cứng
+      image: item.avatarUrl || '/assets/image/pho.png',
+      dish: item.tags ? item.tags.split(',')[0] : 'Món ngon',
+      dishEn: 'Specialty',
     }));
   } catch (error) {
     console.error(`Error fetching ${cityKey}:`, error);
-    return [];
+    return []; // Trả về mảng rỗng để không làm crash trang
   }
 }
 
