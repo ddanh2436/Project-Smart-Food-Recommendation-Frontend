@@ -98,6 +98,16 @@ const Header: React.FC = () => {
   const handleLangSwitch = (lang: 'en' | 'vn') => {
     setLang(lang);
     setIsLangDropdownOpen(false);
+    // Bước A: Chuẩn hóa mã ngôn ngữ ('vn' -> 'vi' để khớp chuẩn quốc tế & code bên kia)
+    const storageLang = lang === 'vn' ? 'vi' : 'en';
+
+    // Bước B: Lưu vào LocalStorage để F5 không bị mất
+    localStorage.setItem('app-language', storageLang);
+
+    // Bước C: BẮN TÍN HIỆU "language-change" ra toàn bộ website
+    if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('language-change'));
+    }
     toast.success(lang === 'en' ? "Language switched to English" : "Đã chuyển sang Tiếng Việt");
   };
 

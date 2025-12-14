@@ -14,7 +14,7 @@ const RoutingMap = dynamic(() => import("@/components/RoutingMap/RoutingMap"), {
   loading: () => <div style={{ padding: '20px', textAlign: 'center', background: '#f5f5f5', borderRadius: '8px' }}>Đang tải bản đồ chỉ đường...</div>,
 });
 
-// Các Icons
+// Các Icons (Giữ nguyên)
 const FilterIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>;
 const CheckIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>;
 const ChevronDownIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="chevron-icon"><path d="M6 9l6 6 6-6"/></svg>;
@@ -120,6 +120,9 @@ function RestaurantsContent() {
   const [activeRating, setActiveRating] = useState<string>('all');
   const [activeOrder, setActiveOrder] = useState<string>('desc'); 
   const [activeOpenNow, setActiveOpenNow] = useState<boolean>(false);
+  
+  // --- [MỚI] State cho City ---
+  const [activeCity, setActiveCity] = useState<string>('');
 
   const [selectedRes, setSelectedRes] = useState<Restaurant | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -128,13 +131,11 @@ function RestaurantsContent() {
   const [showMap, setShowMap] = useState(false); 
 
   // --- CẬP NHẬT: LOGIC LẤY GPS NGƯỜI DÙNG ---
-  // Khởi tạo mặc định (ví dụ: trung tâm TP.HCM)
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>({
     lat: 10.748017595600404, 
     lon: 106.6767808260947
   });
 
-  // useEffect để xin quyền và lấy vị trí thực tế
   useEffect(() => {
     if (typeof window !== "undefined" && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -146,12 +147,11 @@ function RestaurantsContent() {
         },
         (error) => {
           console.error("Lỗi lấy vị trí hoặc người dùng từ chối:", error);
-          // Giữ nguyên vị trí mặc định nếu không lấy được
         },
         { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
       );
     }
-  }, []); // Chạy 1 lần khi component mount
+  }, []); 
   // ------------------------------------------------
 
   const LIMIT = 32; 
@@ -195,6 +195,7 @@ function RestaurantsContent() {
     let order = searchParams.get('order'); 
     const open = searchParams.get('openNow') === 'true'; 
     const search = searchParams.get('search') || ''; 
+    const city = searchParams.get('city') || ''; // 👈 [MỚI] Lấy city từ URL
 
     if (!order) {
       if (sort === 'distance' || sort === 'price') order = 'asc';
@@ -206,6 +207,7 @@ function RestaurantsContent() {
     setActiveRating(rating);
     setActiveOrder(order);
     setActiveOpenNow(open);
+    setActiveCity(city); // 👈 Cập nhật state city
     
     setSelectedSort(sort);
     setSelectedRating(rating);
@@ -235,8 +237,9 @@ function RestaurantsContent() {
       }
 
       try {
+        // 👇 [QUAN TRỌNG] Truyền tham số city vào hàm gọi API
         const response = await getAllRestaurants(
-          page, LIMIT, dbSortBy, order!, rating, String(open), latStr, lonStr, search
+          page, LIMIT, dbSortBy, order!, rating, String(open), latStr, lonStr, search, city
         );
         
         setRestaurants(response.data || []);
@@ -249,7 +252,7 @@ function RestaurantsContent() {
     };
 
     fetchData();
-  }, [searchParams, userLocation]); // userLocation thay đổi sẽ trigger fetch lại
+  }, [searchParams, userLocation]); 
 
   const updateURL = (newParams: any) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -305,13 +308,46 @@ function RestaurantsContent() {
   };
   const closeModal = () => { setSelectedRes(null); document.body.style.overflow = 'unset'; };
 
+  // --- Logic hiển thị tiêu đề động ---
+  let pageTitle = "Khám phá Nhà hàng";
+  let pageSubtitle = "Bộ sưu tập những địa điểm ẩm thực tốt nhất";
+
+  if (activeCity === 'hanoi') {
+    pageTitle = "Ẩm thực Hà Nội";
+    pageSubtitle = "Đang hiển thị các địa điểm nổi bật tại thủ đô Hà Nội";
+  } else if (activeCity === 'hcmc') {
+    pageTitle = "Ẩm thực TP.HCM";
+    pageSubtitle = "Đang hiển thị các địa điểm nổi bật tại TP. Hồ Chí Minh";
+  }
+  // ----------------------------------
+
   return (
     <div className="restaurants-page-wrapper">
       <div className="container">
         
         <div className="page-header">
-          <h1 className="page-title">Khám phá Nhà hàng</h1>
-          <p className="page-subtitle">Bộ sưu tập những địa điểm ẩm thực tốt nhất</p>
+          <h1 className="page-title">{pageTitle}</h1>
+          <p className="page-subtitle">{pageSubtitle}</p>
+          
+          {/* [MỚI] Nút xóa lọc khu vực nếu đang chọn city */}
+          {activeCity && (
+             <div style={{ marginTop: '10px' }}>
+                <button 
+                    onClick={() => router.push('/restaurants')}
+                    style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#d32f2f',
+                        cursor: 'pointer',
+                        textDecoration: 'underline',
+                        fontSize: '0.9rem',
+                        fontWeight: 500
+                    }}
+                >
+                    &larr; Xem tất cả khu vực
+                </button>
+             </div>
+          )}
         </div>
 
         {/* Toggle Button */}
