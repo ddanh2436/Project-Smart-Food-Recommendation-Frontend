@@ -1,0 +1,262 @@
+/* 1. Import font Playfair Display (Bộ gõ Tiếng Việt đầy đủ) */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap&subset=vietnamese');
+
+.city-spotlight-section {
+  position: relative;
+  padding: 100px 20px;
+  
+  /* Cấu hình ảnh nền Full */
+  background-color: #000;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed; /* Hiệu ứng Parallax */
+  
+  /* Font mặc định cho nội dung thường là Geist Sans */
+  font-family: var(--font-geist-sans), sans-serif;
+  overflow: hidden;
+}
+
+/* Lớp phủ tối để làm nổi chữ trắng */
+.section-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* Tối 50% */
+  z-index: 1;
+}
+
+.spotlight-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 80px;
+  position: relative;
+  z-index: 2;
+}
+
+.city-spotlight-section.reverse .spotlight-container {
+  flex-direction: row-reverse;
+}
+
+/* --- Cột Thông Tin --- */
+.spotlight-info {
+  flex: 1;
+}
+
+.spotlight-badge {
+  display: inline-block;
+  background: #e11d48; /* Đỏ hồng nổi bật */
+  color: white;
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-family: var(--font-geist-sans), sans-serif;
+}
+
+.title-group {
+    margin-bottom: 32px;
+}
+
+/* --- [PHỤC HỒI] FONT CHỮ TINH HOA (PLAYFAIR DISPLAY) --- */
+.spotlight-title {
+  font-family: 'Playfair Display', Times, serif !important; /* Font có chân */
+  font-size: 5rem; /* Kích thước lớn ấn tượng */
+  font-weight: 800;
+  color: #ffffff;  /* Chữ trắng */
+  margin: 0;
+  line-height: 1;
+  letter-spacing: -1px;
+  text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  -webkit-font-smoothing: antialiased;
+}
+
+.spotlight-subtitle {
+  display: block;
+  font-family: 'Playfair Display', Times, serif !important;
+  font-size: 2rem;
+  color: #e2e8f0; /* Trắng xám */
+  font-weight: 400;
+  font-style: italic; /* In nghiêng nghệ thuật */
+  margin-top: 12px;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+/* ---------------------------------------------------- */
+
+.spotlight-desc {
+  font-family: var(--font-geist-sans), sans-serif;
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: #f1f5f9; /* Trắng sáng dễ đọc */
+  margin-bottom: 40px;
+  max-width: 95%;
+  text-align: justify;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.spotlight-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  color: #000;
+  padding: 14px 28px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: var(--font-geist-sans), sans-serif;
+}
+
+.spotlight-btn:hover {
+  background: #e11d48;
+  color: #fff;
+  gap: 20px;
+}
+
+/* --- Phần Visuals & Cards --- */
+.spotlight-visuals {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.restaurant-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 480px;
+}
+
+.res-card {
+  background: rgba(255, 255, 255, 0.9); /* Nền kính mờ */
+  backdrop-filter: blur(12px);
+  padding: 16px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 1px solid rgba(255,255,255,0.3);
+  text-decoration: none;
+}
+
+.res-card:hover {
+  transform: translateY(-5px);
+  background: #fff;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+  border-color: #e11d48;
+}
+
+.res-img-wrapper {
+  width: 90px;
+  height: 90px;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background-color: #f1f5f9;
+}
+
+.res-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.res-details {
+  flex: 1;
+  overflow: hidden;
+}
+
+.res-name {
+  margin: 0 0 6px;
+  font-family: var(--font-geist-sans), sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.res-dish {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.res-meta-row {
+    display: flex;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.res-rating {
+  font-weight: 700;
+  color: #f59e0b;
+}
+
+.dot {
+    margin: 0 8px;
+    font-size: 0.8rem;
+    color: #cbd5e1;
+}
+
+.res-address {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 992px) {
+  .city-spotlight-section {
+    padding: 60px 20px;
+    background-attachment: scroll;
+  }
+  
+  .spotlight-container {
+    flex-direction: column;
+    text-align: left;
+    gap: 40px;
+  }
+  
+  .city-spotlight-section.reverse .spotlight-container {
+    flex-direction: column;
+  }
+
+  .spotlight-title {
+      font-size: 3.5rem;
+  }
+
+  .spotlight-subtitle {
+      font-size: 1.5rem;
+  }
+
+  .spotlight-desc {
+    max-width: 100%;
+  }
+
+  .restaurant-cards {
+    margin: 0 auto;
+  }
+}

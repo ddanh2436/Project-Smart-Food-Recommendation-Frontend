@@ -51,6 +51,7 @@ export const searchRestaurantsByImage = async (file: File) => {
   }
 };
 
+// --- [CẬP NHẬT QUAN TRỌNG] HÀM NÀY ĐÃ ĐƯỢC THÊM THAM SỐ CITY ---
 export const getAllRestaurants = async (
   page: number = 1,
   limit: number = 32,
@@ -60,13 +61,15 @@ export const getAllRestaurants = async (
   openNow: string = "false",
   userLat: string = "",
   userLon: string = "",
-  search: string = ""
+  search: string = "",
+  city: string = "" // 👈 [THÊM MỚI] Nhận tham số city
 ) => {
   try {
+    // 👇 Thêm &city=${city} vào cuối URL
     const res = await api.get(
       `/restaurants?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&rating=${rating}&openNow=${openNow}&userLat=${userLat}&userLon=${userLon}&search=${encodeURIComponent(
         search
-      )}`
+      )}&city=${city}`
     );
     return res.data;
   } catch (error) {
@@ -74,6 +77,7 @@ export const getAllRestaurants = async (
     return { data: [], totalPages: 0 };
   }
 };
+// -------------------------------------------------------------
 
 export const getTopSpaceRestaurants = async (limit: number = 10) => {
   try {
