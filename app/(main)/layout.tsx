@@ -17,6 +17,9 @@ export default function MainLayout({
   // 1. Xác định các trang cần ẩn giao diện chung
   const isProfilePage = pathname.startsWith('/profile');
   const isChatbotPage = pathname.startsWith('/chatbot');
+  
+  // [MỚI] Xác định trang nhà hàng để ẩn riêng Footer
+  const isRestaurantPage = pathname.startsWith('/restaurants');
 
   // 2. Gom điều kiện: Ẩn Header/Footer/Widget nếu là Profile HOẶC Chatbot
   const shouldHideUI = isProfilePage || isChatbotPage;
@@ -31,8 +34,8 @@ export default function MainLayout({
         {children}
       </main>
 
-      {/* Chỉ hiện Footer nếu KHÔNG phải trang Profile và KHÔNG phải Chatbot */}
-      {!shouldHideUI && <Footer />}
+      {/* [QUAN TRỌNG] Chỉ hiện Footer nếu KHÔNG phải Profile, Chatbot VÀ Nhà hàng */}
+      {!shouldHideUI && !isRestaurantPage && <Footer />}
       
       {/* Chỉ hiện nút Chat nổi nếu KHÔNG phải trang Profile và KHÔNG phải Chatbot */}
       {!shouldHideUI && <ChatWidget />}

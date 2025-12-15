@@ -8,7 +8,7 @@ import { useAuth } from "@/app/contexts/AuthContext";
 import Image from "next/image";
 import Link from 'next/link';
 
-// --- Icons ---
+// --- Icons (Giữ nguyên) ---
 const DropdownArrow = () => (
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="6 9 12 15 18 9"></polyline>
@@ -95,19 +95,24 @@ const Header: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // [CHỈNH SỬA] Logic chuyển đổi ngôn ngữ không cần Context mới
   const handleLangSwitch = (lang: 'en' | 'vn') => {
-    setLang(lang);
+    setLang(lang); // Cập nhật state nội bộ của Header (nếu AuthContext có hỗ trợ)
     setIsLangDropdownOpen(false);
-    // Bước A: Chuẩn hóa mã ngôn ngữ ('vn' -> 'vi' để khớp chuẩn quốc tế & code bên kia)
+    
+    // 1. Chuẩn hóa mã: AuthContext dùng 'vn', còn logic chung ta sẽ dùng 'vi' cho chuẩn ISO
     const storageLang = lang === 'vn' ? 'vi' : 'en';
 
-    // Bước B: Lưu vào LocalStorage để F5 không bị mất
+    // 2. Lưu vào LocalStorage
     localStorage.setItem('app-language', storageLang);
 
-    // Bước C: BẮN TÍN HIỆU "language-change" ra toàn bộ website
+    // 3. Bắn sự kiện Custom Event để các trang khác (như RestaurantsPage) nghe thấy
     if (typeof window !== 'undefined') {
-        window.dispatchEvent(new Event('language-change'));
+        // Tạo sự kiện custom
+        const event = new CustomEvent('language-change', { detail: storageLang });
+        window.dispatchEvent(event);
     }
+    
     toast.success(lang === 'en' ? "Language switched to English" : "Đã chuyển sang Tiếng Việt");
   };
 
@@ -157,7 +162,7 @@ const Header: React.FC = () => {
                 </li>
               ))}
               
-              {/* [MỚI] Thêm nút Chatbot AI */}
+              {/* Nút Chatbot AI */}
               <li>
                 <Link 
                   href="/chatbot" 
@@ -165,7 +170,7 @@ const Header: React.FC = () => {
                     display: 'flex', 
                     alignItems: 'center', 
                     gap: '6px',
-                    color: '#facc15', // Màu vàng sáng (Yellow-400) nổi bật
+                    color: '#facc15',
                     fontWeight: 600,
                     textShadow: '0 0 10px rgba(250, 204, 21, 0.2)'
                   }}
@@ -214,7 +219,6 @@ const Header: React.FC = () => {
             {isLoading ? (
               <div className="loading-skeleton" style={{width: 100, height: 40, borderRadius: 20, background: 'rgba(255,255,255,0.2)'}}></div>
             ) : user ? (
-              // === USER DROPDOWN SECTION ===
               <div className="user-dropdown-wrapper" ref={userDropdownRef}>
                 <button 
                   className="user-toggle-button" 
@@ -254,7 +258,6 @@ const Header: React.FC = () => {
                   </div>
                 )}
               </div>
-              // === END USER DROPDOWN ===
             ) : (
               <button onClick={handleLoginClick} className="header-auth-button">
                 {T.nav.loginSignup}
