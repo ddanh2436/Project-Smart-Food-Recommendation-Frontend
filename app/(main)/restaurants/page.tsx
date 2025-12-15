@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, Suspense } from "react";
+import React, { useEffect, useState, Suspense, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -11,7 +11,7 @@ import dynamic from "next/dynamic";
 // Import component bản đồ (Dynamic để tránh lỗi SSR)
 const RoutingMap = dynamic(() => import("@/components/RoutingMap/RoutingMap"), {
   ssr: false,
-  loading: () => <div style={{ padding: '20px', textAlign: 'center', background: '#f5f5f5', borderRadius: '8px' }}>Đang tải bản đồ chỉ đường...</div>,
+  loading: () => <div style={{ padding: '20px', textAlign: 'center', background: '#f5f5f5', borderRadius: '8px' }}>Đang tải bản đồ...</div>,
 });
 
 // Các Icons (Giữ nguyên)
@@ -59,40 +59,6 @@ interface Restaurant {
   lon?: number;
 }
 
-const getRatingLabel = (score: number) => {
-  if (!score && score !== 0) return "N/A";
-  if (score >= 9.0) return "Xuất sắc";
-  if (score >= 8.0) return "Rất tốt";
-  if (score >= 7.0) return "Tốt";
-  if (score >= 6.0) return "Khá";
-  if (score >= 5.0) return "Trung bình";
-  return "Cần cải thiện";
-};
-
-const SORT_OPTIONS = [
-  { id: 'default', label: 'Mới nhất' },
-  { id: 'distance', label: 'Gần tôi nhất' },
-  { id: 'quality', label: 'Chất lượng món ăn' },
-  { id: 'space', label: 'Không gian đẹp' },
-  { id: 'location', label: 'Vị trí thuận lợi' },
-  { id: 'service', label: 'Phục vụ tốt' },
-  { id: 'price', label: 'Giá cả hợp lý' },
-];
-
-const RATING_RANGES = [
-  { id: 'all', label: 'Tất cả' },
-  { id: 'gte9', label: 'Xuất sắc (> 9.0)' },
-  { id: '8to9', label: 'Rất tốt (8.0 - 9.0)' },
-  { id: '7to8', label: 'Tốt (7.0 - 8.0)' },
-  { id: '6to7', label: 'Khá (6.0 - 7.0)' },
-  { id: 'lt6', label: 'Bình dân (< 6.0)' },
-];
-
-const ORDER_OPTIONS = [
-  { id: 'desc', label: 'Cao đến Thấp (Giảm dần)', icon: <SortDescIcon /> },
-  { id: 'asc', label: 'Thấp đến Cao (Tăng dần)', icon: <SortAscIcon /> },
-];
-
 const RatingRow = ({ label, score }: { label: string, score: number }) => (
   <div className="rating-row">
     <span className="rating-label">{label}</span>
@@ -101,9 +67,165 @@ const RatingRow = ({ label, score }: { label: string, score: number }) => (
   </div>
 );
 
+// --- TỪ ĐIỂN SONG NGỮ (Giữ nguyên) ---
+const DICT = {
+    vi: {
+        pageTitle: "Khám phá Nhà hàng",
+        pageSubtitle: "Bộ sưu tập những địa điểm ẩm thực tốt nhất",
+        hanoiTitle: "Ẩm thực Hà Nội",
+        hanoiSubtitle: "Đang hiển thị các địa điểm nổi bật tại thủ đô Hà Nội",
+        hcmcTitle: "Ẩm thực TP.HCM",
+        hcmcSubtitle: "Đang hiển thị các địa điểm nổi bật tại TP. Hồ Chí Minh",
+        viewAllAreas: "Xem tất cả khu vực",
+        advancedFilter: "Bộ lọc nâng cao",
+        filteringBy: "Đang lọc theo:",
+        sortBy: "Sắp xếp",
+        orderBy: "Thứ tự",
+        rating: "Điểm số",
+        openNow: "Đang mở cửa",
+        clearFilter: "Xóa bộ lọc",
+        criteria: "Tiêu chí:",
+        order: "Thứ tự:",
+        status: "Trạng thái:",
+        apply: "Lọc kết quả",
+        reset: "Reset",
+        close: "Đóng",
+        loading: "Đang tải dữ liệu trang",
+        noResultTitle: "Không tìm thấy kết quả",
+        noResultDesc: "Rất tiếc, chúng tôi không tìm thấy nhà hàng nào phù hợp.",
+        clearAndRetry: "Xóa bộ lọc & Thử lại",
+        prev: "Trước",
+        next: "Sau",
+        page: "Trang",
+        showMap: "Xem đường đi đến quán",
+        hideMap: "Ẩn bản đồ chỉ đường",
+        noMapData: "Rất tiếc, quán này chưa có dữ liệu tọa độ để chỉ đường.",
+        detailRating: "Đánh giá chi tiết",
+        viewDetail: "Xem chi tiết đầy đủ",
+        priceUpdate: "Đang cập nhật",
+        routeTooltip: "Chỉ đường tới quán",
+        
+        // Labels
+        l_newest: "Mới nhất",
+        l_distance: "Gần tôi nhất",
+        l_quality: "Chất lượng món ăn",
+        l_space: "Không gian đẹp",
+        l_location: "Vị trí thuận lợi",
+        l_service: "Phục vụ tốt",
+        l_price: "Giá cả hợp lý",
+        l_all: "Tất cả",
+        l_excellent: "Xuất sắc",
+        l_verygood: "Rất tốt",
+        l_good: "Tốt",
+        l_fair: "Khá",
+        l_average: "Trung bình",
+        l_poor: "Cần cải thiện",
+        l_cheap: "Bình dân",
+        l_desc: "Cao đến Thấp",
+        l_asc: "Thấp đến Cao",
+        
+        // Modal Criteria
+        c_quality: "Chất lượng",
+        c_location: "Vị trí",
+        c_space: "Không gian",
+        c_service: "Phục vụ",
+        c_price: "Giá cả"
+    },
+    en: {
+        pageTitle: "Discover Restaurants",
+        pageSubtitle: "Collection of the best culinary locations",
+        hanoiTitle: "Hanoi Cuisine",
+        hanoiSubtitle: "Displaying highlights in Hanoi capital",
+        hcmcTitle: "HCMC Cuisine",
+        hcmcSubtitle: "Displaying highlights in Ho Chi Minh City",
+        viewAllAreas: "View all areas",
+        advancedFilter: "Advanced Filters",
+        filteringBy: "Filtering by:",
+        sortBy: "Sort by",
+        orderBy: "Order",
+        rating: "Rating",
+        openNow: "Open Now",
+        clearFilter: "Clear filters",
+        criteria: "Criteria:",
+        order: "Order:",
+        status: "Status:",
+        apply: "Apply Filter",
+        reset: "Reset",
+        close: "Close",
+        loading: "Loading data page",
+        noResultTitle: "No results found",
+        noResultDesc: "Sorry, we couldn't find any suitable restaurants.",
+        clearAndRetry: "Clear Filter & Retry",
+        prev: "Prev",
+        next: "Next",
+        page: "Page",
+        showMap: "Show directions",
+        hideMap: "Hide map",
+        noMapData: "Sorry, coordinates are not available for this restaurant.",
+        detailRating: "Detailed Reviews",
+        viewDetail: "View full details",
+        priceUpdate: "Updating",
+        routeTooltip: "Get directions",
+
+        // Labels
+        l_newest: "Newest",
+        l_distance: "Nearest to me",
+        l_quality: "Food Quality",
+        l_space: "Beautiful Space",
+        l_location: "Good Location",
+        l_service: "Good Service",
+        l_price: "Reasonable Price",
+        l_all: "All",
+        l_excellent: "Excellent",
+        l_verygood: "Very Good",
+        l_good: "Good",
+        l_fair: "Fair",
+        l_average: "Average",
+        l_poor: "Need Improvement",
+        l_cheap: "Budget",
+        l_desc: "High to Low",
+        l_asc: "Low to High",
+
+        // Modal Criteria
+        c_quality: "Quality",
+        c_location: "Location",
+        c_space: "Space",
+        c_service: "Service",
+        c_price: "Price"
+    }
+};
+
 function RestaurantsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  // --- [SỬA ĐỔI] LANGUAGE STATE with EVENT LISTENER ---
+  const [lang, setLang] = useState<'vi' | 'en'>('vi');
+
+  useEffect(() => {
+    // 1. Kiểm tra LocalStorage khi mới vào
+    if (typeof window !== 'undefined') {
+        const storedLang = localStorage.getItem('app-language') as 'vi' | 'en';
+        if (storedLang) setLang(storedLang);
+    }
+
+    // 2. Lắng nghe sự kiện 'language-change' từ Header
+    const handleLangChange = (event: Event) => {
+        const customEvent = event as CustomEvent;
+        if (customEvent.detail) {
+            setLang(customEvent.detail as 'vi' | 'en');
+        }
+    };
+
+    window.addEventListener('language-change', handleLangChange);
+
+    // Cleanup listener khi component unmount
+    return () => {
+        window.removeEventListener('language-change', handleLangChange);
+    };
+  }, []);
+
+  const t = DICT[lang]; // Shortcut for translation
 
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -121,7 +243,7 @@ function RestaurantsContent() {
   const [activeOrder, setActiveOrder] = useState<string>('desc'); 
   const [activeOpenNow, setActiveOpenNow] = useState<boolean>(false);
   
-  // --- [MỚI] State cho City ---
+  // --- State cho City ---
   const [activeCity, setActiveCity] = useState<string>('');
 
   const [selectedRes, setSelectedRes] = useState<Restaurant | null>(null);
@@ -135,6 +257,42 @@ function RestaurantsContent() {
     lat: 10.748017595600404, 
     lon: 106.6767808260947
   });
+
+  // --- DEFINITIONS INSIDE COMPONENT TO USE LANGUAGE ---
+  const SORT_OPTIONS = useMemo(() => [
+    { id: 'default', label: t.l_newest },
+    { id: 'distance', label: t.l_distance },
+    { id: 'quality', label: t.l_quality },
+    { id: 'space', label: t.l_space },
+    { id: 'location', label: t.l_location },
+    { id: 'service', label: t.l_service },
+    { id: 'price', label: t.l_price },
+  ], [lang, t]);
+
+  const RATING_RANGES = useMemo(() => [
+    { id: 'all', label: t.l_all },
+    { id: 'gte9', label: `${t.l_excellent} (> 9.0)` },
+    { id: '8to9', label: `${t.l_verygood} (8.0 - 9.0)` },
+    { id: '7to8', label: `${t.l_good} (7.0 - 8.0)` },
+    { id: '6to7', label: `${t.l_fair} (6.0 - 7.0)` },
+    { id: 'lt6', label: `${t.l_cheap} (< 6.0)` },
+  ], [lang, t]);
+
+  const ORDER_OPTIONS = useMemo(() => [
+    { id: 'desc', label: t.l_desc, icon: <SortDescIcon /> },
+    { id: 'asc', label: t.l_asc, icon: <SortAscIcon /> },
+  ], [lang, t]);
+
+  const getRatingLabel = (score: number) => {
+    if (!score && score !== 0) return "N/A";
+    if (score >= 9.0) return t.l_excellent;
+    if (score >= 8.0) return t.l_verygood;
+    if (score >= 7.0) return t.l_good;
+    if (score >= 6.0) return t.l_fair;
+    if (score >= 5.0) return t.l_average;
+    return t.l_poor;
+  };
+  // ------------------------------------------------
 
   useEffect(() => {
     if (typeof window !== "undefined" && navigator.geolocation) {
@@ -152,7 +310,6 @@ function RestaurantsContent() {
       );
     }
   }, []); 
-  // ------------------------------------------------
 
   const LIMIT = 32; 
 
@@ -195,7 +352,7 @@ function RestaurantsContent() {
     let order = searchParams.get('order'); 
     const open = searchParams.get('openNow') === 'true'; 
     const search = searchParams.get('search') || ''; 
-    const city = searchParams.get('city') || ''; // 👈 [MỚI] Lấy city từ URL
+    const city = searchParams.get('city') || ''; 
 
     if (!order) {
       if (sort === 'distance' || sort === 'price') order = 'asc';
@@ -207,7 +364,7 @@ function RestaurantsContent() {
     setActiveRating(rating);
     setActiveOrder(order);
     setActiveOpenNow(open);
-    setActiveCity(city); // 👈 Cập nhật state city
+    setActiveCity(city); 
     
     setSelectedSort(sort);
     setSelectedRating(rating);
@@ -237,7 +394,6 @@ function RestaurantsContent() {
       }
 
       try {
-        // 👇 [QUAN TRỌNG] Truyền tham số city vào hàm gọi API
         const response = await getAllRestaurants(
           page, LIMIT, dbSortBy, order!, rating, String(open), latStr, lonStr, search, city
         );
@@ -289,7 +445,7 @@ function RestaurantsContent() {
 
   const getSortLabel = (id: string) => SORT_OPTIONS.find(opt => opt.id === id)?.label;
   const getRatingLabelText = (id: string) => RATING_RANGES.find(opt => opt.id === id)?.label;
-  const getOrderLabelText = (id: string) => id === 'asc' ? 'Tăng dần' : 'Giảm dần';
+  const getOrderLabelText = (id: string) => id === 'asc' ? t.l_asc : t.l_desc;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -309,15 +465,15 @@ function RestaurantsContent() {
   const closeModal = () => { setSelectedRes(null); document.body.style.overflow = 'unset'; };
 
   // --- Logic hiển thị tiêu đề động ---
-  let pageTitle = "Khám phá Nhà hàng";
-  let pageSubtitle = "Bộ sưu tập những địa điểm ẩm thực tốt nhất";
+  let pageTitle = t.pageTitle;
+  let pageSubtitle = t.pageSubtitle;
 
   if (activeCity === 'hanoi') {
-    pageTitle = "Ẩm thực Hà Nội";
-    pageSubtitle = "Đang hiển thị các địa điểm nổi bật tại thủ đô Hà Nội";
+    pageTitle = t.hanoiTitle;
+    pageSubtitle = t.hanoiSubtitle;
   } else if (activeCity === 'hcmc') {
-    pageTitle = "Ẩm thực TP.HCM";
-    pageSubtitle = "Đang hiển thị các địa điểm nổi bật tại TP. Hồ Chí Minh";
+    pageTitle = t.hcmcTitle;
+    pageSubtitle = t.hcmcSubtitle;
   }
   // ----------------------------------
 
@@ -325,11 +481,12 @@ function RestaurantsContent() {
     <div className="restaurants-page-wrapper">
       <div className="container">
         
+        {/* [ĐÃ XÓA] Nút chuyển ngữ nổi ở đây vì đã có trên Header */}
+
         <div className="page-header">
           <h1 className="page-title">{pageTitle}</h1>
           <p className="page-subtitle">{pageSubtitle}</p>
           
-          {/* [MỚI] Nút xóa lọc khu vực nếu đang chọn city */}
           {activeCity && (
              <div style={{ marginTop: '10px' }}>
                 <button 
@@ -344,7 +501,7 @@ function RestaurantsContent() {
                         fontWeight: 500
                     }}
                 >
-                    &larr; Xem tất cả khu vực
+                    &larr; {t.viewAllAreas}
                 </button>
              </div>
           )}
@@ -356,21 +513,21 @@ function RestaurantsContent() {
           onClick={() => setIsFilterOpen(!isFilterOpen)}
         >
           <FilterIcon /> 
-          <span>Bộ lọc nâng cao</span>
+          <span>{t.advancedFilter}</span>
           <ChevronDownIcon />
         </button>
 
         {/* Active Indicators */}
         {(activeSort !== 'default' || activeRating !== 'all' || activeOrder !== 'desc' || activeOpenNow) && (
           <div className="active-filters-bar">
-            <span className="active-filters-label">Đang lọc theo:</span>
+            <span className="active-filters-label">{t.filteringBy}</span>
             
-            {activeSort !== 'default' && <div className="active-tag">Sắp xếp: {getSortLabel(activeSort)}</div>}
-            {activeOrder !== 'desc' && <div className="active-tag">Thứ tự: {getOrderLabelText(activeOrder)}</div>}
-            {activeRating !== 'all' && <div className="active-tag">Điểm số: {getRatingLabelText(activeRating)}</div>}
-            {activeOpenNow && <div className="active-tag"><ClockIcon /> Đang mở cửa</div>}
+            {activeSort !== 'default' && <div className="active-tag">{t.sortBy}: {getSortLabel(activeSort)}</div>}
+            {activeOrder !== 'desc' && <div className="active-tag">{t.orderBy}: {getOrderLabelText(activeOrder)}</div>}
+            {activeRating !== 'all' && <div className="active-tag">{t.rating}: {getRatingLabelText(activeRating)}</div>}
+            {activeOpenNow && <div className="active-tag"><ClockIcon /> {t.openNow}</div>}
 
-            <button className="btn-clear-all" onClick={handleResetFilter}>Xóa bộ lọc</button>
+            <button className="btn-clear-all" onClick={handleResetFilter}>{t.clearFilter}</button>
           </div>
         )}
 
@@ -378,7 +535,7 @@ function RestaurantsContent() {
         {isFilterOpen && (
           <div className="advanced-filter-panel">
             <div className="filter-row">
-              <div className="filter-label">Tiêu chí:</div>
+              <div className="filter-label">{t.criteria}</div>
               <div className="filter-options">
                 {SORT_OPTIONS.map((opt) => (
                   <button
@@ -392,7 +549,7 @@ function RestaurantsContent() {
               </div>
             </div>
             <div className="filter-row">
-              <div className="filter-label">Thứ tự:</div>
+              <div className="filter-label">{t.order}</div>
               <div className="filter-options order-options">
                 {ORDER_OPTIONS.map((opt) => (
                   <button key={opt.id} className={`filter-chip order-chip ${selectedOrder === opt.id ? 'active' : ''}`} onClick={() => setSelectedOrder(opt.id)}>
@@ -402,7 +559,7 @@ function RestaurantsContent() {
               </div>
             </div>
             <div className="filter-row">
-              <div className="filter-label">Điểm số:</div>
+              <div className="filter-label">{t.rating}:</div>
               <div className="filter-options">
                 {RATING_RANGES.map((opt) => (
                   <button key={opt.id} className={`filter-chip ${selectedRating === opt.id ? 'active' : ''}`} onClick={() => setSelectedRating(opt.id)}>
@@ -412,24 +569,24 @@ function RestaurantsContent() {
               </div>
             </div>
             <div className="filter-row">
-              <div className="filter-label">Trạng thái:</div>
+              <div className="filter-label">{t.status}</div>
               <div className="filter-options">
                 <button className={`filter-chip ${isOpenNow ? 'active' : ''}`} onClick={() => setIsOpenNow(!isOpenNow)}>
-                  <ClockIcon /> Đang mở cửa
+                  <ClockIcon /> {t.openNow}
                 </button>
               </div>
             </div>
             <div className="filter-actions">
-              <button className="btn-apply-filter" onClick={handleApplyFilter}>Lọc kết quả <CheckIcon /></button>
-              <button className="btn-reset-filter" onClick={handleResetFilter}>Reset</button>
-              <button className="btn-close-filter" onClick={() => setIsFilterOpen(false)}>Đóng</button>
+              <button className="btn-apply-filter" onClick={handleApplyFilter}>{t.apply} <CheckIcon /></button>
+              <button className="btn-reset-filter" onClick={handleResetFilter}>{t.reset}</button>
+              <button className="btn-close-filter" onClick={() => setIsFilterOpen(false)}>{t.close}</button>
             </div>
           </div>
         )}
 
         {/* Grid Content */}
         {loading ? (
-          <div className="loading-container"><div className="spinner"></div> Đang tải dữ liệu trang {currentPage}...</div>
+          <div className="loading-container"><div className="spinner"></div> {t.loading} {currentPage}...</div>
         ) : (
           <>
             <div className="restaurants-grid">
@@ -450,15 +607,15 @@ function RestaurantsContent() {
                         <h3 className="restaurant-name">{res.tenQuan}</h3>
                         <p className="restaurant-address"><MapPinIcon /> {res.diaChi}</p>
                         <div className="card-meta-row">
-                            <div className="meta-item price"><MoneyIcon /><span>{res.giaCa || "Đang cập nhật"}</span></div>
-                            <div className="meta-item hours"><ClockIcon /><span>{res.gioMoCua || "Đang cập nhật"}</span></div>
+                            <div className="meta-item price"><MoneyIcon /><span>{res.giaCa || t.priceUpdate}</span></div>
+                            <div className="meta-item hours"><ClockIcon /><span>{res.gioMoCua || t.priceUpdate}</span></div>
                               <button 
                                 className="btn-quick-route-icon"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     openModal(res, true);
                                 }}
-                                data-tooltip="Chỉ đường tới quán"
+                                data-tooltip={t.routeTooltip}
                               >
                                 <DirectionIcon /> 
                               </button>
@@ -470,17 +627,17 @@ function RestaurantsContent() {
               ) : (
                 <div className="empty-state-container">
                 <div className="empty-state-icon"><SadSearchIcon /></div>
-                <h3 className="empty-state-title">Không tìm thấy kết quả</h3>
-                <p className="empty-state-desc">Rất tiếc, chúng tôi không tìm thấy nhà hàng nào phù hợp.</p>
-                <button className="btn-empty-reset" onClick={handleResetFilter}><RefreshIcon /> Xóa bộ lọc & Thử lại</button>
+                <h3 className="empty-state-title">{t.noResultTitle}</h3>
+                <p className="empty-state-desc">{t.noResultDesc}</p>
+                <button className="btn-empty-reset" onClick={handleResetFilter}><RefreshIcon /> {t.clearAndRetry}</button>
               </div>
               )}
             </div>
             {restaurants.length > 0 && totalPages > 1 && (
               <div className="pagination-wrapper">
-                <button className="page-btn prev" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>&larr; Trước</button>
-                <div className="page-numbers"><span>Trang {currentPage} / {totalPages}</span></div>
-                <button className="page-btn next" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>Sau &rarr;</button>
+                <button className="page-btn prev" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>&larr; {t.prev}</button>
+                <div className="page-numbers"><span>{t.page} {currentPage} / {totalPages}</span></div>
+                <button className="page-btn next" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>{t.next} &rarr;</button>
               </div>
             )}
           </>
@@ -507,8 +664,8 @@ function RestaurantsContent() {
                     <span>{selectedRes.diaChi}</span>
                   </div>
                    <div className="modal-meta-grid">
-                      <div className="modal-meta-item"><ClockIcon /> {selectedRes.gioMoCua || "Đang cập nhật"}</div>
-                      <div className="modal-meta-item highlight"><MoneyIcon /> {selectedRes.giaCa || "Đang cập nhật"}</div>
+                      <div className="modal-meta-item"><ClockIcon /> {selectedRes.gioMoCua || t.priceUpdate}</div>
+                      <div className="modal-meta-item highlight"><MoneyIcon /> {selectedRes.giaCa || t.priceUpdate}</div>
                    </div>
 
                    {/* --- KHU VỰC BẢN ĐỒ --- */}
@@ -517,7 +674,7 @@ function RestaurantsContent() {
                         className="btn-show-map"
                         onClick={() => setShowMap(!showMap)}
                      >
-                        <MapPinIcon /> {showMap ? "Ẩn bản đồ chỉ đường" : "Xem đường đi đến quán"}
+                        <MapPinIcon /> {showMap ? t.hideMap : t.showMap}
                      </button>
 
                      {showMap && selectedRes.lat && selectedRes.lon && (
@@ -531,22 +688,22 @@ function RestaurantsContent() {
                      
                      {showMap && (!selectedRes.lat || !selectedRes.lon) && (
                         <p style={{color: '#d32f2f', fontSize: '14px', marginTop: '10px', textAlign: 'center'}}>
-                            Rất tiếc, quán này chưa có dữ liệu tọa độ để chỉ đường.
+                            {t.noMapData}
                         </p>
                      )}
                    </div>
                    {/* ---------------------------------- */}
 
                    <hr className="modal-divider" />
-                   <h4 className="detail-rating-heading">Đánh giá chi tiết</h4>
+                   <h4 className="detail-rating-heading">{t.detailRating}</h4>
                    <div className="rating-bars">
-                      <RatingRow label="Chất lượng" score={selectedRes.diemChatLuong} />
-                      <RatingRow label="Vị trí" score={selectedRes.diemViTri} />
-                      <RatingRow label="Không gian" score={selectedRes.diemKhongGian} />
-                      <RatingRow label="Phục vụ" score={selectedRes.diemPhucVu} />
-                      <RatingRow label="Giá cả" score={selectedRes.diemGiaCa} />
+                      <RatingRow label={t.c_quality} score={selectedRes.diemChatLuong} />
+                      <RatingRow label={t.c_location} score={selectedRes.diemViTri} />
+                      <RatingRow label={t.c_space} score={selectedRes.diemKhongGian} />
+                      <RatingRow label={t.c_service} score={selectedRes.diemPhucVu} />
+                      <RatingRow label={t.c_price} score={selectedRes.diemGiaCa} />
                    </div>
-                  <Link href={`/restaurants/${selectedRes._id}`} className="btn-go-detail" onClick={(e) => { e.stopPropagation(); document.body.style.overflow = 'unset'; }}>Xem chi tiết đầy đủ</Link>
+                  <Link href={`/restaurants/${selectedRes._id}`} className="btn-go-detail" onClick={(e) => { e.stopPropagation(); document.body.style.overflow = 'unset'; }}>{t.viewDetail}</Link>
                 </div>
               </div>
             </div>
@@ -562,7 +719,7 @@ export default function RestaurantsPage() {
   return (
     <Suspense fallback={
       <div className="loading-container">
-        <div className="spinner"></div> Đang tải...
+        <div className="spinner"></div> Loading...
       </div>
     }>
       <RestaurantsContent />
