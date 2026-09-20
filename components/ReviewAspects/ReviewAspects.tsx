@@ -15,6 +15,19 @@ const VERDICT_LABEL: Record<string, string> = {
   mixed: "Ý kiến trái chiều",
 };
 
+const VERDICT_ICON: Record<string, string> = {
+  positive: "👍",
+  negative: "👎",
+  mixed: "🤔",
+};
+
+/** Shorten a verbatim quote to a clause that fits on one line of the summary. */
+function trimQuote(quote: string, max = 72): string {
+  const clean = quote.replace(/\s+/g, " ").trim();
+  if (clean.length <= max) return clean.toLowerCase();
+  return clean.slice(0, max).replace(/[\s,.;]+\S*$/, "").toLowerCase() + "…";
+}
+
 /**
  * Per-aspect breakdown of what reviewers actually said.
  *
@@ -47,6 +60,15 @@ const ReviewAspects: React.FC<Props> = ({ data, loading }) => {
     return null;
   }
 
+  // Most-discussed first, so the headline points are the ones people actually
+  // talked about rather than a passing mention.
+  const pros = data.aspects
+    .filter((aspect) => aspect.verdict === "positive")
+    .slice(0, 3);
+  const cons = data.aspects
+    .filter((aspect) => aspect.verdict === "negative")
+    .slice(0, 3);
+
   return (
     <div className="aspects-card">
       <div className="aspects-header">
@@ -57,6 +79,45 @@ const ReviewAspects: React.FC<Props> = ({ data, loading }) => {
       </div>
 
       {data.summary && <p className="aspects-summary">{data.summary}</p>}
+
+      {/*
+        TL;DR, above the per-aspect detail.
+        The chart answers "how positive overall"; these two lists answer the
+        question a diner actually arrives with — what is good here, and what
+        should I know before going. Both are derived from the aspect verdicts,
+        so nothing is asserted that the reviews do not support.
+      */}
+      {(pros.length > 0 || cons.length > 0) && (
+        <div className="aspects-tldr">
+          {pros.length > 0 && (
+            <div className="tldr-block pros">
+              <h4 className="tldr-title">👍 Ưu điểm</h4>
+              <ul className="tldr-list">
+                {pros.map((aspect) => (
+                  <li key={aspect.key}>
+                    <strong>{aspect.label}</strong>
+                    {aspect.quotes[0] ? ` — ${trimQuote(aspect.quotes[0])}` : ""}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {cons.length > 0 && (
+            <div className="tldr-block cons">
+              <h4 className="tldr-title">⚠️ Lưu ý</h4>
+              <ul className="tldr-list">
+                {cons.map((aspect) => (
+                  <li key={aspect.key}>
+                    <strong>{aspect.label}</strong>
+                    {aspect.quotes[0] ? ` — ${trimQuote(aspect.quotes[0])}` : ""}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="aspects-grid">
         {data.aspects.map((aspect) => {
@@ -71,6 +132,7 @@ const ReviewAspects: React.FC<Props> = ({ data, loading }) => {
                   <span aria-hidden="true">{aspect.icon}</span> {aspect.label}
                 </span>
                 <span className={`aspect-verdict ${aspect.verdict}`}>
+                  <span aria-hidden="true">{VERDICT_ICON[aspect.verdict]}</span>
                   {VERDICT_LABEL[aspect.verdict] ?? aspect.verdict}
                 </span>
               </div>
