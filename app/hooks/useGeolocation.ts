@@ -35,9 +35,17 @@ export function useGeolocation(options: { auto?: boolean } = {}) {
   // immediately. Cached separately from the live result so the UI can tell them
   // apart if it wants to.
   useEffect(() => {
-    try {
-      const cached = window.sessionStorage.getItem(STORAGE_KEY);
-      if (cached) {
+    // Deferred to a microtask rather than read in a lazy `useState`
+    // initializer: sessionStorage does not exist during server rendering, so
+    // seeding state from it there would make the first client render disagree
+    // with the server HTML. Setting it synchronously in the effect body would
+    // instead trigger a cascading render.
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      try {
+        const cached = window.sessionStorage.getItem(STORAGE_KEY);
+        if (!cached) return;
         const parsed = JSON.parse(cached) as Coords;
         if (
           typeof parsed?.lat === "number" &&
@@ -45,10 +53,13 @@ export function useGeolocation(options: { auto?: boolean } = {}) {
         ) {
           setCoords(parsed);
         }
+      } catch {
+        /* private mode or blocked storage: just ask again */
       }
-    } catch {
-      /* private mode or blocked storage: just ask again */
-    }
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const request = useCallback(() => {
@@ -86,13 +97,23 @@ export function useGeolocation(options: { auto?: boolean } = {}) {
 
   useEffect(() => {
     if (!auto) return;
+    let cancelled = false;
+
     // Only prompt when the user has already granted permission, so a first-time
     // visitor is not hit with a location dialog before doing anything.
+    //
+    // Safari and older browsers have no Permissions API, so there the request
+    // is simply made. It is deferred to a microtask because `request` sets
+    // state synchronously, and doing that in an effect body triggers a
+    // cascading render (react-hooks/set-state-in-effect).
     if (typeof navigator === "undefined" || !navigator.permissions?.query) {
-      request();
-      return;
+      queueMicrotask(() => {
+        if (!cancelled) request();
+      });
+      return () => {
+        cancelled = true;
+      };
     }
-    let cancelled = false;
     navigator.permissions
       .query({ name: "geolocation" as PermissionName })
       .then((result) => {
