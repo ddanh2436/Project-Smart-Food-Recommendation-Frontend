@@ -248,3 +248,45 @@
   
   .brand-desc { max-width: 100%; }
 }
+/* --------------------------------------------------------------------------
+   Primary call to action
+   `.btn-cta-outline` was a thin gold border on a dark photo — visible, but it
+   read as secondary and attracted almost no clicks. A solid amber fill with
+   dark text is unmistakably the primary action and clears contrast comfortably.
+   -------------------------------------------------------------------------- */
+.btn-cta-solid {
+  display: inline-block;
+  padding: 14px 38px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f0ad10, #d98800);
+  color: #1c1917;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  box-shadow: 0 8px 24px rgba(233, 160, 4, 0.35);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+}
+
+.btn-cta-solid:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow: 0 12px 32px rgba(233, 160, 4, 0.5);
+}
+
+.btn-cta-solid:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-cta-solid { transition: none; }
+  .btn-cta-solid:hover { transform: none; }
+}
+
+/* Social row now sits in the contact column. */
+.contact-col .social-icons {
+  margin-top: 18px;
+}

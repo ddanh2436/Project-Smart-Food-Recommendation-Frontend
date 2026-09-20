@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getRestaurants, type Restaurant as ApiRestaurant } from "@/app/lib/api";
+import { formatRating, formatReviewCount } from "@/app/lib/rating";
+import FiveStar from "@/components/FiveStar/FiveStar";
 import { useGeolocation } from "@/app/hooks/useGeolocation";
 import { useAuth } from "@/app/contexts/AuthContext";
 import "./RestaurantsPage.css";
@@ -596,7 +598,7 @@ function RestaurantsContent() {
                         <Image src={res.avatarUrl || "/assets/image/pho.png"} alt={res.tenQuan} width={400} height={300} className="card-image" unoptimized={true} />
                         
                         <div className={`rating-badge ${categoryClass}`}>
-                          {displayScore ? displayScore.toFixed(1) : "N/A"}
+                          <><FiveStar /> {formatRating(displayScore)}</>
                           </div>
                         {/* Results are ordered by a review-count-adjusted
                             score, so show the evidence behind the number. */}
@@ -655,7 +657,7 @@ function RestaurantsContent() {
                 <div className="modal-image-col">
                   <Image src={selectedRes.avatarUrl || "/assets/image/pho.png"} alt={selectedRes.tenQuan} width={900} height={700} className="modal-main-img" unoptimized={true} />
                   <div className="modal-rating-overlay">
-                    <span className="big-score">{selectedRes.diemTrungBinh ? selectedRes.diemTrungBinh.toFixed(1) : "N/A"}</span>
+                    <span className="big-score"><><FiveStar size={18} /> {formatRating(selectedRes.diemTrungBinh)}</></span>
                     <span className="score-label">{getRatingLabel(selectedRes.diemTrungBinh)}</span>
                   </div>
                 </div>

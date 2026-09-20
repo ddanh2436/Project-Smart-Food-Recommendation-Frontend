@@ -21,6 +21,8 @@ import SentimentBadge from "@/components/SentimentBadge/SentimentBadge";
 // [IMPORT] Component hiển thị biểu đồ tổng quan đánh giá
 import ReviewOverview from "@/components/ReviewOverview/ReviewOverview";
 import ReviewAspects from "@/components/ReviewAspects/ReviewAspects";
+import { formatRating, formatReviewCount } from "@/app/lib/rating";
+import FiveStar from "@/components/FiveStar/FiveStar";
 
 // --- ICONS ---
 const MapIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>;
@@ -191,7 +193,7 @@ export default function RestaurantDetailPage() {
               <h1>{res.tenQuan}</h1>
               <div className="hero-rating">
                 <div className="hero-score">
-                  {res.diemTrungBinh ? res.diemTrungBinh.toFixed(1) : "N/A"}
+                  <><FiveStar size={22} /> {formatRating(res.diemTrungBinh)}</>
                 </div>
                 <div className="hero-address">
                   <MapIcon /> {res.diaChi}
