@@ -1,77 +1,135 @@
-# [Tên Dự án: VietNomNom]
+# VietNomNom — Frontend
 
-Một ứng dụng web thông minh (Web App) sử dụng các nguyên lý của Tư duy Tính toán và AI để cung cấp các gợi ý ẩm thực địa phương, cá nhân hóa và "chuẩn vị" cho du khách tại Việt Nam.
+Next.js 16 (App Router) UI for the VietNomNom food recommendation app.
 
----
+Deployment: see [DEPLOY.md](./DEPLOY.md).
 
-## 1. Vấn đề Cốt lõi (The Core Problem)
+## Stack
 
-Bài toán lớn (The Big Problem) mà dự án này giải quyết là:
+- Next.js 16 + React 19, App Router
+- TypeScript (strict — `ignoreBuildErrors` is **off**, see below)
+- Plain CSS per component, plus Tailwind v4 for the chat surfaces
+- Leaflet + leaflet-routing-machine for directions
+- axios via a single configured client in `app/lib/api.ts`
 
-> **Du khách tại Việt Nam bị "quá tải thông tin" và "thiếu thông tin cá nhân hóa" khi tìm kiếm trải nghiệm ẩm thực.**
->
-> Các nền tảng hiện tại (như Google Maps, Foody) cung cấp hàng trăm kết quả chung chung. Du khách không thể biết quán nào phù hợp với khẩu vị cá nhân (ví dụ: "ăn cay", "ăn chay"), ngân sách, hoặc đâu mới là quán "chuẩn vị" (authentic) mà người bản địa hay ăn.
->
-> **Mục tiêu** là xây dựng một hệ thống thông minh có khả năng tiếp nhận các nhu cầu phức tạp (ví dụ: "bún bò cay gần đây"), hiểu được sở thích cá nhân, và cung cấp ngay lập tức một **danh sách gợi ý ngắn (3-5), đã được xếp hạng** về các địa điểm phù hợp nhất.
+## Layout
 
----
+```
+app/
+  (main)/            header + footer shell
+    page.tsx         home: hero, city spotlights, six "Top ..." sections
+    restaurants/     listing with filters, map modal, detail pages
+    chatbot/         full-page AI assistant
+    about-us/        cuisine encyclopaedia
+    profile/         account settings
+  (user)/auth/       sign in / sign up, Google callback
+  contexts/          AuthContext — session *and* language
+  hooks/             useGeolocation
+  lib/api.ts         the single API client
+components/
+  ReviewAspects/     NEW — per-aspect AI review breakdown
+  ChatWidget/        floating assistant
+  ...
+```
 
-## 2. Phân rã Vấn đề (Problem Decomposition)
+## Configuration
 
-Để giải quyết bài toán lớn và phức tạp trên, chúng tôi đã áp dụng các phương pháp Tư duy Tính toán để **"phân rã" (decompose)** nó thành các bài toán con nhỏ hơn, dễ quản lý và giải quyết hơn.
+```bash
+cp .env.example .env.local
+```
 
-Chúng tôi đã chia luồng hoạt động của hệ thống thành **5 bài toán con chính**, tương ứng với 5 bước phát triển cốt lõi:
+| Variable | Purpose |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | backend base URL, no trailing slash |
+| `NEXT_PUBLIC_SITE_URL` | own URL, for SEO metadata |
 
-### 1. Bài toán Xác thực (Authentication)
-* **Vấn đề:** Làm sao để xác thực người dùng (du khách) một cách an toàn, nhanh chóng và tiện lợi mà không cần họ tạo tài khoản thủ công?
-* **Giải pháp:** Áp dụng **Trừu tượng hóa (Abstraction)** bằng cách sử dụng dịch vụ bên thứ ba (Firebase hoặc Supabase) để xử lý toàn bộ logic đăng nhập qua Google/Facebook. Backend (Nest.js) chỉ cần xác thực `token` và liên kết với người dùng trong MongoDB.
+Everything prefixed `NEXT_PUBLIC_` is embedded in the browser bundle — never put
+a secret in one.
 
-### 2. Bài toán Thu thập Hồ sơ (User Profiling)
-* **Vấn đề:** Làm sao để hệ thống "biết" được sở thích nền tảng (khẩu vị, ngân sách, chế độ ăn kiêng) của người dùng để cá nhân hóa gợi ý?
-* **Giải pháp:** Xây dựng một `OnboardingModal` (Step 2) bắt buộc sau lần đăng nhập đầu tiên để thu thập thông tin này và lưu vào CSDL (MongoDB), gắn với ID của người dùng.
+## The API client
 
-### 3. Bài toán Hiểu Ý định (Intent Understanding)
-* **Vấn đề:** Làm sao để hiểu được nhu cầu *tức thời* và *phức tạp* của người dùng, vốn có thể được thể hiện qua nhiều hình thức khác nhau?
-* **Giải pháp (Pattern Recognition):** Nhận dạng ra 3 "mẫu" (pattern) truy vấn chính và cung cấp 3 cơ chế:
-    1.  **AI Feature 1 (NLP):** Xử lý câu lệnh ngôn ngữ tự nhiên ("bún chả ngon quận 1").
-    2.  **AI Feature 2 (Chatbot):** Đối thoại để làm rõ nhu cầu.
-    3.  **Manual Filter:** Bộ lọc thủ công cho người dùng muốn tự chọn.
+`app/lib/api.ts` is the only place that talks to the backend. It handles:
 
-### 4. Bài toán Xếp hạng (The Ranking Problem)
-* **Vấn đề:** Đây là **bài toán cốt lõi**. Sau khi có danh sách các quán ăn phù hợp, làm sao để *sắp xếp* chúng theo thứ tự "phù hợp nhất" với người dùng?
-* **Giải pháp (Algorithm Design):** Thiết kế một **Thuật toán Tính điểm Gợi ý (Recommendation Score Algorithm)**.
-    * `Final_Score = (w1 * Keyword_Score) + (w2 * Budget_Score) + (w3 * Taste_Score) + (w4 * Distance_Score)`
-    * Thuật toán này sẽ tính toán điểm cho từng nhà hàng dựa trên sự "khớp" (matching) giữa nhà hàng và 3 nguồn input: Hồ sơ người dùng (Bài toán 2), Ý định tức thời (Bài toán 3), và Vị trí GPS.
+- **Token refresh.** On a 401 it exchanges the refresh token once and replays the
+  original request. Concurrent 401s share a single in-flight refresh, because
+  each rotation invalidates the previous token and parallel refreshes would race
+  and lose.
+- **Safe storage.** Every `localStorage` access is guarded for SSR and wrapped in
+  try/catch, so private mode or blocked site data cannot throw.
+- **Readable errors.** `describeError` unwraps Nest's validation-message array,
+  which otherwise rendered as `[object Object]`.
 
-### 5. Bài toán Hiển thị (Data Visualization)
-* **Vấn đề:** Làm sao để hiển thị kết quả đã xếp hạng một cách trực quan, dễ hiểu và hữu ích cho du khách đang di chuyển?
-* **Giải pháp:** Xây dựng giao diện (Step 4 & 5) cho phép 2 chế độ xem:
-    1.  **Dạng Danh sách (List View):** Hiển thị các `ResultCard` (Tên, Ảnh, Giá, Khoảng cách) theo thứ tự `Final_Score`.
-    2.  **Dạng Bản đồ (Map View):** Hiển thị các "pin" trên Google Maps.
+## What was fixed
 
----
+**Session handling**
 
-## 3. Các Trụ cột Tư duy Tính toán Khác
+- There was **no token refresh at all**. The access token lives 15 minutes, so
+  users were silently signed out mid-session.
+- Logout only cleared `localStorage` and never called `POST /auth/logout`, so the
+  refresh token stayed valid server-side for its full 7 days — a token captured
+  from a shared machine kept working long after signing out.
+- The interceptor read `localStorage` unguarded, which throws during SSR.
 
-Để giải quyết 5 bài toán con trên, chúng tôi cũng áp dụng:
+**Two competing i18n systems.** `AuthContext` stored `'vn'|'en'` under `appLang`;
+`Header` wrote `'vi'|'en'` under `app-language` and broadcast its own
+`language-change` event that only some pages listened for. Switching language
+updated the header but not the restaurants page, and after a reload the two
+disagreed. There is now one key, one event, and one source of truth, with a
+migration for the old value.
 
-### B. Trừu tượng hóa (Abstraction)
-* **Trừu tượng hóa Nhà hàng:** Mọi quán ăn, dù phức tạp, đều được trừu tượng hóa thành một đối tượng trong MongoDB với các **`tags`** (ví dụ: `["phở bò", "cay", "giá rẻ"]`), `price_range` và `location`.
-* **Trừu tượng hóa Ý định:** Mọi hình thức input (NLP, Chat, Filter) đều được chuẩn hóa thành một **"Đối tượng Truy vấn" (Query Object)**. Điều này cho phép Thuật toán Xếp hạng (Bài toán 4) chỉ cần xử lý một dạng input duy nhất.
+**Invented locations.** Several pages seeded their location state with a
+hardcoded District 1 coordinate, and the chat components sent
+`"10.7769", "106.7009"` on every request. So "distance from you" was measured
+from an arbitrary street — and stayed wrong forever if the user denied
+permission. `useGeolocation` returns `null` until a real position is granted, and
+the UI omits distances rather than inventing them.
 
-### C. Nhận dạng Mẫu (Pattern Recognition)
-* Nhận dạng các "mẫu" chung trong dữ liệu nhà hàng để xây dựng hệ thống `tags`.
-* Nhận dạng các "mẫu" chung trong câu truy vấn của người dùng để xây dựng mô hình NLP (Bài toán 3).
+**`typescript.ignoreBuildErrors: true`** meant every type error shipped to
+production. Turning it off surfaced real ones: six components each redeclared the
+`Restaurant` interface with fields marked required that the API can legitimately
+omit, so `score.toFixed()` could run on `undefined`. There is now one shared type.
 
-### D. Thiết kế Thuật toán (Algorithm Design)
-* Thuật toán lõi chính là **Thuật toán Tính điểm & Xếp hạng (Ranking Algorithm)** đã mô tả ở Bài toán 4, vốn là trái tim của toàn bộ dự án.
+**Other**
 
----
+- `images.remotePatterns` was `hostname: "**"` — an open image proxy that also
+  let a third party burn the Vercel image quota. Now an explicit host list.
+- Modal scroll lock was set imperatively with no cleanup, so navigating away with
+  a modal open left `overflow: hidden` on `<body>` and the next page could not
+  scroll. Now driven by an effect, and Escape closes the dialog.
+- The sign-up form validated a 6-character password while the API required 8, and
+  did not check the username format at all, so both failed server-side with raw
+  validation errors.
+- The greeting message was set via `setState` inside an effect, causing a
+  cascading render on every chat mount.
+- Six near-identical `getTopXRestaurants` functions collapsed into one
+  `getTopRestaurants(sortBy, limit)`; `getAllRestaurants`'s ten positional
+  parameters became a single options object.
 
-## 4. Ngăn xếp Công nghệ (Tech Stack)
+## New features
 
-* **Frontend:** Next.js (React)
-* **Main Backend:** Nest.js (Node.js)
-* **AI Backend:** Python (FastAPI)
-* **Database:** MongoDB
-* **Authentication:** Supabase / Firebase Auth
+- **AI review breakdown** (`components/ReviewAspects`). The existing overview
+  answers "is this place good?"; this answers "good at *what*?" — food, price,
+  service, ambience, hygiene and parking each get a verdict and a verbatim quote
+  pulled from real reviews.
+- **Conversational follow-ups.** The chat now sends its history, so "rẻ hơn đi"
+  and "còn gì khác" refine the previous search instead of starting a new one.
+- **Real geolocation**, cached per session, only prompting when it is needed.
+- **Security headers** via `next.config.ts` (`nosniff`, frame options,
+  referrer policy, a `Permissions-Policy` that allows only geolocation).
+
+## Known remaining lint warnings
+
+`npm run lint` still reports pre-existing `no-explicit-any` and
+`no-unescaped-entities` findings in `RoutingMap`, `about-us` and
+`ReviewOverview`. They are cosmetic, do not affect the build, and were left alone
+to keep this change reviewable.
+
+## Development
+
+```bash
+npm install
+npm run dev          # http://localhost:3000
+npm run build
+npx tsc --noEmit
+npm run lint
+```

@@ -3,8 +3,15 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
-// [UPDATE] Import thêm hàm createNewReview
-import { getRestaurantById, getReviewsByUrl, createNewReview } from "@/app/lib/api";
+import {
+  getRestaurantById,
+  getReviewsByUrl,
+  getReviewInsights,
+  createReview,
+  describeError,
+  type ReviewInsights as ReviewInsightsData,
+  type Restaurant as ApiRestaurant,
+} from "@/app/lib/api";
 import "./RestaurantDetail.css";
 import toast from "react-hot-toast";
 
@@ -13,6 +20,7 @@ import SentimentBadge from "@/components/SentimentBadge/SentimentBadge";
 
 // [IMPORT] Component hiển thị biểu đồ tổng quan đánh giá
 import ReviewOverview from "@/components/ReviewOverview/ReviewOverview";
+import ReviewAspects from "@/components/ReviewAspects/ReviewAspects";
 
 // --- ICONS ---
 const MapIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>;
@@ -49,23 +57,9 @@ const StarRatingInput = ({ rating, setRating }: { rating: number, setRating: (r:
   );
 };
 
-interface RestaurantDetail {
-  _id: string;
-  tenQuan: string;
-  diaChi: string;
-  gioMoCua: string;
-  giaCa: string;
-  diemTrungBinh: number;
-  avatarUrl: string;
-  urlGoc: string;
-  lat: number;
-  lon: number;
-  diemKhongGian: number;
-  diemViTri: number;
-  diemChatLuong: number;
-  diemPhucVu: number;
-  diemGiaCa: number;
-}
+// The API shape, shared rather than redeclared. Optional fields stay
+// optional so the UI is forced to handle missing crawler data.
+type RestaurantDetail = ApiRestaurant;
 
 interface Review {
   _id: string;
@@ -88,6 +82,10 @@ export default function RestaurantDetailPage() {
   const [userRating, setUserRating] = useState(10);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Aspect-level AI digest of the reviews ("food praised, service criticised").
+  const [insights, setInsights] = useState<ReviewInsightsData | null>(null);
+  const [insightsLoading, setInsightsLoading] = useState(false);
+
   useEffect(() => {
     if (!id) return;
 
@@ -100,6 +98,16 @@ export default function RestaurantDetailPage() {
         if (restaurantData && restaurantData.urlGoc) {
           const reviewsData = await getReviewsByUrl(restaurantData.urlGoc);
           setReviews(reviewsData);
+
+          // Loaded after the page is interactive: the digest runs sentiment
+          // inference over every review, so awaiting it inline would hold the
+          // whole page on a cold AI service.
+          if (reviewsData.length > 0) {
+            setInsightsLoading(true);
+            getReviewInsights(restaurantData.urlGoc)
+              .then(setInsights)
+              .finally(() => setInsightsLoading(false));
+          }
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -113,8 +121,19 @@ export default function RestaurantDetailPage() {
 
   // [THÊM HÀM XỬ LÝ GỬI BÌNH LUẬN]
   const handleSubmitReview = async () => {
-    if (!userComment.trim()) {
+    const comment = userComment.trim();
+    if (!comment) {
       toast.error("Vui lòng nhập nội dung bình luận!");
+      return;
+    }
+    // The API requires at least 10 characters; checking here avoids a round
+    // trip that comes back as a raw validation error.
+    if (comment.length < 10) {
+      toast.error("Bình luận cần ít nhất 10 ký tự để AI phân tích chính xác.");
+      return;
+    }
+    if (comment.length > 3000) {
+      toast.error("Bình luận quá dài (tối đa 3000 ký tự).");
       return;
     }
     if (!res || !res.urlGoc) {
@@ -125,7 +144,7 @@ export default function RestaurantDetailPage() {
     setIsSubmitting(true);
     try {
       // 1. Gọi API tạo review (Hàm này đã được thêm vào api.ts ở bước trước)
-      const newReview = await createNewReview({
+      const newReview = await createReview({
         tenQuan: res.tenQuan,
         urlGoc: res.urlGoc,
         diemReview: userRating,
@@ -143,7 +162,9 @@ export default function RestaurantDetailPage() {
       
     } catch (error) {
       console.error(error);
-      toast.error("Có lỗi xảy ra khi gửi bình luận. Vui lòng thử lại.");
+      // Show what the server actually objected to (e.g. "at least 10
+      // characters") rather than a generic failure message.
+      toast.error(describeError(error));
     } finally {
       setIsSubmitting(false);
     }
@@ -263,8 +284,9 @@ export default function RestaurantDetailPage() {
           </div>
           {/* ---------------------------------- */}
 
-          {/* Hiển thị biểu đồ đánh giá tổng quan */}
+          {/* Tổng quan cảm xúc + phân tích theo từng khía cạnh (AI) */}
           <ReviewOverview reviews={reviews} />
+          <ReviewAspects data={insights} loading={insightsLoading} />
 
           <div className="reviews-list">
             {reviews.length > 0 ? (
@@ -286,7 +308,7 @@ export default function RestaurantDetailPage() {
 
 // --- SUB COMPONENTS ---
 
-const RatingBar = ({ label, score }: { label: string, score: number }) => (
+const RatingBar = ({ label, score }: { label: string, score?: number }) => (
   <div className="rating-bar-item">
     <div className="rating-bar-header">
       <span className="r-label">{label}</span>

@@ -4,7 +4,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { getTopRatedRestaurants } from "@/app/lib/api";
+import { getTopRestaurants, type Restaurant } from "@/app/lib/api";
 import "./TopRatingSection.css";
 import { useAuth } from "@/app/contexts/AuthContext"; // Dùng useAuth để lấy T
 
@@ -100,20 +100,8 @@ const XIcon = () => (
 );
 
 // ... (Giữ nguyên Interface cũ) ...
-interface Restaurant {
-  _id: string;
-  tenQuan: string;
-  diaChi: string;
-  gioMoCua: string;
-  giaCa: string;
-  diemTrungBinh: number;
-  avatarUrl: string;
-  diemKhongGian: number;
-  diemViTri: number;
-  diemChatLuong: number;
-  diemPhucVu: number;
-  diemGiaCa: number;
-}
+// `Restaurant` is imported from app/lib/api: one shared shape instead of
+// six near-identical copies, and it marks optional fields as optional.
 
 const TopRatingSection = () => {
   const { T } = useAuth(); // <--- GỌI HOOK DỊCH
@@ -137,7 +125,7 @@ const TopRatingSection = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getTopRatedRestaurants(10);
+        const data = await getTopRestaurants("diemTrungBinh", 10);
         setRestaurants(data);
       } catch (error) {
         console.error("Failed to fetch top rating:", error);
@@ -149,7 +137,7 @@ const TopRatingSection = () => {
   }, []);
 
   // === HÀM XỬ LÝ NHÃN ĐIỂM SỐ BẰNG TỪ ĐIỂN ===
-  const getRatingLabel = (score: number) => {
+  const getRatingLabel = (score?: number) => {
     if (!score && score !== 0) return "N/A";
     if (score >= 9.0) return T.restaurantPage.ratingText.excellent;
     if (score >= 8.0) return T.restaurantPage.ratingText.good;
@@ -407,7 +395,7 @@ const TopRatingSection = () => {
   );
 };
 
-const RatingRow = ({ label, score }: { label: string; score: number }) => (
+const RatingRow = ({ label, score }: { label: string; score?: number }) => (
   <div className="rating-row">
     <span className="rating-label">{label}</span>
     <div className="rating-bar-bg">

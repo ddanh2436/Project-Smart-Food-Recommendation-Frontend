@@ -4,7 +4,9 @@ import React, { useEffect, useState, Suspense, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getAllRestaurants } from "@/app/lib/api";
+import { getRestaurants, type Restaurant as ApiRestaurant } from "@/app/lib/api";
+import { useGeolocation } from "@/app/hooks/useGeolocation";
+import { useAuth } from "@/app/contexts/AuthContext";
 import "./RestaurantsPage.css";
 import dynamic from "next/dynamic";
 
@@ -41,25 +43,10 @@ const DirectionIcon = () => (
   </svg>
 );
 
-interface Restaurant {
-  _id: string;
-  tenQuan: string;
-  diaChi: string;
-  gioMoCua: string;
-  giaCa: string;
-  diemTrungBinh: number;
-  avatarUrl: string;
-  diemKhongGian: number;
-  diemViTri: number;
-  diemChatLuong: number;
-  diemPhucVu: number;
-  diemGiaCa: number;
-  urlGoc: string;
-  lat?: number;
-  lon?: number;
-}
+// Shared shape from app/lib/api.
+type Restaurant = ApiRestaurant;
 
-const RatingRow = ({ label, score }: { label: string, score: number }) => (
+const RatingRow = ({ label, score }: { label: string, score?: number }) => (
   <div className="rating-row">
     <span className="rating-label">{label}</span>
     <div className="rating-bar-bg"><div className="rating-bar-fill" style={{ width: `${(score || 0) * 10}%` }}></div></div>
@@ -199,31 +186,16 @@ function RestaurantsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // --- [SỬA ĐỔI] LANGUAGE STATE with EVENT LISTENER ---
-  const [lang, setLang] = useState<'vi' | 'en'>('vi');
-
-  useEffect(() => {
-    // 1. Kiểm tra LocalStorage khi mới vào
-    if (typeof window !== 'undefined') {
-        const storedLang = localStorage.getItem('app-language') as 'vi' | 'en';
-        if (storedLang) setLang(storedLang);
-    }
-
-    // 2. Lắng nghe sự kiện 'language-change' từ Header
-    const handleLangChange = (event: Event) => {
-        const customEvent = event as CustomEvent;
-        if (customEvent.detail) {
-            setLang(customEvent.detail as 'vi' | 'en');
-        }
-    };
-
-    window.addEventListener('language-change', handleLangChange);
-
-    // Cleanup listener khi component unmount
-    return () => {
-        window.removeEventListener('language-change', handleLangChange);
-    };
-  }, []);
+  /**
+   * Language comes from AuthContext, the single source of truth.
+   *
+   * This page used to keep its own state, read a different storage key
+   * (`app-language`) and listen for the Header's own event, so a reload could
+   * leave it showing a different language from the rest of the app. DICT here is
+   * keyed 'vi'/'en' while the context uses 'vn'/'en', so only the key is mapped.
+   */
+  const { currentLang } = useAuth();
+  const lang: 'vi' | 'en' = currentLang === 'en' ? 'en' : 'vi';
 
   const t = DICT[lang]; // Shortcut for translation
 
@@ -252,11 +224,16 @@ function RestaurantsContent() {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [showMap, setShowMap] = useState(false); 
 
-  // --- CẬP NHẬT: LOGIC LẤY GPS NGƯỜI DÙNG ---
-  const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>({
-    lat: 10.748017595600404, 
-    lon: 106.6767808260947
-  });
+  /**
+   * Real device location, or null.
+   *
+   * This used to be seeded with a fixed District 1 coordinate, so every
+   * "km from you" was measured from that arbitrary point — and stayed wrong
+   * forever if the user denied permission. `useGeolocation` returns null until
+   * the browser actually grants a position, and the UI hides distances until
+   * then rather than inventing them.
+   */
+  const { coords: userLocation, request: requestLocation } = useGeolocation();
 
   // --- DEFINITIONS INSIDE COMPONENT TO USE LANGUAGE ---
   const SORT_OPTIONS = useMemo(() => [
@@ -283,7 +260,7 @@ function RestaurantsContent() {
     { id: 'asc', label: t.l_asc, icon: <SortAscIcon /> },
   ], [lang, t]);
 
-  const getRatingLabel = (score: number) => {
+  const getRatingLabel = (score?: number) => {
     if (!score && score !== 0) return "N/A";
     if (score >= 9.0) return t.l_excellent;
     if (score >= 8.0) return t.l_verygood;
@@ -294,22 +271,8 @@ function RestaurantsContent() {
   };
   // ------------------------------------------------
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lon: position.coords.longitude,
-          });
-        },
-        (error) => {
-          console.error("Lỗi lấy vị trí hoặc người dùng từ chối:", error);
-        },
-        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-      );
-    }
-  }, []); 
+  // Geolocation now lives in useGeolocation(), which caches the fix and only
+  // prompts when permission was already granted.
 
   const LIMIT = 32; 
 
@@ -337,6 +300,11 @@ function RestaurantsContent() {
 
   const handleSelectSort = (sortId: string) => {
     setSelectedSort(sortId);
+    // Sorting by distance needs a position, so prompt when it is chosen rather
+    // than silently ranking every row against an unknown location.
+    if (sortId === 'distance' && !userLocation) {
+      requestLocation();
+    }
     if (sortId === 'distance' || sortId === 'price') {
       setSelectedOrder('asc'); 
     } else {
@@ -386,19 +354,22 @@ function RestaurantsContent() {
         default: dbSortBy = 'diemTrungBinh';
       }
 
-      let latStr = '';
-      let lonStr = '';
-      if (userLocation) {
-        latStr = String(userLocation.lat);
-        lonStr = String(userLocation.lon);
-      }
-
       try {
-        const response = await getAllRestaurants(
-          page, LIMIT, dbSortBy, order!, rating, String(open), latStr, lonStr, search, city
-        );
-        
-        setRestaurants(response.data || []);
+        const response = await getRestaurants({
+          page,
+          limit: LIMIT,
+          sortBy: dbSortBy,
+          order: order as 'asc' | 'desc',
+          rating,
+          openNow: open,
+          // Omitted entirely when unknown, instead of sending `userLat=&userLon=`.
+          userLat: userLocation?.lat,
+          userLon: userLocation?.lon,
+          search,
+          city,
+        });
+
+        setRestaurants((response.data as Restaurant[]) || []);
         setTotalPages(response.totalPages || 1);
       } catch (error) {
         console.error("Failed to fetch restaurants:", error);
@@ -457,12 +428,37 @@ function RestaurantsContent() {
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
   
-  const openModal = (res: Restaurant, autoShowMap: boolean = false) => { 
-    setSelectedRes(res); 
-    setShowMap(autoShowMap); 
-    document.body.style.overflow = 'hidden'; 
+  const openModal = (res: Restaurant, autoShowMap: boolean = false) => {
+    setSelectedRes(res);
+    setShowMap(autoShowMap);
   };
-  const closeModal = () => { setSelectedRes(null); document.body.style.overflow = 'unset'; };
+  const closeModal = () => setSelectedRes(null);
+
+  /**
+   * Scroll lock tied to the modal's lifetime.
+   *
+   * It used to be set imperatively in openModal and cleared in closeModal, with
+   * no cleanup — so navigating away with the modal open (clicking "view full
+   * details") left `overflow: hidden` on <body> and the next page could not be
+   * scrolled at all. Driving it from an effect guarantees release on unmount.
+   */
+  useEffect(() => {
+    if (!selectedRes) return;
+
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    // Escape closes the dialog, which keyboard users expect.
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') closeModal();
+    };
+    window.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      document.body.style.overflow = previous;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [selectedRes]);
 
   // --- Logic hiển thị tiêu đề động ---
   let pageTitle = t.pageTitle;
@@ -703,7 +699,7 @@ function RestaurantsContent() {
                       <RatingRow label={t.c_service} score={selectedRes.diemPhucVu} />
                       <RatingRow label={t.c_price} score={selectedRes.diemGiaCa} />
                    </div>
-                  <Link href={`/restaurants/${selectedRes._id}`} className="btn-go-detail" onClick={(e) => { e.stopPropagation(); document.body.style.overflow = 'unset'; }}>{t.viewDetail}</Link>
+                  <Link href={`/restaurants/${selectedRes._id}`} className="btn-go-detail" onClick={(e) => e.stopPropagation()}>{t.viewDetail}</Link>
                 </div>
               </div>
             </div>

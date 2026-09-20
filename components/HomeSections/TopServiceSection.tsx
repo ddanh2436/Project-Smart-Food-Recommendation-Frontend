@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link"; 
-import { getTopServiceRestaurants } from "@/app/lib/api";
+import { getTopRestaurants, type Restaurant } from "@/app/lib/api";
 import "./TopRatingSection.css";
 import { useAuth } from "@/app/contexts/AuthContext";
 
@@ -15,21 +15,9 @@ const MoneyIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="no
 const MapPinIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>;
 const XIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
 
-interface Restaurant {
-  _id: string;
-  tenQuan: string;
-  diaChi: string;
-  gioMoCua: string;
-  giaCa: string;
-  diemTrungBinh: number;
-  avatarUrl: string;
-  diemKhongGian: number;
-  diemViTri: number;
-  diemChatLuong: number;
-  diemPhucVu: number;
-  diemGiaCa: number;
-}
-const getRatingLabel = (score: number) => {
+// `Restaurant` is imported from app/lib/api: one shared shape instead of
+// six near-identical copies, and it marks optional fields as optional.
+const getRatingLabel = (score?: number) => {
   if (!score && score !== 0) return "N/A";
   if (score >= 9.0) return "Xuất sắc";
   if (score >= 8.0) return "Rất tốt";
@@ -56,7 +44,7 @@ const TopServiceSection = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getTopServiceRestaurants(10);
+        const data = await getTopRestaurants("diemPhucVu", 10);
         setRestaurants(data);
       } catch (error) {
         console.error("Failed to fetch top service:", error);
@@ -174,7 +162,7 @@ const TopServiceSection = () => {
   );
 };
 
-const RatingRow = ({ label, score, highlight, color }: { label: string, score: number, highlight?: boolean, color?: string }) => (
+const RatingRow = ({ label, score, highlight, color }: { label: string, score?: number, highlight?: boolean, color?: string }) => (
   <div className="rating-row">
     <span className={`rating-label ${highlight ? 'font-bold' : ''}`} style={{color: highlight ? color : ''}}>{label}</span>
     <div className="rating-bar-bg"><div className="rating-bar-fill" style={{ width: `${(score || 0) * 10}%`, backgroundColor: highlight ? color : undefined }}></div></div>

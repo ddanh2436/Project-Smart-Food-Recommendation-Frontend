@@ -1,8 +1,9 @@
 // components/HomeSections/CitySpotlightSection.tsx
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import './CitySpotlightSection.css';
+import { useAuth } from '@/app/contexts/AuthContext';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -37,17 +38,10 @@ const CitySpotlightSection: React.FC<CitySpotlightProps> = ({
   restaurants,
   reverseLayout = false,
 }) => {
-  const [lang, setLang] = useState<'vi' | 'en'>('vi');
-
-  useEffect(() => {
-    const updateLang = () => {
-      const savedLang = localStorage.getItem('app-language') as 'vi' | 'en';
-      if (savedLang) setLang(savedLang);
-    };
-    updateLang();
-    window.addEventListener('language-change', updateLang);
-    return () => window.removeEventListener('language-change', updateLang);
-  }, []);
+  // Language from AuthContext instead of a private copy read from its own
+  // storage key, which could disagree with the header after a reload.
+  const { currentLang } = useAuth();
+  const lang: 'vi' | 'en' = currentLang === 'en' ? 'en' : 'vi';
 
   const t = (vi: string, en: string) => (lang === 'vi' ? vi : en);
   const displayRestaurants = restaurants.slice(0, 3);
