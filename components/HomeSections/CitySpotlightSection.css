@@ -1,5 +1,4 @@
 /* 1. Import font Playfair Display (Bộ gõ Tiếng Việt đầy đủ) */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap&subset=vietnamese');
 
 .city-spotlight-section {
   position: relative;
@@ -12,7 +11,7 @@
   background-attachment: fixed; /* Hiệu ứng Parallax */
   
   /* Font mặc định cho nội dung thường là Geist Sans */
-  font-family: var(--font-geist-sans), sans-serif;
+  font-family: var(--font-ui);
   overflow: hidden;
 }
 
@@ -57,7 +56,7 @@
   margin-bottom: 24px;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  font-family: var(--font-geist-sans), sans-serif;
+  font-family: var(--font-ui);
 }
 
 .title-group {
@@ -66,7 +65,7 @@
 
 /* --- [PHỤC HỒI] FONT CHỮ TINH HOA (PLAYFAIR DISPLAY) --- */
 .spotlight-title {
-  font-family: 'Playfair Display', Times, serif !important; /* Font có chân */
+  font-family: var(--font-display) !important; /* Font có chân */
   font-size: 5rem; /* Kích thước lớn ấn tượng */
   font-weight: 800;
   color: #ffffff;  /* Chữ trắng */
@@ -79,7 +78,7 @@
 
 .spotlight-subtitle {
   display: block;
-  font-family: 'Playfair Display', Times, serif !important;
+  font-family: var(--font-display) !important;
   font-size: 2rem;
   color: #e2e8f0; /* Trắng xám */
   font-weight: 400;
@@ -91,7 +90,7 @@
 /* ---------------------------------------------------- */
 
 .spotlight-desc {
-  font-family: var(--font-geist-sans), sans-serif;
+  font-family: var(--font-ui);
   font-size: 1.15rem;
   line-height: 1.8;
   color: #f1f5f9; /* Trắng sáng dễ đọc */
@@ -115,7 +114,7 @@
   transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 1px;
-  font-family: var(--font-geist-sans), sans-serif;
+  font-family: var(--font-ui);
 }
 
 .spotlight-btn:hover {
@@ -183,7 +182,7 @@
 
 .res-name {
   margin: 0 0 6px;
-  font-family: var(--font-geist-sans), sans-serif;
+  font-family: var(--font-ui);
   font-size: 1.2rem;
   font-weight: 700;
   color: #0f172a;

@@ -2,18 +2,13 @@
 
 import React from "react";
 import type { ReviewInsights } from "@/app/lib/api";
+import { useTranslation } from "@/app/hooks/useTranslation";
 import "./ReviewAspects.css";
 
 interface Props {
   data: ReviewInsights | null;
   loading?: boolean;
 }
-
-const VERDICT_LABEL: Record<string, string> = {
-  positive: "Được khen",
-  negative: "Bị phàn nàn",
-  mixed: "Ý kiến trái chiều",
-};
 
 const VERDICT_ICON: Record<string, string> = {
   positive: "👍",
@@ -40,11 +35,13 @@ function trimQuote(quote: string, max = 72): string {
  * Every quote is extracted from a real review — nothing here is generated.
  */
 const ReviewAspects: React.FC<Props> = ({ data, loading }) => {
+  const { t } = useTranslation();
+
   if (loading) {
     return (
       <div className="aspects-card" aria-busy="true">
         <div className="aspects-header">
-          <h3>🧠 AI phân tích chi tiết</h3>
+          <h3>🧠 {t.reviews.aspectsTitle}</h3>
         </div>
         <div className="aspects-skeleton">
           {[0, 1, 2].map((index) => (
@@ -72,9 +69,9 @@ const ReviewAspects: React.FC<Props> = ({ data, loading }) => {
   return (
     <div className="aspects-card">
       <div className="aspects-header">
-        <h3>🧠 AI phân tích chi tiết</h3>
+        <h3>🧠 {t.reviews.aspectsTitle}</h3>
         <span className="aspects-count">
-          {data.review_count} đánh giá
+          {data.review_count} {t.common.reviewsSuffix}
         </span>
       </div>
 
@@ -91,7 +88,7 @@ const ReviewAspects: React.FC<Props> = ({ data, loading }) => {
         <div className="aspects-tldr">
           {pros.length > 0 && (
             <div className="tldr-block pros">
-              <h4 className="tldr-title">👍 Ưu điểm</h4>
+              <h4 className="tldr-title">👍 {t.reviews.aspectsPros}</h4>
               <ul className="tldr-list">
                 {pros.map((aspect) => (
                   <li key={aspect.key}>
@@ -105,7 +102,7 @@ const ReviewAspects: React.FC<Props> = ({ data, loading }) => {
 
           {cons.length > 0 && (
             <div className="tldr-block cons">
-              <h4 className="tldr-title">⚠️ Lưu ý</h4>
+              <h4 className="tldr-title">⚠️ {t.reviews.aspectsCons}</h4>
               <ul className="tldr-list">
                 {cons.map((aspect) => (
                   <li key={aspect.key}>
@@ -133,14 +130,16 @@ const ReviewAspects: React.FC<Props> = ({ data, loading }) => {
                 </span>
                 <span className={`aspect-verdict ${aspect.verdict}`}>
                   <span aria-hidden="true">{VERDICT_ICON[aspect.verdict]}</span>
-                  {VERDICT_LABEL[aspect.verdict] ?? aspect.verdict}
+                  {t.reviews.verdict[
+                    aspect.verdict as keyof typeof t.reviews.verdict
+                  ] ?? aspect.verdict}
                 </span>
               </div>
 
               <div
                 className="aspect-bar"
                 role="img"
-                aria-label={`${percent}% tích cực trên ${aspect.mentions} lượt nhắc đến`}
+                aria-label={`${percent}% ${t.reviews.aspectsPositiveShare} / ${aspect.mentions} ${t.reviews.aspectsMentions}`}
               >
                 <div
                   className={`aspect-fill ${aspect.verdict}`}
@@ -149,8 +148,12 @@ const ReviewAspects: React.FC<Props> = ({ data, loading }) => {
               </div>
 
               <div className="aspect-meta">
-                <span>{percent}% tích cực</span>
-                <span>{aspect.mentions} lượt nhắc</span>
+                <span>
+                  {percent}% {t.reviews.aspectsPositiveShare}
+                </span>
+                <span>
+                  {aspect.mentions} {t.reviews.aspectsMentions}
+                </span>
               </div>
 
               {aspect.quotes.length > 0 && (
@@ -165,8 +168,12 @@ const ReviewAspects: React.FC<Props> = ({ data, loading }) => {
 
       {data.available === false && (
         <p className="aspects-note">
-          {data.message ??
-            "Dịch vụ AI đang khởi động, số liệu có thể chưa đầy đủ."}
+          {/* The API's own `message` for this state is a fixed English sentence
+              ("AI service unavailable, showing basic counts only"), which made
+              it the one line on this card that stayed English for a Vietnamese
+              reader. `available: false` already identifies the state, so the
+              wording belongs to the interface rather than to the response. */}
+          {t.reviews.aspectsWarming}
         </p>
       )}
     </div>

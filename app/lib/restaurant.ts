@@ -24,6 +24,8 @@ export function parseTags(raw: unknown): string[] {
     .filter(Boolean);
 }
 
+import type { Dict, Lang } from "@/app/lib/i18n";
+
 export interface AmenityGroup {
   key: string;
   label: string;
@@ -76,22 +78,71 @@ const MEAL_TAGS: Record<string, string> = {
 };
 
 /**
+ * English for the tags above.
+ *
+ * These are a closed vocabulary that the crawler produced, so translating them
+ * is a lookup, not a guess. A tag that is not in this map is shown as it was
+ * stored — better an untranslated word than an invented one.
+ */
+const TAG_EN: Record<string, string> = {
+  "Máy lạnh": "Air conditioning",
+  "Sạch sẽ": "Clean",
+  "Không gian đẹp": "Attractive room",
+  "Decor đẹp": "Nicely decorated",
+  "Thoáng mát": "Airy",
+  "Sang trọng": "Upscale",
+  "Ấm cúng": "Cosy",
+  "Lịch sự": "Smart",
+  "Thoải mái": "Relaxed",
+  "Vỉa hè": "Street-side",
+  "Trong hẻm": "Down an alley",
+  "Sân vườn": "Garden",
+  "View đẹp": "Good view",
+  "Yên tĩnh": "Quiet",
+  "Gia đình": "Families",
+  "Trẻ em": "Children",
+  "Hẹn hò": "Dates",
+  "Lãng mạn": "Romantic",
+  "Nhậu": "Drinks with friends",
+  "Tụ tập": "Get-togethers",
+  "Nhóm hội": "Groups",
+  "Tiếp khách": "Entertaining guests",
+  "Doanh nhân": "Business",
+  "Cơm văn phòng": "Office lunch",
+  "Bình dân": "Budget",
+  "Ăn sáng": "Breakfast",
+  "Ăn trưa": "Lunch",
+  "Bữa trưa": "Lunch",
+  "Ăn tối": "Dinner",
+  "Ăn đêm": "Late night",
+};
+
+/** A tag in the requested language, unchanged when there is no translation. */
+export function tagLabel(tag: string, lang: Lang): string {
+  return lang === "en" ? TAG_EN[tag] ?? tag : tag;
+}
+
+/**
  * Group a restaurant's tags into the attributes a diner cares about.
  *
  * The detail page previously showed only price and opening hours, which left
  * the "general information" panel looking empty even though the document
  * carried a dozen usable attributes all along.
  */
-export function groupAmenities(tags: string[]): AmenityGroup[] {
+export function groupAmenities(
+  tags: string[],
+  t: Dict,
+  lang: Lang
+): AmenityGroup[] {
   const pick = (source: Record<string, string>) =>
     tags
       .filter((tag) => source[tag])
-      .map((tag) => ({ tag, icon: source[tag] }));
+      .map((tag) => ({ tag: tagLabel(tag, lang), icon: source[tag] }));
 
   const groups: AmenityGroup[] = [
-    { key: "space", label: "Không gian & tiện ích", items: pick(SPACE_TAGS) },
-    { key: "audience", label: "Phù hợp với", items: pick(AUDIENCE_TAGS) },
-    { key: "meals", label: "Phục vụ các bữa", items: pick(MEAL_TAGS) },
+    { key: "space", label: t.detail.amenitySpace, items: pick(SPACE_TAGS) },
+    { key: "audience", label: t.detail.amenityAudience, items: pick(AUDIENCE_TAGS) },
+    { key: "meals", label: t.detail.amenityMeals, items: pick(MEAL_TAGS) },
   ];
   return groups.filter((group) => group.items.length > 0);
 }
@@ -118,11 +169,22 @@ export function cuisineTags(tags: string[]): string[] {
 // ---------------------------------------------------------------------------
 export type OpenState = "open" | "closing-soon" | "closed" | "unknown";
 
+/**
+ * The facts about opening hours, with no wording attached.
+ *
+ * This used to return finished Vietnamese sentences, which meant the badge on
+ * the restaurant page stayed Vietnamese on the English site no matter what the
+ * rest of the page did. The times and the state are data; `describeOpenStatus`
+ * turns them into words in whichever language is showing.
+ */
 export interface OpenStatus {
   state: OpenState;
-  label: string;
-  /** Detail line, e.g. "Đóng cửa lúc 22:00" or "Mở lại lúc 07:00". */
-  detail: string | null;
+  /** "22:00" — when the current window ends, if the place is open. */
+  closesAt: string | null;
+  /** "07:00" — the next opening time, if it is closed. */
+  reopensAt: string | null;
+  /** Minutes until closing, when that is under the "closing soon" threshold. */
+  minutesToClose: number | null;
 }
 
 /** Minutes past midnight, or null if the string is not a time. */
@@ -149,7 +211,7 @@ export function getOpenStatus(
   now: Date = new Date()
 ): OpenStatus {
   if (!hours || !hours.trim()) {
-    return { state: "unknown", label: "Chưa có giờ mở cửa", detail: null };
+    return UNKNOWN_STATUS;
   }
 
   const minutesNow = now.getHours() * 60 + now.getMinutes();
@@ -163,7 +225,7 @@ export function getOpenStatus(
   }
 
   if (windows.length === 0) {
-    return { state: "unknown", label: "Chưa có giờ mở cửa", detail: null };
+    return UNKNOWN_STATUS;
   }
 
   const format = (minutes: number) => {
@@ -189,14 +251,16 @@ export function getOpenStatus(
     if (untilClose <= CLOSING_SOON_MINUTES) {
       return {
         state: "closing-soon",
-        label: "Sắp đóng cửa",
-        detail: `Đóng cửa lúc ${format(end)} · còn ${untilClose} phút`,
+        closesAt: format(end),
+        reopensAt: null,
+        minutesToClose: untilClose,
       };
     }
     return {
       state: "open",
-      label: "Đang mở cửa",
-      detail: `Đóng cửa lúc ${format(end)}`,
+      closesAt: format(end),
+      reopensAt: null,
+      minutesToClose: null,
     };
   }
 
@@ -208,9 +272,45 @@ export function getOpenStatus(
 
   return {
     state: "closed",
-    label: "Đã đóng cửa",
-    detail: upcoming !== undefined ? `Mở lại lúc ${format(upcoming)}` : null,
+    closesAt: null,
+    reopensAt: upcoming !== undefined ? format(upcoming) : null,
+    minutesToClose: null,
   };
+}
+
+const UNKNOWN_STATUS: OpenStatus = {
+  state: "unknown",
+  closesAt: null,
+  reopensAt: null,
+  minutesToClose: null,
+};
+
+/** Words for an `OpenStatus`, in the language currently showing. */
+export function describeOpenStatus(
+  status: OpenStatus,
+  t: Dict
+): { label: string; detail: string | null } {
+  switch (status.state) {
+    case "closing-soon":
+      return {
+        label: t.openStatus.closingSoon,
+        detail: `${t.openStatus.closesAt} ${status.closesAt} · ${t.openStatus.minutesLeft} ${status.minutesToClose} ${t.common.minutes}`,
+      };
+    case "open":
+      return {
+        label: t.openStatus.open,
+        detail: `${t.openStatus.closesAt} ${status.closesAt}`,
+      };
+    case "closed":
+      return {
+        label: t.openStatus.closed,
+        detail: status.reopensAt
+          ? `${t.openStatus.reopensAt} ${status.reopensAt}`
+          : null,
+      };
+    default:
+      return { label: t.openStatus.unknown, detail: null };
+  }
 }
 
 // ---------------------------------------------------------------------------

@@ -29,6 +29,16 @@
   color: #fbbf24;
 }
 
+/* Quieter than the score it qualifies, and aligned on the baseline so the
+   two read as one number rather than two. */
+.hero-score-scale {
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1;
+  color: rgba(251, 191, 36, 0.6);
+  margin-left: -6px;
+}
+
 .hero-review-count {
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.72);
@@ -275,70 +285,18 @@
   font-size: 1.1rem;
 }
 
-/* ---- Stars -------------------------------------------------------------- */
-.star-display,
-.star-input-row {
-  display: inline-flex;
-  gap: 2px;
-  line-height: 1;
-}
+/* ---- Score ------------------------------------------------------------- */
+/* The star widgets that used to live here are gone: scores are 0-10 and a
+   five-star glyph cannot show that without halving the number, which put the
+   page out of step with its own filters. See components/Score/Score.css. */
 
-.star-slot,
-.star-slot-interactive {
-  position: relative;
-  display: inline-block;
-  color: rgba(255, 255, 255, 0.22);
-}
-
-.star-slot-interactive {
-  font-size: 30px;
-}
-
-.star-empty {
-  display: block;
-}
-
-.star-fill {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  color: #fbbf24;
-}
-
-.star-hit {
-  position: absolute;
-  top: 0;
-  height: 100%;
-  padding: 0;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-}
-.star-hit:focus-visible {
-  outline: 2px solid #fbbf24;
-  outline-offset: 2px;
-}
-
-.star-input {
+.review-score {
   display: flex;
   align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
-}
-
-.star-input-value {
-  display: inline-flex;
-  align-items: baseline;
   gap: 8px;
-  font-size: 1rem;
+  margin-bottom: 8px;
   color: #fbbf24;
-}
-
-.star-input-label {
-  font-size: 0.85rem;
-  color: #a8a29e;
-  font-weight: 500;
+  font-size: 0.95rem;
 }
 
 .rating-select-row {
@@ -484,19 +442,6 @@
   background: rgba(255, 255, 255, 0.07);
   color: #a8a29e;
   border-color: rgba(255, 255, 255, 0.14);
-}
-
-.review-score {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.review-score-value {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #fbbf24;
 }
 
 .review-text {
@@ -755,7 +700,13 @@
     padding: 14px;
     gap: 10px;
   }
-  .star-slot-interactive {
-    font-size: 26px;
-  }
+}
+
+/* The scale spelled out next to a section heading, once per section, so the
+   numbers underneath do not each have to carry a denominator. */
+.section-scale {
+  font-size: 0.72em;
+  font-weight: 500;
+  color: #a8a29e;
+  letter-spacing: 0;
 }

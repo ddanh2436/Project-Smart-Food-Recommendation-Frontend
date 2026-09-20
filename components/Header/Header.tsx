@@ -8,6 +8,7 @@ import { useAuth } from "@/app/contexts/AuthContext";
 import Image from "next/image";
 import Link from 'next/link';
 import { logout } from '@/app/lib/api';
+import { dictionaries } from '@/app/lib/i18n';
 
 // --- Icons (Giữ nguyên) ---
 const DropdownArrow = () => (
@@ -107,8 +108,12 @@ const Header: React.FC = () => {
   const handleLangSwitch = (lang: 'en' | 'vn') => {
     setLang(lang);
     setIsLangDropdownOpen(false);
+    // Confirmed in the language just selected, not the one being left.
+    const next = lang === 'en' ? 'en' : 'vn';
     toast.success(
-      lang === 'en' ? "Language switched to English" : "Đã chuyển sang Tiếng Việt"
+      next === 'en'
+        ? dictionaries.en.nav.switchedEn
+        : dictionaries.vi.nav.switchedVi
     );
   };
 
@@ -179,7 +184,7 @@ const Header: React.FC = () => {
                   className="hover:opacity-80 transition-opacity"
                 >
                   <span style={{ fontSize: '1.2rem' }}>🤖</span> 
-                  Chatbot AI
+                  {T.nav.chatbot}
                 </Link>
               </li>
 
@@ -250,7 +255,7 @@ const Header: React.FC = () => {
                   <div className="dropdown-menu user-menu">
                     <Link href="/profile" className="dropdown-item" onClick={() => setIsUserDropdownOpen(false)}>
                       <UserIcon />
-                      Hồ sơ của tôi
+                      {T.nav.profile}
                     </Link>
                     <div className="dropdown-divider"></div>
                     <button className="dropdown-item logout-item" onClick={() => setShowLogoutModal(true)}>

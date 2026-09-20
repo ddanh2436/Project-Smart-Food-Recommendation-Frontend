@@ -7,7 +7,6 @@ import {
   FaPaperPlane,
   FaComments,
   FaMapMarkerAlt,
-  FaStar,
   FaImage,
   FaSpinner,
   FaTimes,
@@ -16,8 +15,9 @@ import {
   FaRedo,
   FaTrash,
 } from "react-icons/fa";
-import { CHAT_SUGGESTIONS, useChatSession } from "@/app/hooks/useChatSession";
-import { formatRating, formatReviewCount } from "@/app/lib/rating";
+import { chatSuggestions, useChatSession } from "@/app/hooks/useChatSession";
+import { formatReviewCount } from "@/app/lib/rating";
+import { ScoreBadge } from "@/components/Score/Score";
 
 /** Render **bold** segments without pulling in a markdown dependency. */
 function RichText({ text }: { text: string }) {
@@ -63,6 +63,8 @@ export default function ChatWidget() {
   // Conversation state lives in a shared hook so the floating widget and the
   // full chat page cannot drift apart.
   const {
+    t,
+    lang,
     messages,
     loading,
     coords,
@@ -71,7 +73,7 @@ export default function ChatWidget() {
     sendImage,
     enableLocationAndRetry,
     reset,
-  } = useChatSession("vi");
+  } = useChatSession();
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
@@ -156,7 +158,7 @@ export default function ChatWidget() {
       {/* ---------------------------------------------------------------- */}
       <button
         onClick={() => setIsOpen(true)}
-        aria-label="Mở trợ lý tìm quán ăn"
+        aria-label={t.chat.openLabel}
         className={`group fixed bottom-6 right-6 z-[9998] flex h-14 w-14 items-center justify-center rounded-full border border-amber-300/30 bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-xl shadow-orange-950/40 transition duration-300 hover:scale-105 hover:shadow-orange-600/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400 active:scale-95 motion-reduce:transition-none sm:h-16 sm:w-16 ${
           isOpen
             ? "pointer-events-none scale-0 opacity-0"
@@ -165,7 +167,7 @@ export default function ChatWidget() {
       >
         <FaComments size={26} />
         <span className="pointer-events-none absolute right-[4.5rem] hidden whitespace-nowrap rounded-lg border border-stone-700 bg-stone-900 px-3 py-1.5 text-xs font-semibold text-amber-400 opacity-0 shadow-xl transition-opacity group-hover:opacity-100 sm:block">
-          Tìm quán ngon ngay!
+          {t.chat.bubble}
         </span>
       </button>
 
@@ -188,7 +190,7 @@ export default function ChatWidget() {
       <div
         role="dialog"
         aria-modal="false"
-        aria-label="Trợ lý ẩm thực NomNom"
+        aria-label={t.chat.ariaWindow}
         className={`fixed z-[9999] flex flex-col overflow-hidden border border-stone-800 bg-stone-950 shadow-2xl shadow-black/70 transition-all duration-300 ease-out motion-reduce:transition-none
           inset-x-0 bottom-0 top-0 rounded-none
           sm:inset-auto sm:bottom-6 sm:right-6 sm:top-auto sm:h-[min(600px,calc(100vh-10rem))] sm:w-[396px] sm:rounded-2xl
@@ -213,7 +215,7 @@ export default function ChatWidget() {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75 motion-reduce:animate-none" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
                 </span>
-                {coords ? "Đã biết vị trí của bạn" : "Sẵn sàng hỗ trợ"}
+                {coords ? t.chat.knowsLocation : t.chat.ready}
               </p>
             </div>
           </div>
@@ -221,8 +223,8 @@ export default function ChatWidget() {
           <div className="relative z-10 flex items-center gap-1">
             <button
               onClick={clearChat}
-              aria-label="Xóa cuộc trò chuyện"
-              title="Xóa cuộc trò chuyện"
+              aria-label={t.chat.resetLabel}
+              title={t.chat.resetLabel}
               className="rounded-full p-2 text-stone-400 transition-colors hover:bg-white/5 hover:text-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
             >
               <FaTrash size={13} />
@@ -231,8 +233,8 @@ export default function ChatWidget() {
                 scroll control rather than "dismiss". */}
             <button
               onClick={() => setIsOpen(false)}
-              aria-label="Đóng cửa sổ chat"
-              title="Đóng"
+              aria-label={t.chat.closeLabel}
+              title={t.common.closeLabel}
               className="rounded-full p-2 text-stone-400 transition-colors hover:bg-white/5 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
             >
               <FaTimes size={15} />
@@ -266,7 +268,7 @@ export default function ChatWidget() {
                 {msg.imageUrl && (
                   <img
                     src={msg.imageUrl}
-                    alt="Ảnh món ăn bạn đã gửi"
+                    alt={t.chat.sentImageAlt}
                     className="mb-2 h-32 w-32 rounded-xl border border-amber-500/30 object-cover"
                   />
                 )}
@@ -290,8 +292,8 @@ export default function ChatWidget() {
                   >
                     <FaLocationArrow size={12} />
                     {geoStatus === "denied"
-                      ? "Bật lại quyền vị trí trong trình duyệt"
-                      : "Cho phép truy cập vị trí"}
+                      ? t.chat.reallowLocation
+                      : t.chat.allowLocation}
                   </button>
                 )}
 
@@ -300,7 +302,7 @@ export default function ChatWidget() {
                     onClick={() => send(msg.failedQuery!)}
                     className="mt-2 inline-flex items-center gap-2 rounded-lg border border-stone-700 bg-stone-900 px-3 py-2 text-[13px] font-semibold text-stone-300 transition-colors hover:border-amber-500/40 hover:text-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
                   >
-                    <FaRedo size={11} /> Thử lại
+                    <FaRedo size={11} /> {t.common.retry}
                   </button>
                 )}
 
@@ -308,7 +310,7 @@ export default function ChatWidget() {
                 {msg.results && msg.results.length > 0 && (
                   <ul className="mt-3 w-full space-y-2">
                     {msg.results.map((item) => {
-                      const reviews = formatReviewCount(item.reviewCount);
+                      const reviews = formatReviewCount(item.reviewCount, lang);
                       return (
                         <li key={item._id}>
                           <Link
@@ -333,8 +335,7 @@ export default function ChatWidget() {
                               />
                               {/* One badge only, so the food stays visible. */}
                               <span className="absolute left-1 top-1 flex items-center gap-1 rounded bg-black/75 px-1.5 py-0.5 text-[10px] font-bold text-amber-400 backdrop-blur-sm">
-                                <FaStar size={8} />
-                                {formatRating(item.diemTrungBinh)}
+                                <ScoreBadge score={item.diemTrungBinh} withScale />
                               </span>
                             </div>
 
@@ -354,7 +355,7 @@ export default function ChatWidget() {
 
                               <div className="flex items-center gap-1.5 text-[10px]">
                                 <span className="truncate rounded border border-amber-500/20 bg-amber-950/40 px-1.5 py-0.5 text-amber-400">
-                                  {item.giaCa || "Đang cập nhật"}
+                                  {item.giaCa || t.common.updating}
                                 </span>
                                 {typeof item.distance === "number" &&
                                   item.distance < 100 && (
@@ -384,7 +385,7 @@ export default function ChatWidget() {
               <BrandAvatar size={30} />
               <div
                 className="flex items-center gap-1 rounded-2xl rounded-tl-sm border border-amber-900/40 bg-stone-900 px-4 py-3"
-                aria-label="Trợ lý đang soạn câu trả lời"
+                aria-label={t.chat.typing}
               >
                 {[0, 1, 2].map((i) => (
                   <span
@@ -406,7 +407,7 @@ export default function ChatWidget() {
             className="absolute bottom-[112px] left-1/2 z-20 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-stone-700 bg-stone-900/95 px-3 py-1.5 text-[11px] font-semibold text-stone-200 shadow-lg backdrop-blur transition hover:border-amber-500/40"
           >
             <FaArrowDown size={10} />
-            {unread > 0 ? `${unread} tin nhắn mới` : "Xuống cuối"}
+            {unread > 0 ? `${unread} ${t.chat.newMessages}` : t.chat.toBottom}
           </button>
         )}
 
@@ -417,9 +418,9 @@ export default function ChatWidget() {
               pushed the input to the very bottom edge. */}
           <div
             className="flex gap-2 overflow-x-auto px-3 pb-1 pt-2.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            aria-label="Gợi ý câu hỏi"
+            aria-label={t.chat.suggestionsLabel}
           >
-            {CHAT_SUGGESTIONS.map((text) => (
+            {chatSuggestions(t).map((text) => (
               <button
                 key={text}
                 onClick={() => send(text)}
@@ -449,15 +450,15 @@ export default function ChatWidget() {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={loading}
-                aria-label="Gửi ảnh món ăn để nhận diện"
-                title="Gửi ảnh món ăn"
+                aria-label={t.chat.imageLabel}
+                title={t.chat.imageTitle}
                 className="shrink-0 rounded-lg p-2 text-stone-400 transition-colors hover:text-amber-400 disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
               >
                 <FaImage size={17} />
               </button>
 
               <label htmlFor="nomnom-input" className="sr-only">
-                Nhập câu hỏi cho trợ lý
+                {t.chat.inputLabel}
               </label>
               <input
                 id="nomnom-input"
@@ -465,7 +466,7 @@ export default function ChatWidget() {
                 type="text"
                 autoComplete="off"
                 className="min-w-0 flex-1 border-none bg-transparent px-1.5 py-1 text-sm text-stone-100 caret-amber-500 outline-none placeholder:text-stone-500"
-                placeholder="Món ăn, khu vực, mức giá..."
+                placeholder={t.chat.placeholderShort}
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
                 onCompositionStart={() => (composingRef.current = true)}
@@ -487,7 +488,7 @@ export default function ChatWidget() {
               <button
                 type="submit"
                 disabled={!canSend}
-                aria-label="Gửi"
+                aria-label={t.chat.send}
                 className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-amber-400 ${
                   canSend
                     ? "bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-md shadow-orange-900/40 hover:brightness-110 active:scale-95"

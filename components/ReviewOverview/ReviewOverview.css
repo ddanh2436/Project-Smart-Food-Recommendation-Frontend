@@ -180,9 +180,11 @@
 .summary-bubble p {
   margin: 0;
   font-size: 14px;
-  font-style: italic;
+  /* Not italic any more. The italics and the quotation marks around this line
+     together made a sentence the site generates look like a quote from a diner.
+     Italic also thins the tone marks on Vietnamese vowels at this size. */
   color: #e2e8f0;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .sentiment-bars-compact {

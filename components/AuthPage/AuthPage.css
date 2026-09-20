@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap");
 
 /* Container cho cả trang, dùng để căn giữa */
 .auth-page-container {
@@ -6,7 +5,7 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  font-family: "Nunito", sans-serif;
+  font-family: var(--font-ui);
   overflow: hidden;
   position: relative;
 }
@@ -349,7 +348,7 @@
 .input-group input,
 .auth-button,
 .ghost-button {
-  font-family: "Nunito", sans-serif;
+  font-family: var(--font-ui);
 }
 
 /* --- CSS BỔ SUNG ĐỂ XỬ LÝ FORM --- */

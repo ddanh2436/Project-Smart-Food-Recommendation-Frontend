@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { getProfile, tokenStore } from "@/app/lib/api";
+import { useTranslation } from "@/app/hooks/useTranslation";
 
 /**
  * Landing page for the Google OAuth redirect.
@@ -21,6 +22,7 @@ import { getProfile, tokenStore } from "@/app/lib/api";
 export default function AuthCallbackPage() {
   const router = useRouter();
   const { setUser } = useAuth();
+  const { t } = useTranslation();
   const [error, setError] = useState<string | null>(null);
   // StrictMode mounts effects twice in development; without this guard the
   // token exchange would run twice.
@@ -39,7 +41,7 @@ export default function AuthCallbackPage() {
     const refreshToken = params.get("refreshToken");
 
     if (!accessToken || !refreshToken) {
-      setError("Thiếu thông tin đăng nhập. Vui lòng thử lại.");
+      setError(t.auth.callbackMissing);
       const timer = setTimeout(() => router.replace("/auth"), 1800);
       return () => clearTimeout(timer);
     }
@@ -57,10 +59,10 @@ export default function AuthCallbackPage() {
       })
       .catch(() => {
         tokenStore.clear();
-        setError("Không lấy được thông tin tài khoản. Vui lòng đăng nhập lại.");
+        setError(t.auth.callbackNoProfile);
         setTimeout(() => router.replace("/auth"), 1800);
       });
-  }, [router, setUser]);
+  }, [router, setUser, t]);
 
   return (
     <div
@@ -92,7 +94,7 @@ export default function AuthCallbackPage() {
             🍜
           </span>
           <h1 style={{ fontSize: "1.1rem", margin: 0 }}>
-            Đang đăng nhập, vui lòng chờ...
+            {t.auth.callbackSigningIn}
           </h1>
         </>
       )}

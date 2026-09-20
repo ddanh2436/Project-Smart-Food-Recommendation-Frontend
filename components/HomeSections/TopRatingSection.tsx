@@ -5,10 +5,10 @@ import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { getTopRestaurants, type Restaurant } from "@/app/lib/api";
-import { formatRating, formatReviewCount } from "@/app/lib/rating";
-import FiveStar from "@/components/FiveStar/FiveStar";
+import { formatReviewCount, ratingLabel } from "@/app/lib/rating";
+import { ScoreBadge } from "@/components/Score/Score";
 import "./TopRatingSection.css";
-import { useAuth } from "@/app/contexts/AuthContext"; // Dùng useAuth để lấy T
+import { useTranslation } from "@/app/hooks/useTranslation";
 
 // ... (Giữ nguyên phần import Icons cũ) ...
 const ChevronLeft = () => (
@@ -106,7 +106,7 @@ const XIcon = () => (
 // six near-identical copies, and it marks optional fields as optional.
 
 const TopRatingSection = () => {
-  const { T } = useAuth(); // <--- GỌI HOOK DỊCH
+  const { lang, t: T } = useTranslation();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRes, setSelectedRes] = useState<Restaurant | null>(null);
@@ -139,16 +139,7 @@ const TopRatingSection = () => {
   }, []);
 
   // === HÀM XỬ LÝ NHÃN ĐIỂM SỐ BẰNG TỪ ĐIỂN ===
-  const getRatingLabel = (score?: number) => {
-    if (!score && score !== 0) return "N/A";
-    if (score >= 9.0) return T.restaurantPage.ratingText.excellent;
-    if (score >= 8.0) return T.restaurantPage.ratingText.good;
-    if (score >= 7.0) return T.restaurantPage.ratingText.average;
-    if (score >= 5.0) return T.restaurantPage.ratingText.average;
-    return T.restaurantPage.ratingText.bad;
-  };
-  // ===========================================
-
+  
   const handleScrollButton = (direction: "left" | "right") => {
     if (sliderRef.current) {
       const scrollAmount = 340;
@@ -257,16 +248,16 @@ const TopRatingSection = () => {
                         draggable={false}
                       />
                       <div className="rating-badge">
-                        <><FiveStar /> {formatRating(res.diemTrungBinh)}</>
+                        <ScoreBadge score={res.diemTrungBinh} />
                       </div>
                     </div>
                     <div className="card-content">
                       <h3 className="restaurant-name">{res.tenQuan}</h3>
                       <p className="card-tag-row">
-                        <span className="card-category">Đánh giá tổng hợp</span>
-                        {formatReviewCount(res.reviewCount) && (
+                        <span className="card-category">{T.home.cardOverall}</span>
+                        {formatReviewCount(res.reviewCount, lang) && (
                           <span className="card-review-count">
-                            {formatReviewCount(res.reviewCount)}
+                            {formatReviewCount(res.reviewCount, lang)}
                           </span>
                         )}
                       </p>
@@ -315,12 +306,10 @@ const TopRatingSection = () => {
                   />
                   <div className="modal-rating-overlay">
                     <span className="big-score">
-                      {selectedRes.diemTrungBinh
-                        ? selectedRes.diemTrungBinh.toFixed(1)
-                        : "N/A"}
+                      <ScoreBadge score={selectedRes.diemTrungBinh} withScale />
                     </span>
                     <span className="score-label">
-                      {getRatingLabel(selectedRes.diemTrungBinh)}
+                      {ratingLabel(selectedRes.diemTrungBinh, T)}
                     </span>
                   </div>
                 </div>

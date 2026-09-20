@@ -11,7 +11,9 @@ import {
 } from "react-icons/fa";
 import type { Restaurant } from "@/app/lib/api";
 import { isSaved, toggleSaved } from "@/app/lib/api";
+import { useTranslation } from "@/app/hooks/useTranslation";
 import {
+  describeOpenStatus,
   directionsUrl,
   distanceKm,
   formatDistance,
@@ -36,12 +38,13 @@ import {
  * produce HTML that disagrees with the browser as soon as it hydrates.
  */
 export function OpenStatusBadge({ hours }: { hours?: string }) {
+  const { t } = useTranslation();
   const [status, setStatus] = useState<OpenStatus | null>(null);
 
   useEffect(() => {
     const update = () => setStatus(getOpenStatus(hours));
     update();
-    // Re-check every minute so "sắp đóng cửa" appears without a reload.
+    // Re-check every minute so "closing soon" appears without a reload.
     const timer = setInterval(update, 60_000);
     return () => clearInterval(timer);
   }, [hours]);
@@ -50,11 +53,13 @@ export function OpenStatusBadge({ hours }: { hours?: string }) {
     return hours ? <span className="hours-plain">{hours}</span> : null;
   }
 
+  const { label, detail } = describeOpenStatus(status, t);
+
   return (
     <span className={`open-badge ${status.state}`}>
       <span className="open-dot" aria-hidden="true" />
-      <span className="open-label">{status.label}</span>
-      {status.detail && <span className="open-detail">· {status.detail}</span>}
+      <span className="open-label">{label}</span>
+      {detail && <span className="open-detail">· {detail}</span>}
     </span>
   );
 }
@@ -81,6 +86,7 @@ export function QuickActions({
   coords,
   onShowMap,
 }: QuickActionsProps) {
+  const { t } = useTranslation();
   const [saved, setSaved] = useState(false);
   const [shared, setShared] = useState(false);
 
@@ -126,7 +132,7 @@ export function QuickActions({
         target="_blank"
         rel="noopener noreferrer"
       >
-        <FaDirections /> Chỉ đường
+        <FaDirections /> {t.detail.directions}
       </a>
 
       <button
@@ -136,16 +142,16 @@ export function QuickActions({
         aria-pressed={saved}
       >
         {saved ? <FaHeart /> : <FaRegHeart />}
-        {saved ? "Đã lưu" : "Lưu quán"}
+        {saved ? t.detail.saved : t.detail.save}
       </button>
 
       <button type="button" className="qa-btn" onClick={handleShare}>
         {shared ? <FaCheck /> : <FaShareAlt />}
-        {shared ? "Đã sao chép" : "Chia sẻ"}
+        {shared ? t.detail.shared : t.detail.share}
       </button>
 
       <button type="button" className="qa-btn" onClick={onShowMap}>
-        <FaDirections /> Xem bản đồ
+        <FaDirections /> {t.detail.viewMap}
       </button>
 
       {restaurant.urlGoc && (
@@ -155,7 +161,7 @@ export function QuickActions({
           target="_blank"
           rel="noopener noreferrer"
         >
-          <FaExternalLinkAlt /> Nguồn Foody
+          <FaExternalLinkAlt /> {t.detail.source}
         </a>
       )}
     </div>
@@ -179,13 +185,17 @@ export function DistanceLine({
   restaurant: Restaurant;
   coords: { lat: number; lon: number } | null;
 }) {
+  const { t } = useTranslation();
   const km = distanceKm(coords, restaurant);
   if (km === null || km > 500) return null;
 
   return (
     <p className="distance-line">
-      📍 Cách bạn <strong>{formatDistance(km)}</strong> · khoảng{" "}
-      <strong>{travelMinutes(km)} phút</strong> đi xe
+      📍 {t.detail.distancePrefix} <strong>{formatDistance(km)}</strong> ·{" "}
+      <strong>
+        {travelMinutes(km)} {t.common.minutes}
+      </strong>{" "}
+      {t.detail.travelSuffix}
     </p>
   );
 }
@@ -202,7 +212,8 @@ export function DistanceLine({
  * who the place suits, which meals it serves — that were never surfaced.
  */
 export function AmenityTags({ tags }: { tags: string[] }) {
-  const groups = groupAmenities(tags);
+  const { t, lang } = useTranslation();
+  const groups = groupAmenities(tags, t, lang);
   if (groups.length === 0) return null;
 
   return (

@@ -1,6 +1,5 @@
 /* components/Footer/Footer.css */
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Nunito:wght@300;400;600&display=swap');
 
 :root {
   --footer-bg: #050505;       /* Đen sâu */
@@ -12,7 +11,7 @@
 
 .footer-wrapper {
   width: 100%;
-  font-family: 'Nunito', sans-serif;
+  font-family: var(--font-ui);
   background-color: var(--footer-bg);
   color: var(--footer-text);
   border-top: 1px solid var(--footer-border);
@@ -52,7 +51,7 @@
 }
 
 .cta-title {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-display);
   font-size: 3rem;
   color: var(--footer-highlight);
   margin-bottom: 1rem;
@@ -148,7 +147,7 @@
 
 /* Headings */
 .footer-heading {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-display);
   font-size: 1.4rem;
   color: var(--footer-highlight);
   margin-bottom: 1.5rem;
