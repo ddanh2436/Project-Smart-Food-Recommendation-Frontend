@@ -5,6 +5,8 @@ import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { getTopRestaurants, type Restaurant } from "@/app/lib/api";
+import { formatRating, formatReviewCount } from "@/app/lib/rating";
+import FiveStar from "@/components/FiveStar/FiveStar";
 import "./TopRatingSection.css";
 import { useAuth } from "@/app/contexts/AuthContext"; // Dùng useAuth để lấy T
 
@@ -255,36 +257,19 @@ const TopRatingSection = () => {
                         draggable={false}
                       />
                       <div className="rating-badge">
-                        {res.diemTrungBinh
-                          ? res.diemTrungBinh.toFixed(1)
-                          : "N/A"}
-                      </div>
-                      {/* How much evidence the score rests on. Listings are
-                          ordered by a review-count-adjusted score, so without
-                          this a 10.0 from one review looks mis-ranked. */}
-                      {typeof res.reviewCount === "number" && res.reviewCount > 0 && (
-                        <div className="review-count-badge">
-                          {res.reviewCount} đánh giá
-                        </div>
-                      )}
-                      <div
-                        style={{
-                          position: "absolute",
-                          bottom: 10,
-                          left: 10,
-                          background: "rgba(225, 112, 85, 0.9)",
-                          color: "white",
-                          padding: "2px 8px",
-                          borderRadius: "4px",
-                          fontSize: "11px",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        Đánh giá tổng hợp
+                        <><FiveStar /> {formatRating(res.diemTrungBinh)}</>
                       </div>
                     </div>
                     <div className="card-content">
                       <h3 className="restaurant-name">{res.tenQuan}</h3>
+                      <p className="card-tag-row">
+                        <span className="card-category">Đánh giá tổng hợp</span>
+                        {formatReviewCount(res.reviewCount) && (
+                          <span className="card-review-count">
+                            {formatReviewCount(res.reviewCount)}
+                          </span>
+                        )}
+                      </p>
                       <p className="restaurant-address">
                         <MapPinIcon /> {res.diaChi}
                       </p>

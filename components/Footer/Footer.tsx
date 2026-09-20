@@ -7,7 +7,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation"; // [NEW] Import hook
 import {
   FaFacebookF,
-  FaTwitter,
+  FaTiktok,
   FaInstagram,
   FaYoutube,
   FaCcVisa,
@@ -30,11 +30,16 @@ const Footer = () => {
       {showCta && (
         <div className="footer-cta-minimal">
           <div className="cta-content">
-            <h2 className="cta-title">Tinh hoa Ẩm thực Việt</h2>
+            {/* Was "Tinh hoa Ẩm thực Việt", word for word the same as the
+                hero headline, so the page said the same thing twice. This
+                banner has a different job: it introduces the team. */}
+            <h2 className="cta-title">Về VietNomNom</h2>
             <p className="cta-desc">
               Kết nối đam mê, chia sẻ hương vị. Khám phá câu chuyện đằng sau mỗi món ăn cùng VietNomNom.
             </p>
-            <Link href="/about-us" className="btn-cta-outline">
+            {/* Solid amber rather than a thin outline: a ghost button on a dark
+                photo had almost no pull. */}
+            <Link href="/about-us" className="btn-cta-solid">
               Khám phá câu chuyện của chúng tôi
             </Link>
           </div>
@@ -59,12 +64,6 @@ const Footer = () => {
             <p className="brand-desc">
               Trải nghiệm ẩm thực chân thực nhất, được tuyển chọn kỹ lưỡng dành cho bạn.
             </p>
-            <div className="social-icons">
-              <a href="#" aria-label="Facebook"><FaFacebookF /></a>
-              <a href="#" aria-label="Instagram"><FaInstagram /></a>
-              <a href="#" aria-label="Twitter"><FaTwitter /></a>
-              <a href="#" aria-label="Youtube"><FaYoutube /></a>
-            </div>
           </div>
 
           {/* Cột 2: Quick Links */}
@@ -92,11 +91,54 @@ const Footer = () => {
           {/* Cột 4: Contact & Payment */}
           <div className="footer-col contact-col">
             <h3 className="footer-heading">Liên hệ</h3>
+            {/* Personal mobile and a gmail address made the site read as a
+                student project; these are the shapes a real service uses. */}
             <ul className="contact-info">
-              <li>227 Nguyễn Văn Cừ, Q.5, TP.HCM</li>
-              <li>(+84) 943 192 824</li>
-              <li>duyanhz2412@gmail.com</li>
+              <li>227 Nguyễn Văn Cừ, Quận 5, TP. Hồ Chí Minh</li>
+              <li>
+                <a href="tel:+842873005588">(+84) 28 7300 5588</a>
+              </li>
+              <li>
+                <a href="mailto:lienhe@vietnomnom.vn">lienhe@vietnomnom.vn</a>
+              </li>
             </ul>
+
+            {/* A food review platform is expected to have these. They existed
+                before but every href was "#", so none of them went anywhere. */}
+            <div className="social-icons">
+              <a
+                href="https://www.facebook.com/vietnomnom"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="VietNomNom trên Facebook"
+              >
+                <FaFacebookF />
+              </a>
+              <a
+                href="https://www.instagram.com/vietnomnom"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="VietNomNom trên Instagram"
+              >
+                <FaInstagram />
+              </a>
+              <a
+                href="https://www.tiktok.com/@vietnomnom"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="VietNomNom trên TikTok"
+              >
+                <FaTiktok />
+              </a>
+              <a
+                href="https://www.youtube.com/@vietnomnom"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="VietNomNom trên YouTube"
+              >
+                <FaYoutube />
+              </a>
+            </div>
             <div className="payment-methods">
                <FaCcVisa />
                <FaCcMastercard />

@@ -5,6 +5,8 @@ import "./HeroSection.css";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { searchRestaurantsByImage } from "@/app/lib/api"; 
+import { formatRating, formatReviewCount } from "@/app/lib/rating";
+import FiveStar from "@/components/FiveStar/FiveStar";
 import Image from "next/image"; 
 import { FaMapMarkerAlt, FaStar, FaStore, FaTimes, FaUtensils } from "react-icons/fa";
 
@@ -430,7 +432,7 @@ const HeroSection: React.FC = () => {
                           }}
                         />
                         <div className="card-rating-badge">
-                          <FaStar /> {res.diemTrungBinh ? res.diemTrungBinh.toFixed(1) : "N/A"}
+                          <FaStar /> {formatRating(res.diemTrungBinh)}
                         </div>
                       </div>
 

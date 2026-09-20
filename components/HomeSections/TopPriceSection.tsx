@@ -4,6 +4,8 @@ import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link"; 
 import { getTopRestaurants, type Restaurant } from "@/app/lib/api";
+import { formatRating, formatReviewCount } from "@/app/lib/rating";
+import FiveStar from "@/components/FiveStar/FiveStar";
 import "./TopRatingSection.css";
 import { useAuth } from "@/app/contexts/AuthContext";
 
@@ -94,13 +96,8 @@ const TopPriceSection = () => {
                     <div className="card-image-wrapper">
                       <Image src={res.avatarUrl || "/assets/image/pho.png"} alt={res.tenQuan} width={400} height={300} className="card-image" unoptimized={true} draggable={false} />
                       <div className="rating-badge" style={{ backgroundColor: '#00b894' }}>
-                        {res.diemGiaCa ? res.diemGiaCa.toFixed(1) : "N/A"}
+                        <><FiveStar /> {formatRating(res.diemGiaCa)}</>
                       </div>
-                      {/* Listings are ordered by a review-count-adjusted score,
-                          so show how much evidence the number rests on. */}
-                      {typeof res.reviewCount === "number" && res.reviewCount > 0 && (
-                        <div className="review-count-badge">{res.reviewCount} đánh giá</div>
-                      )}
                        <div style={{
                           position: 'absolute', bottom: 10, left: 10, 
                           background: 'rgba(0, 184, 148, 0.9)', color: 'white', 
@@ -111,6 +108,14 @@ const TopPriceSection = () => {
                     </div>
                     <div className="card-content">
                       <h3 className="restaurant-name">{res.tenQuan}</h3>
+                      <p className="card-tag-row">
+                        <span className="card-category">Giá cả</span>
+                        {formatReviewCount(res.reviewCount) && (
+                          <span className="card-review-count">
+                            {formatReviewCount(res.reviewCount)}
+                          </span>
+                        )}
+                      </p>
                       <p className="restaurant-address"><MapPinIcon /> {res.diaChi}</p>
                       <div className="card-meta-row">
                           <div className="meta-item price"><MoneyIcon /><span>{res.giaCa || "---"}</span></div>

@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   FaPaperPlane,
-  FaRobot,
   FaMapMarkerAlt,
   FaStar,
   FaEraser,
@@ -17,6 +17,25 @@ import {
   FaRedo,
 } from "react-icons/fa";
 import { CHAT_SUGGESTIONS, useChatSession } from "@/app/hooks/useChatSession";
+import { formatRating, formatReviewCount } from "@/app/lib/rating";
+
+/** The brand mark, used instead of a generic robot glyph. */
+function BrandAvatar({ size = 36 }: { size?: number }) {
+  return (
+    <span
+      className="flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-amber-500/30 bg-stone-900"
+      style={{ width: size, height: size }}
+    >
+      <Image
+        src="/assets/image/logo.png"
+        alt=""
+        width={size}
+        height={size}
+        className="h-full w-full object-contain p-1"
+      />
+    </span>
+  );
+}
 
 /** Render **bold** segments without pulling in a markdown dependency. */
 function RichText({ text }: { text: string }) {
@@ -101,26 +120,24 @@ export default function ChatbotPage() {
     !loading && (messages.length <= 1 || lastMessage?.kind === "not_found");
 
   return (
-    <div className="relative flex h-[100dvh] flex-col overflow-hidden bg-slate-950 font-sans text-slate-200">
+    <div className="relative flex h-[100dvh] flex-col overflow-hidden bg-stone-950 font-sans text-stone-200">
       {/* Ambient background */}
-      <div className="pointer-events-none absolute -left-40 -top-40 h-[480px] w-[480px] rounded-full bg-indigo-900/20 blur-[120px]" />
+      <div className="pointer-events-none absolute -left-40 -top-40 h-[480px] w-[480px] rounded-full bg-amber-900/20 blur-[120px]" />
       <div className="pointer-events-none absolute -bottom-40 -right-40 h-[480px] w-[480px] rounded-full bg-amber-900/20 blur-[120px]" />
 
       {/* ------------------------------- Header ------------------------------ */}
-      <header className="relative z-20 flex shrink-0 items-center justify-between gap-3 border-b border-white/5 bg-slate-900/70 px-4 py-3 backdrop-blur-xl sm:px-6 sm:py-4">
+      <header className="relative z-20 flex shrink-0 items-center justify-between gap-3 border-b border-white/5 bg-stone-900/70 px-4 py-3 backdrop-blur-xl sm:px-6 sm:py-4">
         <div className="flex min-w-0 items-center gap-3 sm:gap-4">
           <button
             onClick={() => router.push("/")}
             aria-label="Quay lại trang chủ"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/5 bg-white/5 text-slate-400 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/5 bg-white/5 text-stone-400 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
           >
             <FaChevronLeft />
           </button>
 
           <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/10 bg-slate-900">
-              <FaRobot size={20} className="text-amber-400" />
-            </div>
+            <BrandAvatar size={44} />
             <div className="min-w-0">
               <h1 className="flex items-center gap-2 truncate text-base font-bold tracking-wide text-white sm:text-lg">
                 NomNom Assistant
@@ -128,7 +145,7 @@ export default function ChatbotPage() {
                   AI
                 </span>
               </h1>
-              <p className="flex items-center gap-1.5 text-xs text-slate-400">
+              <p className="flex items-center gap-1.5 text-xs text-stone-400">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75 motion-reduce:animate-none" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
@@ -141,7 +158,7 @@ export default function ChatbotPage() {
 
         <button
           onClick={reset}
-          className="flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
+          className="flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-stone-400 transition-colors hover:bg-white/5 hover:text-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
         >
           <FaEraser /> <span className="hidden sm:inline">Làm mới</span>
         </button>
@@ -164,11 +181,7 @@ export default function ChatbotPage() {
                 msg.sender === "user" ? "justify-end" : "justify-start"
               }`}
             >
-              {msg.sender === "bot" && (
-                <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-700 bg-slate-900 text-amber-500">
-                  <FaRobot size={15} />
-                </div>
-              )}
+              {msg.sender === "bot" && <BrandAvatar size={36} />}
 
               <div
                 className={`flex max-w-[min(85%,42rem)] flex-col ${
@@ -187,7 +200,7 @@ export default function ChatbotPage() {
                   className={`whitespace-pre-line px-4 py-3 text-[15px] leading-relaxed ${
                     msg.sender === "user"
                       ? "rounded-2xl rounded-tr-sm bg-gradient-to-br from-amber-500 to-orange-600 text-white"
-                      : "rounded-2xl rounded-tl-sm border border-slate-800 bg-slate-900/80 text-slate-200"
+                      : "rounded-2xl rounded-tl-sm border border-amber-900/40 bg-stone-900 text-stone-200"
                   }`}
                 >
                   <RichText text={msg.text} />
@@ -208,7 +221,7 @@ export default function ChatbotPage() {
                 {msg.failedQuery && (
                   <button
                     onClick={() => send(msg.failedQuery!)}
-                    className="mt-2 inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-semibold text-slate-300 transition-colors hover:border-amber-500/40 hover:text-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
+                    className="mt-2 inline-flex items-center gap-2 rounded-lg border border-stone-700 bg-stone-900 px-4 py-2 text-sm font-semibold text-stone-300 transition-colors hover:border-amber-500/40 hover:text-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
                   >
                     <FaRedo size={12} /> Thử lại
                   </button>
@@ -220,7 +233,7 @@ export default function ChatbotPage() {
                       <li key={item._id}>
                         <Link
                           href={`/restaurants/${item._id}`}
-                          className="group flex h-[92px] overflow-hidden rounded-xl border border-slate-800 bg-slate-900/60 transition-colors hover:border-amber-500/40 hover:bg-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
+                          className="group flex h-[92px] overflow-hidden rounded-xl border border-stone-800 bg-stone-900/60 transition-colors hover:border-amber-500/40 hover:bg-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
                         >
                           <div className="relative h-full w-[92px] shrink-0 overflow-hidden">
                             <img
@@ -237,21 +250,19 @@ export default function ChatbotPage() {
                             />
                             <span className="absolute left-1 top-1 flex items-center gap-1 rounded bg-black/75 px-1.5 py-0.5 text-[10px] font-bold text-amber-400 backdrop-blur-sm">
                               <FaStar size={8} />
-                              {item.diemTrungBinh
-                                ? item.diemTrungBinh.toFixed(1)
-                                : "N/A"}
+                              {formatRating(item.diemTrungBinh)}
                             </span>
                           </div>
 
                           <div className="flex min-w-0 flex-1 flex-col justify-between p-3">
                             <div className="min-w-0">
-                              <h3 className="truncate text-sm font-bold text-slate-100 transition-colors group-hover:text-amber-400">
+                              <h3 className="line-clamp-2 text-sm font-bold leading-snug text-stone-100 transition-colors group-hover:text-amber-400">
                                 {item.tenQuan}
                               </h3>
-                              <p className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-slate-400">
+                              <p className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-stone-400">
                                 <FaMapMarkerAlt
                                   size={9}
-                                  className="shrink-0 text-slate-500"
+                                  className="shrink-0 text-stone-500"
                                 />
                                 <span className="truncate">{item.diaChi}</span>
                               </p>
@@ -266,12 +277,11 @@ export default function ChatbotPage() {
                                     {item.distance.toFixed(1)}km
                                   </span>
                                 )}
-                              {typeof item.reviewCount === "number" &&
-                                item.reviewCount > 0 && (
-                                  <span className="shrink-0 text-slate-500">
-                                    {item.reviewCount} đánh giá
-                                  </span>
-                                )}
+                              {formatReviewCount(item.reviewCount) && (
+                                <span className="shrink-0 text-stone-500">
+                                  {formatReviewCount(item.reviewCount)}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </Link>
@@ -285,17 +295,15 @@ export default function ChatbotPage() {
 
           {loading && (
             <div className="flex w-full justify-start gap-3">
-              <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-700 bg-slate-900 text-amber-500">
-                <FaRobot size={15} />
-              </div>
+              <BrandAvatar size={36} />
               <div
-                className="flex items-center gap-1.5 rounded-2xl rounded-tl-sm border border-slate-800 bg-slate-900/80 px-4 py-3.5"
+                className="flex items-center gap-1.5 rounded-2xl rounded-tl-sm border border-amber-900/40 bg-stone-900 px-4 py-3.5"
                 aria-label="Trợ lý đang soạn câu trả lời"
               >
                 {[0, 1, 2].map((i) => (
                   <span
                     key={i}
-                    className="h-2 w-2 animate-bounce rounded-full bg-slate-400 motion-reduce:animate-none"
+                    className="h-2 w-2 animate-bounce rounded-full bg-amber-500/70 motion-reduce:animate-none"
                     style={{ animationDelay: `${i * 0.15}s` }}
                   />
                 ))}
@@ -313,22 +321,22 @@ export default function ChatbotPage() {
             endRef.current?.scrollIntoView({ behavior: "smooth" });
             setAtBottom(true);
           }}
-          className="absolute bottom-28 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-slate-700 bg-slate-900/95 px-4 py-2 text-xs font-semibold text-slate-200 shadow-lg backdrop-blur transition hover:border-amber-500/40"
+          className="absolute bottom-28 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-stone-700 bg-stone-900/95 px-4 py-2 text-xs font-semibold text-stone-200 shadow-lg backdrop-blur transition hover:border-amber-500/40"
         >
           <FaArrowDown size={11} /> Xuống cuối
         </button>
       )}
 
       {/* ------------------------------- Composer ---------------------------- */}
-      <div className="relative z-20 shrink-0 border-t border-white/5 bg-slate-900/70 backdrop-blur-xl">
+      <div className="relative z-20 shrink-0 border-t border-white/5 bg-stone-900/70 backdrop-blur-xl">
         <div className="mx-auto w-full max-w-3xl px-4 py-3 sm:px-8 sm:py-4">
           {showSuggestions && (
-            <div className="mb-3 flex flex-wrap gap-2">
+            <div className="mb-3 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" aria-label="Gợi ý câu hỏi">
               {CHAT_SUGGESTIONS.map((text) => (
                 <button
                   key={text}
                   onClick={() => send(text)}
-                  className="rounded-full border border-slate-700 bg-slate-900 px-3.5 py-1.5 text-[13px] text-slate-300 transition-colors hover:border-amber-500/50 hover:text-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
+                  className="shrink-0 whitespace-nowrap rounded-full border border-stone-700 bg-stone-800/60 px-3.5 py-1.5 text-[13px] text-stone-300 transition-colors hover:border-amber-500/50 hover:text-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
                 >
                   {text}
                 </button>
@@ -341,7 +349,7 @@ export default function ChatbotPage() {
               event.preventDefault();
               send(input);
             }}
-            className="flex items-center gap-2 rounded-2xl border border-slate-700 bg-black/40 px-3 py-2 transition-colors focus-within:border-amber-500/60"
+            className="flex items-center gap-2 rounded-2xl border border-stone-700 bg-black/40 px-3 py-2 transition-colors focus-within:border-amber-500/60"
           >
             <input
               type="file"
@@ -356,7 +364,7 @@ export default function ChatbotPage() {
               disabled={loading}
               aria-label="Gửi ảnh món ăn để nhận diện"
               title="Gửi ảnh món ăn"
-              className="rounded-lg p-2.5 text-slate-400 transition-colors hover:text-amber-400 disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
+              className="rounded-lg p-2.5 text-stone-400 transition-colors hover:text-amber-400 disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
             >
               <FaImage size={18} />
             </button>
@@ -369,7 +377,7 @@ export default function ChatbotPage() {
               ref={inputRef}
               type="text"
               autoComplete="off"
-              className="min-w-0 flex-1 border-none bg-transparent px-1 text-[15px] text-slate-200 caret-amber-500 outline-none placeholder:text-slate-500"
+              className="min-w-0 flex-1 border-none bg-transparent px-1 text-[15px] text-stone-200 caret-amber-500 outline-none placeholder:text-stone-500"
               placeholder="Món ăn, khu vực, mức giá... ví dụ: bún bò huế ở Quận 1 dưới 100k"
               value={input}
               onChange={(event) => setInput(event.target.value)}
@@ -391,7 +399,11 @@ export default function ChatbotPage() {
               type="submit"
               disabled={loading || !input.trim()}
               aria-label="Gửi"
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-white transition-all hover:shadow-md hover:shadow-orange-500/20 active:scale-95 disabled:grayscale disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-amber-400"
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-amber-400 ${
+                input.trim() && !loading
+                  ? "bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-md shadow-orange-900/40 hover:brightness-110 active:scale-95"
+                  : "cursor-not-allowed bg-stone-800 text-stone-600"
+              }`}
             >
               {loading ? (
                 <FaSpinner className="animate-spin motion-reduce:animate-none" size={14} />

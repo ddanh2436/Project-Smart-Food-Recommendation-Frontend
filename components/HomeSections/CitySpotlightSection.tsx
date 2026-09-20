@@ -6,6 +6,8 @@ import './CitySpotlightSection.css';
 import { useAuth } from '@/app/contexts/AuthContext';
 import Image from 'next/image';
 import Link from 'next/link';
+import { formatRating, formatReviewCount } from "@/app/lib/rating";
+import FiveStar from "@/components/FiveStar/FiveStar";
 
 export interface Restaurant {
   id: string;
@@ -104,7 +106,7 @@ const CitySpotlightSection: React.FC<CitySpotlightProps> = ({
                             <span className="dish-name">{t(res.dish, res.dishEn)}</span>
                         </div>
                         <div className="res-meta-row">
-                           <div className="res-rating">⭐ {res.rating.toFixed(1)}</div>
+                           <div className="res-rating">⭐ <><FiveStar /> {formatRating(res.rating)}</></div>
                            <span className="dot">•</span>
                            <div className="res-address">{res.address}</div>
                         </div>
