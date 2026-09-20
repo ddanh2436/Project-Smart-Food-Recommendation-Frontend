@@ -184,6 +184,23 @@ export interface Restaurant {
   lat?: number;
   lon?: number;
   distance?: number;
+
+  /**
+   * How many reviews back this restaurant's scores, and the review-count
+   * adjusted scores the API orders by.
+   *
+   * Populated by the backend's rating-stats backfill. Listings are ordered by
+   * the adjusted score while the card displays the raw one, so surfacing the
+   * count is what makes the ordering legible: without it a 10.0 from a single
+   * review looks mis-ranked next to a 9.0 from thirty.
+   */
+  reviewCount?: number;
+  diemTrungBinhAdj?: number;
+  diemKhongGianAdj?: number;
+  diemViTriAdj?: number;
+  diemChatLuongAdj?: number;
+  diemPhucVuAdj?: number;
+  diemGiaCaAdj?: number;
 }
 
 export interface RestaurantPage {

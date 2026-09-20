@@ -97,6 +97,11 @@ const TopLocationSection = () => {
                       <div className="rating-badge" style={{ backgroundColor: '#0984e3' }}>
                         {res.diemViTri ? res.diemViTri.toFixed(1) : "N/A"}
                       </div>
+                      {/* Listings are ordered by a review-count-adjusted score,
+                          so show how much evidence the number rests on. */}
+                      {typeof res.reviewCount === "number" && res.reviewCount > 0 && (
+                        <div className="review-count-badge">{res.reviewCount} đánh giá</div>
+                      )}
                       <div style={{
                           position: 'absolute', bottom: 10, left: 10, 
                           background: 'rgba(9, 132, 227, 0.9)', color: 'white', 

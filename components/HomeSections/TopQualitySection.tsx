@@ -109,6 +109,11 @@ const TopQualitySection = () => {
                       <div className="rating-badge" style={{ backgroundColor: '#e17055' }}>
                         {res.diemChatLuong ? res.diemChatLuong.toFixed(1) : "N/A"}
                       </div>
+                      {/* Listings are ordered by a review-count-adjusted score,
+                          so show how much evidence the number rests on. */}
+                      {typeof res.reviewCount === "number" && res.reviewCount > 0 && (
+                        <div className="review-count-badge">{res.reviewCount} đánh giá</div>
+                      )}
                       <div style={{
                           position: 'absolute', bottom: 10, left: 10, 
                           background: 'rgba(225, 112, 85, 0.9)', color: 'white', 

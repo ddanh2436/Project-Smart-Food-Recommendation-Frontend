@@ -259,6 +259,14 @@ const TopRatingSection = () => {
                           ? res.diemTrungBinh.toFixed(1)
                           : "N/A"}
                       </div>
+                      {/* How much evidence the score rests on. Listings are
+                          ordered by a review-count-adjusted score, so without
+                          this a 10.0 from one review looks mis-ranked. */}
+                      {typeof res.reviewCount === "number" && res.reviewCount > 0 && (
+                        <div className="review-count-badge">
+                          {res.reviewCount} đánh giá
+                        </div>
+                      )}
                       <div
                         style={{
                           position: "absolute",

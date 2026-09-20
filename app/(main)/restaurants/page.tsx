@@ -598,6 +598,13 @@ function RestaurantsContent() {
                         <div className={`rating-badge ${categoryClass}`}>
                           {displayScore ? displayScore.toFixed(1) : "N/A"}
                           </div>
+                        {/* Results are ordered by a review-count-adjusted
+                            score, so show the evidence behind the number. */}
+                        {typeof res.reviewCount === "number" && res.reviewCount > 0 && (
+                          <div className="review-count-badge">
+                            {res.reviewCount} {lang === 'vi' ? 'đánh giá' : 'reviews'}
+                          </div>
+                        )}
                       </div>
                       <div className="card-content">
                         <h3 className="restaurant-name">{res.tenQuan}</h3>
