@@ -6,16 +6,17 @@ import { useTranslation } from "@/app/hooks/useTranslation";
 import { useRouter } from "next/navigation";
 import { searchRestaurantsByImage } from "@/app/lib/api"; 
 import { ScoreBadge } from "@/components/Score/Score";
+import FeaturedTicker from "./FeaturedTicker";
 import toast from "react-hot-toast";
 import { FaMapMarkerAlt, FaStore, FaTimes, FaUtensils } from "react-icons/fa";
 
 // Copy lives in app/lib/i18n.ts. This component used to hold its own
 // dictionary, which is how strings added later (the panel's search button, the
 // image-search modal, the history tooltip) ended up Vietnamese-only.
-// --- DỮ LIỆU MOCK ---
-const topFoods = ["Phở Bò Tái Nạm", "Bánh Mì Huỳnh Hoa", "Bún Chả Hương Liên", "Cơm Tấm Ba Ghiền", "Bánh Xèo Bà Dưỡng"];
-const topDrinks = ["Cà Phê Trứng", "Trà Sen Vàng", "Nước Mía Sầu Riêng", "Bạc Xỉu Đá", "Dừa Tắc"];
-const topRestaurants = ["Phở Thìn Lò Đúc", "Bếp Của Ngoại", "Cục Gạch Quán", "Pizza 4P's", "The Deck Saigon"];
+// The mock lists that used to live here (topFoods / topDrinks /
+// topRestaurants) are gone with the carousel that showed them: they were
+// invented names, present in no record, rendered with `cursor: pointer` and no
+// click handler. FeaturedTicker shows real restaurants instead.
 const TRENDING_KEYWORDS = ["Phở", "Bún đậu", "Bún bò", "Hủ tiếu", "Bánh mì"];
 
 const DISCOVER_OPTIONS = {
@@ -337,16 +338,7 @@ const HeroSection: React.FC = () => {
         </div>
 
         <div className="hero-featured-right">
-          <div className="glass-panel">
-            <div className="slider-viewport">
-              <div className="slider-track">
-                <div className="slider-card"><h3>{T.hero.headers[0]}</h3><ul>{topFoods.map((item, i) => <li key={i}>{item}</li>)}</ul></div>
-                <div className="slider-card"><h3>{T.hero.headers[1]}</h3><ul>{topDrinks.map((item, i) => <li key={i}>{item}</li>)}</ul></div>
-                <div className="slider-card"><h3>{T.hero.headers[2]}</h3><ul>{topRestaurants.map((item, i) => <li key={i}>{item}</li>)}</ul></div>
-                <div className="slider-card"><h3>{T.hero.headers[0]}</h3><ul>{topFoods.map((item, i) => <li key={i}>{item}</li>)}</ul></div>
-              </div>
-            </div>
-          </div>
+          <FeaturedTicker />
         </div>
 
       </div>

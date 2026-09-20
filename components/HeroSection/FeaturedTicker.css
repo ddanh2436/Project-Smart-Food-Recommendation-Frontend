@@ -1,0 +1,291 @@
+/* --------------------------------------------------------------------------
+   Featured restaurants ticker (hero, right-hand panel)
+
+   Replaces a three-slide horizontal carousel of plain text. Each row now
+   carries a photo, a score and a place, and links to the restaurant.
+   -------------------------------------------------------------------------- */
+
+.featured-panel {
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  /* Glass, not a slab: the hero photo has to stay legible behind it. A flat
+     dark rectangle over a food photograph reads as a sticker on the page. */
+  background: rgba(18, 18, 20, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+/* --- Header -------------------------------------------------------------- */
+
+.featured-head {
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.featured-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.32rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--primary-gold, #e9a004);
+}
+
+.featured-sub {
+  margin: 3px 0 0;
+  font-size: 0.74rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* --- Scrolling area ------------------------------------------------------ */
+
+.featured-viewport {
+  position: relative;
+  /* About four and a half rows: the half row is what tells the reader the
+     list continues, without needing a scrollbar to say so. */
+  height: 268px;
+  overflow: hidden;
+
+  /* Rows dissolve at the top and bottom edges instead of being sliced off,
+     so the loop reads as continuous motion rather than a clipped box. */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 14%,
+    #000 86%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 14%,
+    #000 86%,
+    transparent
+  );
+}
+
+.featured-track {
+  display: flex;
+  flex-direction: column;
+  animation-name: featured-scroll;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+/* The track holds the list twice, so -50% lands exactly on the second copy
+   and the restart is invisible. */
+@keyframes featured-scroll {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+/* Reading a row takes longer than it takes to scroll past, so pointing at the
+   panel — or tabbing into it — has to stop it. Without this the list moves out
+   from under the cursor before it can be clicked. */
+.featured-viewport:hover .featured-track,
+.featured-viewport:focus-within .featured-track {
+  animation-play-state: paused;
+}
+
+.featured-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* --- Row ----------------------------------------------------------------- */
+
+.featured-row {
+  padding: 0 8px;
+}
+
+.featured-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: background-color 0.18s ease, transform 0.18s ease;
+}
+
+.featured-link:hover,
+.featured-link:focus-visible {
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateX(4px);
+}
+
+.featured-link:focus-visible {
+  outline: 2px solid var(--primary-gold, #e9a004);
+  outline-offset: 1px;
+}
+
+.featured-thumb {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.featured-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.featured-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #fff;
+  /* One line, clipped: two-line names would make the rows unequal and break
+     the seamless loop, which depends on both halves being the same height. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.featured-caption {
+  font-size: 0.75rem;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.52);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Score over review count, right-aligned, so the pair lines up with the two
+   lines of text to its left. */
+.featured-score-col {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+/* Score on the 0–10 scale used everywhere else in the app. A five-star badge
+   here would contradict the filters, the criteria bars and the assistant. */
+.featured-score {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(233, 160, 4, 0.14);
+  border: 1px solid rgba(233, 160, 4, 0.28);
+  color: #f5b93a;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+}
+
+.featured-count {
+  font-size: 0.66rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.42);
+  white-space: nowrap;
+}
+
+.featured-arrow {
+  flex-shrink: 0;
+  width: 0;
+  overflow: hidden;
+  color: var(--primary-gold, #e9a004);
+  font-size: 0.85rem;
+  opacity: 0;
+  transition: opacity 0.18s ease, width 0.18s ease;
+}
+
+.featured-link:hover .featured-arrow,
+.featured-link:focus-visible .featured-arrow {
+  width: 14px;
+  opacity: 1;
+}
+
+/* --- Loading & empty ----------------------------------------------------- */
+
+.featured-skeleton {
+  height: 46px;
+  margin: 9px 18px;
+  border-radius: 10px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(255, 255, 255, 0.09) 50%,
+    rgba(255, 255, 255, 0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: featured-shimmer 1.4s linear infinite;
+}
+
+@keyframes featured-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.featured-empty {
+  margin: 0;
+  padding: 24px 18px;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.45);
+  text-align: center;
+}
+
+/* --- Motion preferences -------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  /* No auto-scroll at all. The panel becomes an ordinary scrollable list, so
+     the same restaurants are still reachable — hiding half of them would be a
+     worse answer than stopping the animation. */
+  .featured-track {
+    animation: none;
+  }
+  .featured-viewport {
+    overflow-y: auto;
+  }
+  /* The second copy exists only to make the scroll loop. With no scroll, it
+     would just list every restaurant twice. */
+  .featured-track > [aria-hidden="true"] {
+    display: none;
+  }
+  .featured-skeleton {
+    animation: none;
+  }
+}
+
+/* --- Small screens ------------------------------------------------------- */
+
+@media (max-width: 1024px) {
+  .featured-panel {
+    max-width: 320px;
+  }
+  .featured-viewport {
+    height: 226px;
+  }
+}
+
+@media (max-width: 768px) {
+  .featured-panel {
+    max-width: 100%;
+  }
+}

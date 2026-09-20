@@ -126,7 +126,8 @@ const vi = {
     discoverBtn: "Tìm theo bộ sưu tập",
     discoverClose: "Đóng bộ sưu tập",
     or: "Hoặc",
-    headers: ["Món ngon nổi bật", "Thức uống phải thử", "Nhà hàng tiêu biểu"],
+    featuredTitle: "Nhà hàng tiêu biểu",
+    featuredSub: "Xếp theo điểm đã hiệu chỉnh theo số lượt đánh giá",
     trendingLabel: "🔥 Xu hướng:",
     panelTitle: "Tùy chọn tìm kiếm:",
     categories: {
@@ -502,7 +503,8 @@ const en: typeof vi = {
     discoverBtn: "Browse collections",
     discoverClose: "Close collections",
     or: "Or",
-    headers: ["Standout dishes", "Drinks to try", "Notable restaurants"],
+    featuredTitle: "Featured restaurants",
+    featuredSub: "Ranked by score, adjusted for how many people rated it",
     trendingLabel: "🔥 Trending:",
     panelTitle: "Narrow your search:",
     categories: {
