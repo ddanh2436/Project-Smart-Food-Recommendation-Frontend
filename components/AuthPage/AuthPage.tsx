@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect } from "react";
 import "./AuthPage.css"; 
-import { login, register, getProfile, describeError } from "@/app/lib/api";
+import { API_URL, login, register, getProfile, describeError } from "@/app/lib/api";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import Image from "next/image";
@@ -19,6 +19,19 @@ import {
   FaEyeSlash,
 } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
+
+/**
+ * Where "Continue with Google" sends the browser.
+ *
+ * This was written out as http://localhost:3001/auth/google, so the button
+ * worked on a developer’s machine and pointed the deployed site at a server
+ * that is not running — ERR_CONNECTION_REFUSED. Email and password sign-in was
+ * unaffected because it goes through the API client, which reads the deployed
+ * host from NEXT_PUBLIC_API_URL. OAuth has to leave the site, so this is a full
+ * page navigation rather than an XHR and cannot use that client; it needs the
+ * base URL named here instead.
+ */
+const GOOGLE_SIGN_IN_URL = `${API_URL}/auth/google`;
 
 // === DỮ LIỆU NGÔN NGỮ ===
 const langData = {
@@ -296,7 +309,7 @@ const AuthForm: React.FC = () => {
                 <FaFacebookF />
               </a>
               <a
-                href="http://localhost:3001/auth/google"
+                href={GOOGLE_SIGN_IN_URL}
                 className="social-icon google-hover"
               >
                 <FcGoogle />
@@ -360,7 +373,7 @@ const AuthForm: React.FC = () => {
                 <FaFacebookF />
               </a>
               <a
-                href="http://localhost:3001/auth/google"
+                href={GOOGLE_SIGN_IN_URL}
                 className="social-icon google-hover"
               >
                 <FcGoogle />
