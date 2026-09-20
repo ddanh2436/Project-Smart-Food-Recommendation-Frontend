@@ -1,334 +1,493 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { chatWithBot, searchRestaurantsByImage, type ChatTurn } from "@/app/lib/api";
-import { useGeolocation } from "@/app/hooks/useGeolocation";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { FaPaperPlane, FaComments, FaTimes, FaRobot, FaMapMarkerAlt, FaStar, FaStore, FaImage, FaSpinner, FaChevronDown } from "react-icons/fa";
+import {
+  FaPaperPlane,
+  FaComments,
+  FaRobot,
+  FaMapMarkerAlt,
+  FaStar,
+  FaImage,
+  FaSpinner,
+  FaChevronDown,
+  FaArrowDown,
+  FaLocationArrow,
+  FaRedo,
+  FaTrash,
+} from "react-icons/fa";
+import { CHAT_SUGGESTIONS, useChatSession } from "@/app/hooks/useChatSession";
 
-interface Message {
-  id: number;
-  sender: "user" | "bot";
-  text: string;
-  results?: any[];
-  isImage?: boolean;
-  imageUrl?: string;
-}
-
-const GREETINGS = [
-  "Chào bạn! 👋 Hôm nay chúng ta sẽ khám phá món ngon nào đây?",
-  "Hello! 🥘 Đang đói bụng phải không? Gửi ảnh hoặc tên món để mình tìm nhé!",
-  "VietNomNom xin chào! 🍜 Phở, cơm, hay lẩu? Mình cân được hết!",
-  "Hi there! ✨ Cần tìm quán ăn không gian đẹp hay đồ ăn ngon? Hỏi mình ngay!",
-];
-
-/**
- * Pick an opening line.
- *
- * Used as a lazy useState initializer rather than a setState inside an effect.
- * The effect version ran after the first paint, so the panel rendered empty and
- * then immediately re-rendered with the greeting — a cascading render that React
- * now warns about (react-hooks/set-state-in-effect).
- */
-function initialGreeting(): Message[] {
-  return [
-    {
-      id: 1,
-      sender: "bot",
-      text: GREETINGS[Math.floor(Math.random() * GREETINGS.length)],
-    },
-  ];
+/** Render **bold** segments without pulling in a markdown dependency. */
+function RichText({ text }: { text: string }) {
+  return (
+    <>
+      {text.split("**").map((part, index) =>
+        index % 2 === 1 ? (
+          <strong key={index} className="font-semibold text-amber-400">
+            {part}
+          </strong>
+        ) : (
+          <span key={index}>{part}</span>
+        )
+      )}
+    </>
+  );
 }
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [messages, setMessages] = useState<Message[]>(initialGreeting);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [atBottom, setAtBottom] = useState(true);
+  const [unread, setUnread] = useState(0);
+
+  // Conversation state lives in a shared hook so the floating widget and the
+  // full chat page cannot drift apart.
+  const {
+    messages,
+    loading,
+    coords,
+    geoStatus,
+    send: sendMessage,
+    sendImage,
+    enableLocationAndRetry,
+    reset,
+  } = useChatSession("vi");
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const endRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Vietnamese input goes through an IME; Enter during composition selects a
+  // candidate and must not send the message.
+  const composingRef = useRef(false);
 
-  // Real device location, used for "near me" style questions. Null until the
-  // browser grants it; the backend then simply ranks without distance.
-  const { coords } = useGeolocation();
-
-  // 2. Auto scroll
+  // --- scrolling ---------------------------------------------------------
+  // Only follow new messages when the user is already at the bottom. Scrolling
+  // unconditionally yanked the view away while they were reading earlier
+  // results.
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isOpen, loading]);
-
-  // --- XỬ LÝ GỬI TEXT ---
-  const handleSend = async () => {
-    if (!input.trim()) return;
-
-    const userText = input;
-    setInput(""); 
-    
-    const userMsg: Message = { id: Date.now(), sender: "user", text: userText };
-    setMessages(prev => [...prev, userMsg]);
-    setLoading(true);
-
-    /**
-     * The coordinates here were hardcoded to a point in District 1, so every
-     * "near me" request was answered relative to that spot regardless of where
-     * the user actually was. `history` is new too: without it the assistant had
-     * no way to resolve a follow-up like "rẻ hơn" or "còn gì khác".
-     */
-    const history: ChatTurn[] = messages
-      .filter((m) => m.text)
-      .map((m) => ({ role: m.sender, text: m.text }));
-
-    const res = await chatWithBot(userText, { history, coords });
-
-    setLoading(false);
-
-    if (res) {
-      const botMsg: Message = { 
-        id: Date.now() + 1, 
-        sender: "bot", 
-        text: res.reply, 
-        results: res.results 
-      };
-      setMessages(prev => [...prev, botMsg]);
+    if (!isOpen) return;
+    if (atBottom) {
+      endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
     } else {
-      setMessages(prev => [...prev, { id: Date.now(), sender: "bot", text: "Hệ thống đang bận, bạn thử lại sau nhé! 😓" }]);
+      setUnread((n) => n + 1);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, loading]);
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const near = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+    setAtBottom(near);
+    if (near) setUnread(0);
   };
 
-  // --- XỬ LÝ GỬI ẢNH ---
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const jumpToLatest = () => {
+    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    setUnread(0);
+    setAtBottom(true);
+  };
 
-    const imageUrl = URL.createObjectURL(file);
-    const userMsg: Message = { 
-      id: Date.now(), 
-      sender: "user", 
-      text: "Đã gửi ảnh...", 
-      isImage: true,
-      imageUrl: imageUrl 
+  // --- open / close ------------------------------------------------------
+  useEffect(() => {
+    if (!isOpen) return;
+    // Focus the field so the user can type immediately.
+    const timer = setTimeout(() => inputRef.current?.focus(), 250);
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsOpen(false);
     };
-    setMessages(prev => [...prev, userMsg]);
-    setLoading(true);
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isOpen]);
 
-    try {
-      const res = await searchRestaurantsByImage(file, coords ?? undefined);
-      setLoading(false);
+  // --- sending -----------------------------------------------------------
+  const send = (text: string) => {
+    if (!text.trim() || loading) return;
+    setInput("");
+    setAtBottom(true);
+    void sendMessage(text);
+  };
 
-      if (res && res.detectedFood) {
-        const detectedName = res.detectedFood;
-        const restaurants = res.data || [];
-        
-        const botMsg: Message = {
-          id: Date.now() + 1,
-          sender: "bot",
-          text: `Mình đoán đây là món **"${detectedName}"**. 😋 Dưới đây là các quán ngon nhất:`,
-          results: restaurants
-        };
-        setMessages(prev => [...prev, botMsg]);
-      } else {
-        setMessages(prev => [...prev, { id: Date.now() + 1, sender: "bot", text: "Hmm... Ảnh khó nhận diện quá. Bạn thử chụp rõ hơn hoặc nhập tên món nhé! 🤔" }]);
-      }
-    } catch (error) {
-      setLoading(false);
-      setMessages(prev => [...prev, { id: Date.now(), sender: "bot", text: "Lỗi xử lý ảnh rồi. Thử lại sau nha!" }]);
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setAtBottom(true);
+      void sendImage(file);
     }
-
+    // Allow re-picking the same file.
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  return (
-    <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end font-sans">
-      
-      {/* --- NÚT MỞ CHAT (Floating) --- */}
-      <div className={`transition-all duration-500 ease-in-out ${isOpen ? 'opacity-0 translate-y-10 pointer-events-none scale-0' : 'opacity-100 translate-y-0 scale-100'}`}>
-        <button 
-          onClick={() => setIsOpen(true)}
-          className="group relative flex items-center justify-center w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-700 text-white rounded-full shadow-2xl shadow-orange-900/50 hover:shadow-orange-600/70 transition-all duration-300 hover:scale-110 active:scale-95 border border-white/20"
-        >
-          {/* Icon Chat */}
-          <FaComments size={30} className="animate-bounce-slow drop-shadow-md" />
-          
-          {/* Tooltip */}
-          <span className="absolute right-20 bg-slate-900 text-amber-400 text-xs font-bold px-3 py-1.5 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-slate-700">
-            Tìm quán ngon ngay!
-          </span>
-          
-          {/* Ping Effect */}
-          <span className="absolute top-0 right-0 -mt-1 -mr-1 flex h-4 w-4">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-4 w-4 bg-orange-500 border-2 border-white"></span>
-          </span>
-        </button>
-      </div>
+  const clearChat = () => {
+    reset();
+    setUnread(0);
+    setAtBottom(true);
+  };
 
-      {/* --- KHUNG CHAT (Midnight Amber) --- */}
-      <div 
-        className={`fixed bottom-6 right-6 w-[380px] h-[600px] bg-slate-950/95 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/60 border border-slate-800 flex flex-col overflow-hidden transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) origin-bottom-right ${
-          isOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-75 opacity-0 translate-y-10 pointer-events-none'
+  const lastMessage = messages[messages.length - 1];
+  const showSuggestions =
+    !loading &&
+    (messages.length <= 1 || lastMessage?.kind === "not_found");
+
+  return (
+    <>
+      {/* ---------------------------------------------------------------- */}
+      {/* Launcher                                                          */}
+      {/* ---------------------------------------------------------------- */}
+      <button
+        onClick={() => setIsOpen(true)}
+        aria-label="Mở trợ lý tìm quán ăn"
+        className={`group fixed bottom-5 right-5 z-[9998] flex h-14 w-14 items-center justify-center rounded-full border border-white/20 bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-xl shadow-orange-900/40 transition duration-300 hover:scale-105 hover:shadow-orange-600/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400 active:scale-95 motion-reduce:transition-none sm:h-16 sm:w-16 ${
+          isOpen
+            ? "pointer-events-none scale-0 opacity-0"
+            : "scale-100 opacity-100"
         }`}
       >
-        
-        {/* HEADER */}
-        <div className="bg-slate-900/80 p-4 flex justify-between items-center shadow-lg shrink-0 border-b border-white/5 relative overflow-hidden">
-          {/* Decor background */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <FaComments size={26} />
+        <span className="pointer-events-none absolute right-[4.5rem] hidden whitespace-nowrap rounded-lg border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs font-semibold text-amber-400 opacity-0 shadow-xl transition-opacity group-hover:opacity-100 sm:block">
+          Tìm quán ngon ngay!
+        </span>
+      </button>
 
-          <div className="flex items-center gap-3 relative z-10">
-            <div className="relative">
-               <div className="absolute -inset-1 bg-gradient-to-r from-amber-500 to-orange-600 rounded-full blur opacity-40"></div>
-               <div className="relative w-10 h-10 bg-slate-900 rounded-full flex items-center justify-center border border-white/10">
-                 <FaRobot size={20} className="text-amber-400" />
-               </div>
+      {/* Backdrop, phone only: the panel covers the screen there, so the page
+          behind it should not be interactive. */}
+      {isOpen && (
+        <div
+          onClick={() => setIsOpen(false)}
+          className="fixed inset-0 z-[9998] bg-black/50 backdrop-blur-sm sm:hidden"
+          aria-hidden="true"
+        />
+      )}
+
+      {/* ---------------------------------------------------------------- */}
+      {/* Panel                                                             */}
+      {/* ---------------------------------------------------------------- */}
+      <div
+        role="dialog"
+        aria-modal="false"
+        aria-label="Trợ lý ẩm thực NomNom"
+        className={`fixed z-[9999] flex flex-col overflow-hidden border border-slate-800 bg-slate-950 shadow-2xl shadow-black/60 transition-all duration-300 ease-out motion-reduce:transition-none
+          inset-x-0 bottom-0 top-0 rounded-none
+          sm:inset-auto sm:bottom-5 sm:right-5 sm:top-auto sm:h-[min(640px,calc(100vh-3rem))] sm:w-[400px] sm:rounded-2xl
+          ${
+            isOpen
+              ? "pointer-events-auto translate-y-0 opacity-100 sm:scale-100"
+              : "pointer-events-none translate-y-6 opacity-0 sm:scale-95"
+          }`}
+      >
+        {/* -------- Header -------- */}
+        <header className="relative flex shrink-0 items-center justify-between gap-2 border-b border-white/5 bg-slate-900/90 px-4 py-3">
+          <div className="pointer-events-none absolute right-0 top-0 h-28 w-28 rounded-full bg-amber-500/10 blur-3xl" />
+          <div className="relative z-10 flex min-w-0 items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-slate-950">
+              <FaRobot size={18} className="text-amber-400" />
             </div>
-            <div>
-              <h3 className="font-bold text-lg text-white tracking-wide">NomNom Assistant</h3>
-              <p className="text-[11px] text-slate-400 flex items-center gap-1.5 font-medium">
+            <div className="min-w-0">
+              <h2 className="truncate text-base font-bold tracking-wide text-white">
+                NomNom Assistant
+              </h2>
+              <p className="flex items-center gap-1.5 text-[11px] font-medium text-slate-400">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75 motion-reduce:animate-none" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
                 </span>
-                Online
+                {coords ? "Đã biết vị trí của bạn" : "Sẵn sàng hỗ trợ"}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 relative z-10">
-             <button 
-              onClick={() => setIsOpen(false)} 
-              className="hover:bg-white/10 p-2 rounded-full transition-colors text-slate-400 hover:text-white"
+
+          <div className="relative z-10 flex items-center gap-1">
+            <button
+              onClick={clearChat}
+              aria-label="Xóa cuộc trò chuyện"
+              title="Xóa cuộc trò chuyện"
+              className="rounded-full p-2 text-slate-400 transition-colors hover:bg-white/10 hover:text-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
             >
-              <FaChevronDown size={16} />
+              <FaTrash size={13} />
+            </button>
+            <button
+              onClick={() => setIsOpen(false)}
+              aria-label="Thu nhỏ cửa sổ chat"
+              className="rounded-full p-2 text-slate-400 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
+            >
+              <FaChevronDown size={15} />
             </button>
           </div>
-        </div>
+        </header>
 
-        {/* BODY */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-5 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent bg-slate-950">
+        {/* -------- Messages -------- */}
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          role="log"
+          aria-live="polite"
+          aria-relevant="additions text"
+          className="relative flex-1 space-y-4 overflow-y-auto bg-slate-950 px-4 py-4"
+        >
           {messages.map((msg) => (
-            <div key={msg.id} className={`flex w-full ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
-              
-              {/* Avatar Bot */}
-              {msg.sender === 'bot' && (
-                <div className="w-8 h-8 bg-slate-900 rounded-full flex items-center justify-center text-amber-500 text-xs mr-2 shadow-md shrink-0 mt-1 border border-slate-700">
-                  <FaRobot />
+            <div
+              key={msg.id}
+              className={`flex w-full gap-2 ${
+                msg.sender === "user" ? "justify-end" : "justify-start"
+              }`}
+            >
+              {msg.sender === "bot" && (
+                <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-700 bg-slate-900 text-amber-500">
+                  <FaRobot size={13} />
                 </div>
               )}
 
-              <div className={`flex flex-col max-w-[85%] ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
-                
-                {/* Ảnh user gửi */}
-                {msg.isImage && msg.imageUrl && (
-                    <div className="mb-2 rounded-xl overflow-hidden border border-amber-500/30 shadow-md">
-                        <img src={msg.imageUrl} alt="Food" className="w-32 h-32 object-cover" />
-                    </div>
+              <div
+                className={`flex max-w-[86%] flex-col ${
+                  msg.sender === "user" ? "items-end" : "items-start"
+                }`}
+              >
+                {msg.imageUrl && (
+                  <img
+                    src={msg.imageUrl}
+                    alt="Ảnh món ăn bạn đã gửi"
+                    className="mb-2 h-32 w-32 rounded-xl border border-amber-500/30 object-cover"
+                  />
                 )}
 
-                {/* Bong bóng Chat */}
-                <div className={`px-4 py-3 text-[14px] leading-relaxed shadow-sm relative ${
-                  msg.sender === 'user' 
-                    ? 'bg-gradient-to-br from-amber-500 to-orange-700 text-white rounded-2xl rounded-tr-sm shadow-orange-900/20' 
-                    : 'bg-slate-900 border border-slate-800 text-slate-200 rounded-2xl rounded-tl-sm'
-                }`}>
-                  {msg.text.split("**").map((part, i) => i % 2 === 1 ? <strong key={i} className="text-amber-400">{part}</strong> : part)}
+                <div
+                  className={`whitespace-pre-line px-4 py-2.5 text-[14px] leading-relaxed ${
+                    msg.sender === "user"
+                      ? "rounded-2xl rounded-tr-sm bg-gradient-to-br from-amber-500 to-orange-600 text-white"
+                      : "rounded-2xl rounded-tl-sm border border-slate-800 bg-slate-900 text-slate-200"
+                  }`}
+                >
+                  <RichText text={msg.text} />
                 </div>
 
-                {/* --- KẾT QUẢ TÌM KIẾM --- */}
+                {/* Location prompt, shown when the answer needed coordinates. */}
+                {msg.kind === "need_location" && !coords && (
+                  <button
+                    onClick={enableLocationAndRetry}
+                    className="mt-2 inline-flex items-center gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-[13px] font-semibold text-amber-300 transition-colors hover:bg-amber-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
+                  >
+                    <FaLocationArrow size={12} />
+                    {geoStatus === "denied"
+                      ? "Bật lại quyền vị trí trong trình duyệt"
+                      : "Cho phép truy cập vị trí"}
+                  </button>
+                )}
+
+                {/* Retry, shown when the request itself failed. */}
+                {msg.failedQuery && (
+                  <button
+                    onClick={() => send(msg.failedQuery!)}
+                    className="mt-2 inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-[13px] font-semibold text-slate-300 transition-colors hover:border-amber-500/40 hover:text-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
+                  >
+                    <FaRedo size={11} /> Thử lại
+                  </button>
+                )}
+
+                {/* -------- Result cards -------- */}
                 {msg.results && msg.results.length > 0 && (
-                  <div className="mt-3 w-full space-y-2.5 pl-1">
-                    {msg.results.map((item: any) => (
-                      <Link href={`/restaurants/${item._id}`} key={item._id} className="block group">
-                        <div className="bg-slate-900/60 hover:bg-slate-900 rounded-xl border border-slate-800 hover:border-amber-500/30 shadow-sm hover:shadow-amber-500/10 transition-all duration-300 flex overflow-hidden cursor-pointer h-[80px] relative">
-                          
-                          {/* Hình ảnh */}
-                          <div className="relative w-[80px] h-full shrink-0">
+                  <ul className="mt-3 w-full space-y-2">
+                    {msg.results.map((item) => (
+                      <li key={item._id}>
+                        <Link
+                          href={`/restaurants/${item._id}`}
+                          className="group flex h-[84px] overflow-hidden rounded-xl border border-slate-800 bg-slate-900/60 transition-colors hover:border-amber-500/40 hover:bg-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
+                        >
+                          <div className="relative h-full w-[84px] shrink-0 overflow-hidden">
                             <img
                               src={item.avatarUrl || "/assets/image/pho.png"}
-                              alt={item.tenQuan}
+                              alt=""
                               referrerPolicy="no-referrer"
-                              className="object-cover w-full h-full opacity-90 group-hover:scale-110 transition-transform duration-500"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                if (!target.src.includes("/assets/image/pho.png")) target.src = "/assets/image/pho.png";
+                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110 motion-reduce:transition-none"
+                              onError={(event) => {
+                                const target =
+                                  event.target as HTMLImageElement;
+                                if (
+                                  !target.src.includes("/assets/image/pho.png")
+                                ) {
+                                  target.src = "/assets/image/pho.png";
+                                }
                               }}
                             />
-                            <div className="absolute top-1 right-1 bg-black/70 backdrop-blur-sm text-yellow-400 text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5">
-                               <FaStar size={8} /> {item.diemTrungBinh ? item.diemTrungBinh.toFixed(1) : "N/A"}
-                            </div>
+                            <span className="absolute left-1 top-1 flex items-center gap-1 rounded bg-black/75 px-1.5 py-0.5 text-[10px] font-bold text-amber-400 backdrop-blur-sm">
+                              <FaStar size={8} />
+                              {item.diemTrungBinh
+                                ? item.diemTrungBinh.toFixed(1)
+                                : "N/A"}
+                            </span>
                           </div>
 
-                          {/* Thông tin */}
-                          <div className="p-2.5 flex flex-col justify-between flex-1 min-w-0">
-                            <div>
-                              <h4 className="font-bold text-[13px] text-slate-100 truncate group-hover:text-amber-400 transition-colors">
+                          <div className="flex min-w-0 flex-1 flex-col justify-between p-2.5">
+                            <div className="min-w-0">
+                              <h3 className="truncate text-[13px] font-bold text-slate-100 transition-colors group-hover:text-amber-400">
                                 {item.tenQuan}
-                              </h4>
-                              <p className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5 truncate">
-                                <FaMapMarkerAlt className="text-slate-500 shrink-0" /> 
-                                {item.diaChi}
+                              </h3>
+                              <p className="mt-0.5 flex items-center gap-1 truncate text-[10px] text-slate-400">
+                                <FaMapMarkerAlt
+                                  size={9}
+                                  className="shrink-0 text-slate-500"
+                                />
+                                <span className="truncate">{item.diaChi}</span>
                               </p>
                             </div>
-                            <div className="flex justify-between items-center">
-                              <span className="text-[10px] text-amber-500 bg-amber-950/30 px-1.5 py-0.5 rounded border border-amber-500/20">
-                                {item.giaCa || "Menu"}
+
+                            <div className="flex items-center gap-1.5 text-[10px]">
+                              <span className="truncate rounded border border-amber-500/20 bg-amber-950/30 px-1.5 py-0.5 text-amber-500">
+                                {item.giaCa || "Đang cập nhật"}
                               </span>
+                              {/* Distance and review count explain the ordering,
+                                  which otherwise looks arbitrary. */}
+                              {typeof item.distance === "number" &&
+                                item.distance < 100 && (
+                                  <span className="shrink-0 text-emerald-400">
+                                    {item.distance.toFixed(1)}km
+                                  </span>
+                                )}
+                              {typeof item.reviewCount === "number" &&
+                                item.reviewCount > 0 && (
+                                  <span className="shrink-0 text-slate-500">
+                                    {item.reviewCount} đánh giá
+                                  </span>
+                                )}
                             </div>
                           </div>
-                        </div>
-                      </Link>
+                        </Link>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 )}
               </div>
             </div>
           ))}
-          
-          {/* Loading */}
+
           {loading && (
-            <div className="flex justify-start w-full animate-fade-in">
-              <div className="w-8 h-8 bg-slate-900 rounded-full flex items-center justify-center text-amber-500 text-xs mr-2 mt-1 border border-slate-700">
-                 <FaRobot />
+            <div className="flex w-full justify-start gap-2">
+              <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-700 bg-slate-900 text-amber-500">
+                <FaRobot size={13} />
               </div>
-              <div className="bg-slate-900 border border-slate-800 px-3 py-2.5 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-1">
-                <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></span>
+              <div
+                className="flex items-center gap-1 rounded-2xl rounded-tl-sm border border-slate-800 bg-slate-900 px-4 py-3"
+                aria-label="Trợ lý đang soạn câu trả lời"
+              >
+                {[0, 1, 2].map((i) => (
+                  <span
+                    key={i}
+                    className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 motion-reduce:animate-none"
+                    style={{ animationDelay: `${i * 0.15}s` }}
+                  />
+                ))}
               </div>
             </div>
           )}
-          <div ref={messagesEndRef} />
+
+          <div ref={endRef} />
         </div>
 
-        {/* INPUT AREA */}
-        <div className="p-3 bg-slate-900 border-t border-slate-800 shrink-0 relative z-20">
-          <div className="flex items-center gap-2 bg-black/40 rounded-xl px-2 py-2 border border-slate-700 focus-within:border-amber-500/50 focus-within:shadow-[0_0_15px_rgba(245,158,11,0.1)] transition-all duration-300">
-            
-            {/* Nút Upload Ảnh */}
-            <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
-            <button onClick={() => fileInputRef.current?.click()} className="p-2 text-slate-400 hover:text-amber-400 transition-colors" title="Gửi ảnh">
-                <FaImage size={18} />
+        {/* Jump-to-latest, only while scrolled away from the bottom. */}
+        {!atBottom && (
+          <button
+            onClick={jumpToLatest}
+            className="absolute bottom-[104px] left-1/2 z-20 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-slate-700 bg-slate-900/95 px-3 py-1.5 text-[11px] font-semibold text-slate-200 shadow-lg backdrop-blur transition hover:border-amber-500/40"
+          >
+            <FaArrowDown size={10} />
+            {unread > 0 ? `${unread} tin nhắn mới` : "Xuống cuối"}
+          </button>
+        )}
+
+        {/* -------- Suggestions -------- */}
+        {showSuggestions && (
+          <div className="shrink-0 border-t border-slate-800/60 bg-slate-950 px-3 pt-3">
+            <p className="mb-2 text-[11px] font-medium text-slate-500">
+              Thử hỏi:
+            </p>
+            <div className="flex flex-wrap gap-1.5 pb-1">
+              {CHAT_SUGGESTIONS.map((text) => (
+                <button
+                  key={text}
+                  onClick={() => send(text)}
+                  className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1.5 text-[12px] text-slate-300 transition-colors hover:border-amber-500/50 hover:text-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
+                >
+                  {text}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* -------- Composer -------- */}
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            send(input);
+          }}
+          className="shrink-0 border-t border-slate-800 bg-slate-900 p-3"
+        >
+          <div className="flex items-center gap-1 rounded-xl border border-slate-700 bg-black/40 px-2 py-1.5 transition-colors focus-within:border-amber-500/60">
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              ref={fileInputRef}
+              onChange={handleImageUpload}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={loading}
+              aria-label="Gửi ảnh món ăn để nhận diện"
+              title="Gửi ảnh món ăn"
+              className="rounded-lg p-2 text-slate-400 transition-colors hover:text-amber-400 disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
+            >
+              <FaImage size={17} />
             </button>
 
-            <div className="h-5 w-[1px] bg-slate-700 mx-1"></div>
-
+            <label htmlFor="nomnom-input" className="sr-only">
+              Nhập câu hỏi cho trợ lý
+            </label>
             <input
+              id="nomnom-input"
+              ref={inputRef}
               type="text"
-              className="flex-1 bg-transparent border-none outline-none text-sm px-2 text-slate-200 placeholder-slate-500 caret-amber-500"
-              placeholder="Nhập tên món..."
+              autoComplete="off"
+              className="min-w-0 flex-1 border-none bg-transparent px-1 text-sm text-slate-200 caret-amber-500 outline-none placeholder:text-slate-500"
+              placeholder="Món ăn, khu vực, mức giá..."
               value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+              onChange={(event) => setInput(event.target.value)}
+              // Vietnamese typing goes through an IME: Enter mid-composition
+              // picks a candidate and must not submit the message.
+              onCompositionStart={() => (composingRef.current = true)}
+              onCompositionEnd={() => (composingRef.current = false)}
+              onKeyDown={(event) => {
+                if (
+                  event.key === "Enter" &&
+                  !composingRef.current &&
+                  !event.nativeEvent.isComposing
+                ) {
+                  event.preventDefault();
+                  send(input);
+                }
+              }}
             />
-            
-            <button 
-              onClick={handleSend}
+
+            <button
+              type="submit"
               disabled={loading || !input.trim()}
-              className="bg-gradient-to-r from-amber-500 to-orange-600 text-white w-8 h-8 rounded-lg flex items-center justify-center disabled:opacity-50 disabled:grayscale transition-all shadow-md hover:shadow-orange-500/20 active:scale-95"
+              aria-label="Gửi"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-r from-amber-500 to-orange-600 text-white transition-all hover:shadow-md hover:shadow-orange-500/20 active:scale-95 disabled:grayscale disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-amber-400"
             >
-              {loading && input.trim() ? <FaSpinner className="animate-spin" /> : <FaPaperPlane size={12} />}
+              {loading ? (
+                <FaSpinner className="animate-spin motion-reduce:animate-none" size={13} />
+              ) : (
+                <FaPaperPlane size={13} />
+              )}
             </button>
           </div>
-        </div>
+        </form>
       </div>
-    </div>
+    </>
   );
 }
