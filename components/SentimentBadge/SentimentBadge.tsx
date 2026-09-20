@@ -1,56 +1,63 @@
-import React from 'react';
+"use client";
+
+import React from "react";
+import { useTranslation } from "@/app/hooks/useTranslation";
 
 interface SentimentBadgeProps {
-  label: string; // LABEL_0, LABEL_1, hoặc LABEL_2
-  score?: number; // Độ tin cậy (optional)
+  /** LABEL_0 / LABEL_1 / LABEL_2, or NEG / NEU / POS. */
+  label: string;
+  /** Model confidence, currently not shown. */
+  score?: number;
 }
 
-const SentimentBadge: React.FC<SentimentBadgeProps> = ({ label, score }) => {
+const SentimentBadge: React.FC<SentimentBadgeProps> = ({ label }) => {
+  const { t } = useTranslation();
+
+  // No label means the row predates the sentiment pass; render nothing rather
+  // than claiming it is neutral.
+  if (!label) return null;
+
   let config = {
-    text: 'Trung tính',
-    color: '#6c757d', // Xám
-    bgColor: '#e2e3e5',
-    icon: '😐'
+    text: t.reviews.sentiment.neutral,
+    color: "#6c757d",
+    bgColor: "#e2e3e5",
+    icon: "😐",
   };
 
-  // Dựa trên logic trong file test_sentiment.py của bạn
-  if (label === 'LABEL_2' || label === 'POS') {
+  if (label === "LABEL_2" || label === "POS") {
     config = {
-      text: 'Tích cực',
-      color: '#155724', // Xanh lá đậm
-      bgColor: '#d4edda', // Xanh lá nhạt
-      icon: '😊'
+      text: t.reviews.sentiment.positive,
+      color: "#155724",
+      bgColor: "#d4edda",
+      icon: "😊",
     };
-  } else if (label === 'LABEL_0' || label === 'NEG') {
+  } else if (label === "LABEL_0" || label === "NEG") {
     config = {
-      text: 'Tiêu cực',
-      color: '#721c24', // Đỏ đậm
-      bgColor: '#f8d7da', // Đỏ nhạt
-      icon: '😞'
+      text: t.reviews.sentiment.negative,
+      color: "#721c24",
+      bgColor: "#f8d7da",
+      icon: "😞",
     };
   }
 
-  // Nếu không có label (data cũ chưa chạy AI), không render gì cả
-  if (!label) return null;
-
   return (
-    <span style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: '4px',
-      padding: '2px 8px',
-      borderRadius: '12px',
-      backgroundColor: config.bgColor,
-      color: config.color,
-      fontSize: '12px',
-      fontWeight: 600,
-      marginLeft: '10px', // Cách ra khỏi ngôi sao một chút
-      border: `1px solid ${config.color}20` // Viền mờ
-    }}>
-      <span>{config.icon}</span>
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "4px",
+        padding: "2px 8px",
+        borderRadius: "12px",
+        backgroundColor: config.bgColor,
+        color: config.color,
+        fontSize: "12px",
+        fontWeight: 600,
+        marginLeft: "10px",
+        border: `1px solid ${config.color}20`,
+      }}
+    >
+      <span aria-hidden="true">{config.icon}</span>
       <span>{config.text}</span>
-      {/* Nếu muốn hiện độ tin cậy thì bỏ comment dòng dưới */}
-      {/* {score && <span style={{opacity: 0.7, fontSize: '10px'}}>({Math.round(score * 100)}%)</span>} */}
     </span>
   );
 };

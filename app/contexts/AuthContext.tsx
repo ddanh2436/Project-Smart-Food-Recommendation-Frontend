@@ -5,145 +5,15 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 // [FIX] Import api từ lib thay vì dùng axios trực tiếp để đảm bảo BaseURL đúng (3001)
 import api from '@/app/lib/api'; 
 import { useRouter } from 'next/navigation';
+import {
+  getDict,
+  LANG_CHANGE_EVENT,
+  LANG_STORAGE_KEY,
+  readStoredLang,
+  type Dict,
+} from '@/app/lib/i18n';
 
-// === TỪ ĐIỂN SONG NGỮ ĐƯỢC NHÚNG TRỰC TIẾP ===
-const embeddedTranslations = {
-  vn: {
-    // ... (Giữ nguyên phần từ điển của bạn)
-    common: {
-      loading: "Đang tải...",
-      viewAll: "Xem tất cả",
-      details: "Xem chi tiết",
-      search: "Tìm kiếm",
-      updating: "Đang cập nhật",
-      open: "Mở cửa",
-      close: "Đóng cửa",
-      distance: "km",
-      confirm: "Xác nhận",
-      cancel: "Hủy bỏ",
-    },
-    home: {
-      heroTitle: "Khám phá ẩm thực Việt",
-      heroSubtitle: "Tìm kiếm hương vị yêu thích của bạn",
-      heroSearchPlaceholder: "Tìm kiếm nhà hàng, món ăn...",
-      topRatedTitle: "Nhà hàng được yêu thích",
-      topRatedSub: "Khám phá những địa điểm được đánh giá cao",
-      qualityTitle: "Hương Vị Đỉnh Cao",
-      qualitySub: "Top nhà hàng có chất lượng món ăn tốt nhất",
-      spaceTitle: "Không Gian Ấn Tượng",
-      spaceSub: "Top những quán có view đẹp & không gian chill nhất",
-      serviceTitle: "Dịch Vụ Tuyệt Vời",
-      serviceSub: "Top quán có chất lượng phục vụ chu đáo nhất",
-      priceTitle: "Giá Cả Hợp Lý",
-      priceSub: "Top quán có mức giá phù hợp với nhiều đối tượng",
-      locationTitle: "Vị Trí Đắc Địa",
-      locationSub: "Dễ dàng di chuyển, trung tâm và thuận tiện",
-    },
-    restaurantPage: {
-      filterRating: "Đánh giá chi tiết",
-      labels: {
-        quality: "Chất lượng",
-        service: "Phục vụ",
-        space: "Không gian",
-        price: "Giá cả",
-        location: "Vị trí",
-      },
-      ratingText: {
-        excellent: "Xuất sắc",
-        good: "Rất tốt",
-        average: "Tốt",
-        bad: "Cần cải thiện",
-      }
-    },
-    nav: {
-        home: "Trang chủ",
-        restaurants: "Nhà hàng",
-        nearMe: "Gần tôi",
-        foodsDrinks: "Món ăn & Đồ uống",
-        aboutUs: "Về chúng tôi",
-        loginSignup: "Đăng nhập / Đăng ký",
-        logout: "Đăng xuất", 
-        langVietnamese: "Tiếng Việt",
-        langEnglish: "English",
-    },
-    auth: {
-        loginTitle: "Đăng nhập",
-        logoutSuccess: "Đăng xuất thành công!",
-        logoutConfirmTitle: "Xác nhận Đăng xuất",
-        logoutConfirmMsg: "Bạn có chắc chắn muốn đăng xuất không?",
-        logoutYes: "Đăng xuất",
-        logoutCancel: "Hủy bỏ",
-    },
-  },
-  en: {
-    // ... (Giữ nguyên phần tiếng Anh của bạn)
-    common: {
-      loading: "Loading...",
-      viewAll: "View All",
-      details: "View Details",
-      search: "Search",
-      updating: "Updating",
-      open: "Open",
-      close: "Closed",
-      distance: "km",
-      confirm: "Confirm",
-      cancel: "Cancel",
-    },
-    home: {
-      heroTitle: "Explore Vietnamese Cuisine",
-      heroSubtitle: "Search for your favorite flavors",
-      heroSearchPlaceholder: "Search restaurants, dishes...",
-      topRatedTitle: "Top Rated Restaurants",
-      topRatedSub: "Explore the most highly rated places",
-      qualityTitle: "Top Quality Flavor",
-      qualitySub: "Top restaurants with the best food quality",
-      spaceTitle: "Impressive Ambience",
-      spaceSub: "Top places with great views & chill vibes",
-      serviceTitle: "Excellent Service",
-      serviceSub: "Top restaurants with the most attentive service quality",
-      priceTitle: "Affordable Price",
-      priceSub: "Top restaurants with reasonable prices for many people",
-      locationTitle: "Prime Location",
-      locationSub: "Central, convenient and easy to reach",
-    },
-    restaurantPage: {
-      filterRating: "Rating",
-      labels: {
-        quality: "Quality",
-        service: "Service",
-        space: "Ambience",
-        price: "Price",
-        location: "Location",
-      },
-      ratingText: {
-        excellent: "Excellent",
-        good: "Very Good",
-        average: "Good",
-        bad: "Needs Improvement",
-      }
-    },
-    nav: {
-        home: "Home",
-        restaurants: "Restaurants",
-        nearMe: "Near Me",
-        foodsDrinks: "Foods and Drinks",
-        aboutUs: "About us",
-        loginSignup: "Login / Sign Up",
-        logout: "Logout", 
-        langVietnamese: "Tiếng Việt",
-        langEnglish: "English",
-    },
-    auth: {
-        loginTitle: "Login",
-        logoutSuccess: "Logout successful!",
-        logoutConfirmTitle: "Confirm Logout",
-        logoutConfirmMsg: "Are you sure you want to log out?",
-        logoutYes: "Yes, Log Out",
-        logoutCancel: "Cancel",
-    },
-  },
-};
-// === KẾT THÚC KHỐI TỪ ĐIỂN ===
+// The dictionary lives in app/lib/i18n.ts; see the note there.
 
 interface User {
   id: string;
@@ -161,24 +31,11 @@ interface User {
 
 type Lang = 'en' | 'vn';
 
-/** The only key and event used for the language preference. */
-export const LANG_STORAGE_KEY = 'vnn:lang';
-export const LANG_CHANGE_EVENT = 'vnn:lang-change';
-
-/** Read the stored language outside a React tree (e.g. in a plain function). */
-export function readStoredLang(): Lang {
-  if (typeof window === 'undefined') return 'vn';
-  try {
-    const saved = localStorage.getItem(LANG_STORAGE_KEY);
-    if (saved === 'vn' || saved === 'en') return saved;
-    const legacy = localStorage.getItem('app-language');
-    if (legacy === 'en') return 'en';
-  } catch {
-    /* ignore */
-  }
-  return 'vn';
-}
-type Translations = typeof embeddedTranslations.vn;
+// The storage key, the change event and the out-of-tree reader now live in
+// app/lib/i18n.ts, so `app/lib/api.ts` can read the language without importing
+// this module (which imports the API client, closing a cycle). Re-exported
+// here because other modules already import them from this path.
+export { LANG_CHANGE_EVENT, LANG_STORAGE_KEY, readStoredLang };
 
 interface AuthContextType {
   user: User | null;
@@ -186,7 +43,7 @@ interface AuthContextType {
   isLoading: boolean;
   currentLang: Lang; 
   setLang: (lang: Lang) => void;
-  T: Translations;
+  T: Dict;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -263,7 +120,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
   
-  const T = embeddedTranslations[currentLang]; 
+  /**
+   * Keep the document's own language attribute in step with the choice.
+   *
+   * The root layout can only render one value, and it is what a browser uses to
+   * pick a fallback face and how a screen reader decides which voice to read the
+   * page in - so leaving it on Vietnamese while the interface is English makes
+   * the page announce English text with Vietnamese pronunciation.
+   */
+  useEffect(() => {
+    document.documentElement.lang = currentLang === 'en' ? 'en' : 'vi';
+  }, [currentLang]);
+
+  const T = getDict(currentLang);
 
   return (
     <AuthContext.Provider value={{ 

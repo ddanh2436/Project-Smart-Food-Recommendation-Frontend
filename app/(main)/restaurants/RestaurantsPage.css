@@ -1,12 +1,11 @@
 /* app/(main)/restaurants/RestaurantsPage.css */
 
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Nunito:wght@400;600;700&display=swap");
 
 .restaurants-page-wrapper {
   background-color: #050505;
   min-height: 100vh;
   padding: 100px 2rem 4rem 2rem; /* Padding top lớn để tránh Header */
-  font-family: "Nunito", sans-serif;
+  font-family: var(--font-ui);
   color: #fff;
 }
 
@@ -22,7 +21,7 @@
 }
 
 .page-title {
-  font-family: "Cormorant Garamond", serif;
+  font-family: var(--font-display);
   font-size: 3.5rem;
   color: #e9a004;
   margin-bottom: 0.5rem;
@@ -142,7 +141,7 @@
 }
 
 .restaurant-name {
-  font-family: "Cormorant Garamond", serif;
+  font-family: var(--font-display);
   font-size: 1.4rem;
   color: #fff;
   font-weight: 700;
@@ -309,7 +308,7 @@
   overflow-y: auto;
 }
 .modal-title {
-  font-family: "Cormorant Garamond", serif;
+  font-family: var(--font-display);
   font-size: 2.5rem;
   color: #e9a004;
   margin: 0 0 10px 0;
@@ -450,7 +449,7 @@
 .page-numbers {
   font-size: 1.1rem;
   color: #fff;
-  font-family: "Cormorant Garamond", serif;
+  font-family: var(--font-display);
 }
 
 /* --- BACK TO TOP BUTTON --- */
@@ -515,7 +514,7 @@
   gap: 12px;
   background: rgba(255, 255, 255, 0.05); /* Nền mờ nhẹ */
   color: #fff;
-  font-family: "Nunito", sans-serif;
+  font-family: var(--font-ui);
   font-weight: 700;
   font-size: 1.1rem;
   padding: 12px 24px;
@@ -632,7 +631,7 @@
   padding: 8px 20px;
   border-radius: 12px;
   font-size: 0.95rem;
-  font-family: 'Nunito', sans-serif;
+  font-family: var(--font-ui);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.25s ease;
@@ -769,7 +768,7 @@ filter-actions {
   border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 700;
-  font-family: "Nunito", sans-serif;
+  font-family: var(--font-ui);
 }
 
 .active-tag svg {
@@ -835,7 +834,7 @@ filter-actions {
 }
 
 .empty-state-title {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-display);
   font-size: 2rem;
   font-weight: 700;
   color: #e9a004; /* Màu vàng thương hiệu */

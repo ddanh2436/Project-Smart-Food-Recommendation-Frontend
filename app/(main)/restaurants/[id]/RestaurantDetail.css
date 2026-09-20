@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Nunito:wght@400;600;700&display=swap");
 
 /* --- GLOBAL SETTINGS (MODERN SOFT DARK THEME) --- */
 .detail-page-wrapper {
@@ -7,7 +6,7 @@
   color: #e4e4e7; /* Chữ trắng xám (Zinc-200) - Chống lóa */
   padding-top: 80px;
   padding-bottom: 4rem;
-  font-family: "Nunito", sans-serif;
+  font-family: var(--font-ui);
 }
 
 .container {
@@ -55,7 +54,7 @@ footer {
 }
 
 .hero-content h1 {
-  font-family: "Cormorant Garamond", serif;
+  font-family: var(--font-display);
   font-size: 4rem;
   color: #fff; /* Tiêu đề màu trắng để dễ đọc nhất */
   margin: 0 0 15px 0;
@@ -122,7 +121,7 @@ footer {
 }
 
 .section-heading {
-  font-family: "Cormorant Garamond", serif;
+  font-family: var(--font-display);
   font-size: 2rem;
   color: #fff;
   margin-bottom: 1.5rem;
@@ -169,7 +168,7 @@ footer {
 
 .rating-box h3 {
   text-align: center;
-  font-family: "Cormorant Garamond", serif;
+  font-family: var(--font-display);
   font-size: 1.75rem;
   margin-bottom: 1.5rem;
   color: #fff;
@@ -388,7 +387,7 @@ footer {
   margin-top: 0;
   margin-bottom: 16px;
   color: #fff; /* Tiêu đề màu trắng */
-  font-family: "Cormorant Garamond", serif; /* Font chữ đồng bộ tiêu đề */
+  font-family: var(--font-display); /* Font chữ đồng bộ tiêu đề */
   font-size: 1.5rem;
   letter-spacing: 0.5px;
 }
@@ -401,29 +400,6 @@ footer {
   margin-bottom: 20px;
   font-weight: 600;
   color: #d4d4d8; /* Zinc-300: Màu chữ xám sáng */
-}
-
-.star-input-wrapper {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-}
-
-.star-btn {
-  background: none;
-  border: none;
-  font-size: 1.6rem;
-  color: #52525b; /* Zinc-600: Sao chưa chọn màu xám tối */
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 0;
-  line-height: 1;
-}
-
-.star-btn.active, .star-btn:hover {
-  color: #e9a004; /* Sao đã chọn màu Cam chủ đạo */
-  transform: scale(1.15); /* Hiệu ứng phóng to nhẹ khi chọn */
-  text-shadow: 0 0 10px rgba(233, 160, 4, 0.4); /* Phát sáng nhẹ */
 }
 
 .rating-text-value {
@@ -441,7 +417,7 @@ footer {
   color: #e4e4e7; /* Chữ khi nhập màu trắng */
   border: 1px solid #3f3f46;
   border-radius: 12px;
-  font-family: "Nunito", sans-serif;
+  font-family: var(--font-ui);
   font-size: 1rem;
   line-height: 1.5;
   resize: vertical;

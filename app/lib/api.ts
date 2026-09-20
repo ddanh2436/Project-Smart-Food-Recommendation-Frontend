@@ -4,6 +4,7 @@ import axios, {
   AxiosInstance,
   InternalAxiosRequestConfig,
 } from "axios";
+import { getDict, readStoredLang } from "@/app/lib/i18n";
 
 export const API_URL =
   process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "") ||
@@ -544,11 +545,18 @@ export async function updateProfile(payload: Record<string, unknown>) {
  *
  * Nest validation failures put an array of messages in `message`; showing the
  * raw object gave users "[object Object]".
+ *
+ * This is called from event handlers rather than from render, so it cannot use
+ * the translation hook. It reads the stored language directly — the same value
+ * the provider reads — so a timeout does not surface in Vietnamese on the
+ * English site. Messages that come back from the server are passed through as
+ * the server wrote them.
  */
 export function describeError(error: unknown): string {
+  const t = getDict(readStoredLang());
   if (axios.isAxiosError(error)) {
     if (error.code === "ECONNABORTED") {
-      return "Máy chủ phản hồi chậm, vui lòng thử lại.";
+      return t.errors.timeout;
     }
     const data = error.response?.data as
       | { message?: string | string[] }
@@ -556,7 +564,7 @@ export function describeError(error: unknown): string {
     const message = data?.message;
     if (Array.isArray(message)) return message.join(", ");
     if (typeof message === "string") return message;
-    if (!error.response) return "Không thể kết nối tới máy chủ.";
+    if (!error.response) return t.errors.offline;
     return error.message;
   }
   return error instanceof Error ? error.message : String(error);

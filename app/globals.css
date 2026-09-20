@@ -3,13 +3,28 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /*
+    The two type stacks for the whole app. Every stylesheet references these
+    rather than naming a family, which is what stops a font being asked for in
+    one file and never loaded - the state this project was in, with five
+    families requested across thirteen `@import url(...)` lines.
+
+    The fallbacks matter for Vietnamese: Segoe UI (Windows), Roboto (Android) and
+    Helvetica/Arial all carry the full Vietnamese range, so a slow font load
+    degrades to a face that can still render "không gian thoáng mát" rather than
+    dropping marks.
+  */
+  --font-ui: var(--font-sans-loaded), "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  --font-display: var(--font-display-loaded), Georgia, "Times New Roman", serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-ui);
+  --font-serif: var(--font-display);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,9 +37,18 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-  margin  : 0;
-  padding : 0;
+  /*
+    Was Arial. That single line overrode the webfont the layout had just loaded,
+    so every element without its own font-family - which is most of the
+    interface - rendered Vietnamese in a system face whose tone marks sit too
+    high and collide with the vowel diacritics beneath them.
+  */
+  font-family: var(--font-ui);
+  /* Vietnamese stacks two marks over some vowels; the default line height
+     clipped them where lines were set tight. */
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
 }
 
 /* --------------------------------------------------------------------------
@@ -113,4 +137,37 @@ body {
   /* Kept for the restaurants listing, which still shows it over the image.
      Softened so it does not fight the score badge. */
   background: rgba(17, 17, 17, 0.78);
+}
+
+/* --------------------------------------------------------------------------
+   Inline map placeholder
+   Shown while the Leaflet bundle loads. It sits outside the React tree that
+   knows the language, so it carries no words - a spinner reads the same in
+   Vietnamese and English.
+   -------------------------------------------------------------------------- */
+.map-inline-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+  padding: 20px;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+
+.map-inline-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(0, 0, 0, 0.12);
+  border-top-color: #ea580c;
+  border-radius: 50%;
+  animation: map-inline-spin 0.8s linear infinite;
+}
+
+@keyframes map-inline-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-inline-spinner { animation-duration: 2.4s; }
 }

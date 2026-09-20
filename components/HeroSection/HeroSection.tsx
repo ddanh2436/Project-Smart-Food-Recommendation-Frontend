@@ -2,52 +2,16 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import "./HeroSection.css";
-import { useAuth } from "@/app/contexts/AuthContext";
+import { useTranslation } from "@/app/hooks/useTranslation";
 import { useRouter } from "next/navigation";
 import { searchRestaurantsByImage } from "@/app/lib/api"; 
-import { formatRating, formatReviewCount } from "@/app/lib/rating";
-import FiveStar from "@/components/FiveStar/FiveStar";
-import Image from "next/image"; 
-import { FaMapMarkerAlt, FaStar, FaStore, FaTimes, FaUtensils } from "react-icons/fa";
+import { ScoreBadge } from "@/components/Score/Score";
+import toast from "react-hot-toast";
+import { FaMapMarkerAlt, FaStore, FaTimes, FaUtensils } from "react-icons/fa";
 
-// === DỮ LIỆU NGÔN NGỮ ===
-const langData = {
-  en: {
-    line1: "Start your flavor journey with",
-    line2: "Vietnamese Cuisine",
-    subText: "Explore the hidden gems and authentic tastes around you.",
-    placeholder: "What are you craving today?",
-    discoverBtn: "Discover Collections",
-    or: "Or",
-    headers: ["Top Dishes", "Must-Try Drinks", "Best Restaurants"],
-    trendingLabel: "🔥 Trending:",
-    panelTitle: "Customize your search:", 
-    categories: { 
-      region: "Region",
-      dish: "Dish Type",
-      space: "Ambience"
-    },
-    historyTitle: "Recent Searches"
-  },
-  vn: {
-    line1: "Khởi đầu hành trình vị giác với",
-    line2: "Tinh hoa Ẩm thực Việt",
-    subText: "Khám phá những quán ăn và hương vị chuẩn vị ngay quanh bạn.",
-    placeholder: "Hôm nay bạn muốn ăn gì...",
-    discoverBtn: "Tìm kiếm theo Bộ sưu tập",
-    or: "Hoặc",
-    headers: ["Món ngon nổi bật", "Thức uống phải thử", "Nhà hàng tiêu biểu"],
-    trendingLabel: "🔥 Xu hướng:",
-    panelTitle: "Tùy chọn tìm kiếm:", 
-    categories: { 
-      region: "Vùng miền",
-      dish: "Loại món",
-      space: "Không gian"
-    },
-    historyTitle: "Lịch sử tìm kiếm"
-  }
-};
-
+// Copy lives in app/lib/i18n.ts. This component used to hold its own
+// dictionary, which is how strings added later (the panel's search button, the
+// image-search modal, the history tooltip) ended up Vietnamese-only.
 // --- DỮ LIỆU MOCK ---
 const topFoods = ["Phở Bò Tái Nạm", "Bánh Mì Huỳnh Hoa", "Bún Chả Hương Liên", "Cơm Tấm Ba Ghiền", "Bánh Xèo Bà Dưỡng"];
 const topDrinks = ["Cà Phê Trứng", "Trà Sen Vàng", "Nước Mía Sầu Riêng", "Bạc Xỉu Đá", "Dừa Tắc"];
@@ -96,8 +60,7 @@ const HeroSection: React.FC = () => {
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const [showHistory, setShowHistory] = useState(false);
 
-  const { currentLang } = useAuth();
-  const T = langData[currentLang]; 
+  const { t: T } = useTranslation();
   const router = useRouter(); 
   const panelRef = useRef<HTMLDivElement>(null); // Ref bao quanh khu vực search
 
@@ -184,11 +147,11 @@ const HeroSection: React.FC = () => {
       if (data && data.data) {
         setImageResult(data); 
       } else {
-        alert("Không nhận diện được món ăn hoặc không tìm thấy quán!");
+        toast.error(T.hero.imageFailed);
       }
     } catch (err) {
       console.error(err);
-      alert("Có lỗi xảy ra khi xử lý ảnh.");
+      toast.error(T.hero.imageError);
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -219,9 +182,9 @@ const HeroSection: React.FC = () => {
       <div className="hero-main-wrapper">
         <div className="hero-content-left">
           <div className="hero-text-block">
-            <span className="hero-overline">{T.line1}</span>
-            <h1 className="hero-title">{T.line2}</h1>
-            <p className="hero-subtitle">{T.subText}</p>
+            <span className="hero-overline">{T.home.heroOverline}</span>
+            <h1 className="hero-title">{T.home.heroTitle}</h1>
+            <p className="hero-subtitle">{T.home.heroSubtitle}</p>
           </div>
 
           {/* Wrapper cho Search và Panel */}
@@ -231,7 +194,7 @@ const HeroSection: React.FC = () => {
                 <SearchIcon />
                 <input
                   type="text"
-                  placeholder={T.placeholder}
+                  placeholder={T.home.heroSearchPlaceholder}
                   value={searchValue}
                   onChange={(e) => {
                     setSearchValue(e.target.value);
@@ -250,7 +213,7 @@ const HeroSection: React.FC = () => {
                   className="camera-btn camera-ai-btn"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploading}
-                  title="Tìm kiếm bằng hình ảnh (AI)"
+                  title={T.hero.imageSearch}
                 >
                   {isUploading ? "..." : <CameraIcon />}
                 </button>
@@ -267,7 +230,7 @@ const HeroSection: React.FC = () => {
             {/* --- PANEL LỊCH SỬ TÌM KIẾM --- */}
             {showHistory && searchHistory.length > 0 && !isPanelOpen && (
               <div className="search-history-dropdown">
-                <div className="history-header">{T.historyTitle}</div>
+                <div className="history-header">{T.hero.historyTitle}</div>
                 <ul className="history-list">
                   {searchHistory.map((item, index) => (
                     <li key={index} className="history-item" onClick={() => handleHistoryClick(item)}>
@@ -278,7 +241,7 @@ const HeroSection: React.FC = () => {
                       <button 
                         className="btn-remove-history" 
                         onClick={(e) => removeHistoryItem(e, item)}
-                        title="Xóa"
+                        title={T.hero.historyRemove}
                       >
                         <XIcon />
                       </button>
@@ -292,28 +255,28 @@ const HeroSection: React.FC = () => {
             {isPanelOpen && (
               <div className="discovery-panel">
                 <div className="panel-header">
-                  <span className="panel-title">{T.panelTitle}</span>
+                  <span className="panel-title">{T.hero.panelTitle}</span>
                   <button className="panel-close-btn" onClick={() => setIsPanelOpen(false)}><CloseIcon /></button>
                 </div>
                 
                 <div className="panel-body">
                   <div className="panel-category-group">
-                    <span className="category-label">{T.categories.region}</span>
+                    <span className="category-label">{T.hero.categories.region}</span>
                     <div className="category-tags">
-                      {DISCOVER_OPTIONS.region.map(tag => (
+                      {DISCOVER_OPTIONS.region.map((tag, index) => (
                         <button 
                           key={tag} 
                           className={`choice-tag ${selectedTags.includes(tag) ? 'active' : ''}`}
                           onClick={() => toggleTag(tag)}
                         >
-                          {tag}
+                          {T.hero.regions[index] ?? tag}
                         </button>
                       ))}
                     </div>
                   </div>
 
                   <div className="panel-category-group">
-                    <span className="category-label">{T.categories.dish}</span>
+                    <span className="category-label">{T.hero.categories.dish}</span>
                     <div className="category-tags">
                       {DISCOVER_OPTIONS.dish.map(tag => (
                         <button 
@@ -328,15 +291,15 @@ const HeroSection: React.FC = () => {
                   </div>
 
                   <div className="panel-category-group">
-                    <span className="category-label">{T.categories.space}</span>
+                    <span className="category-label">{T.hero.categories.space}</span>
                     <div className="category-tags">
-                      {DISCOVER_OPTIONS.space.map(tag => (
+                      {DISCOVER_OPTIONS.space.map((tag, index) => (
                         <button 
                           key={tag} 
                           className={`choice-tag ${selectedTags.includes(tag) ? 'active' : ''}`}
                           onClick={() => toggleTag(tag)}
                         >
-                          {tag}
+                          {T.hero.spaces[index] ?? tag}
                         </button>
                       ))}
                     </div>
@@ -344,14 +307,14 @@ const HeroSection: React.FC = () => {
                 </div>
                 
                 <button className="panel-search-btn" onClick={() => handleSearch()}>
-                  Tìm kiếm ngay ({selectedTags.length})
+                  {T.hero.searchNow} ({selectedTags.length})
                 </button>
               </div>
             )}
 
             {!isPanelOpen && !showHistory && (
                 <div className="hero-trending">
-                <span className="trending-label">{T.trendingLabel}</span>
+                <span className="trending-label">{T.hero.trendingLabel}</span>
                 {TRENDING_KEYWORDS.map((keyword, index) => (
                     <span key={index} className="trending-tag" onClick={() => handleSearch(keyword)}>
                     {keyword}
@@ -362,12 +325,12 @@ const HeroSection: React.FC = () => {
           </div>
 
           <div className="hero-actions">
-            <span className="hero-divider">{T.or}</span>
+            <span className="hero-divider">{T.hero.or}</span>
             <button 
                 className={`btn-discover-glow ${isPanelOpen ? 'active' : ''}`} 
                 onClick={handleDiscoverClick}
             >
-              {isPanelOpen ? "Đóng Bộ sưu tập" : T.discoverBtn}
+              {isPanelOpen ? T.hero.discoverClose : T.hero.discoverBtn}
               {!isPanelOpen && <ArrowRightIcon />}
             </button>
           </div>
@@ -377,10 +340,10 @@ const HeroSection: React.FC = () => {
           <div className="glass-panel">
             <div className="slider-viewport">
               <div className="slider-track">
-                <div className="slider-card"><h3>{T.headers[0]}</h3><ul>{topFoods.map((item, i) => <li key={i}>{item}</li>)}</ul></div>
-                <div className="slider-card"><h3>{T.headers[1]}</h3><ul>{topDrinks.map((item, i) => <li key={i}>{item}</li>)}</ul></div>
-                <div className="slider-card"><h3>{T.headers[2]}</h3><ul>{topRestaurants.map((item, i) => <li key={i}>{item}</li>)}</ul></div>
-                <div className="slider-card"><h3>{T.headers[0]}</h3><ul>{topFoods.map((item, i) => <li key={i}>{item}</li>)}</ul></div>
+                <div className="slider-card"><h3>{T.hero.headers[0]}</h3><ul>{topFoods.map((item, i) => <li key={i}>{item}</li>)}</ul></div>
+                <div className="slider-card"><h3>{T.hero.headers[1]}</h3><ul>{topDrinks.map((item, i) => <li key={i}>{item}</li>)}</ul></div>
+                <div className="slider-card"><h3>{T.hero.headers[2]}</h3><ul>{topRestaurants.map((item, i) => <li key={i}>{item}</li>)}</ul></div>
+                <div className="slider-card"><h3>{T.hero.headers[0]}</h3><ul>{topFoods.map((item, i) => <li key={i}>{item}</li>)}</ul></div>
               </div>
             </div>
           </div>
@@ -396,7 +359,7 @@ const HeroSection: React.FC = () => {
             {/* Header Modal */}
             <div className="modal-header-modern">
               <div className="modal-title-wrapper">
-                <span className="detect-label">AI Nhận diện:</span>
+                <span className="detect-label">{T.hero.detected}</span>
                 <h3 className="detected-dish-name">{imageResult.detectedFood}</h3>
               </div>
               <button className="modal-close-btn" onClick={() => setImageResult(null)}>
@@ -409,7 +372,7 @@ const HeroSection: React.FC = () => {
               {imageResult.data.length === 0 ? (
                  <div className="empty-state">
                     <div className="empty-icon">🍽️</div>
-                    <p>Rất tiếc, chưa tìm thấy quán nào bán món này trong hệ thống.</p>
+                    <p>{T.hero.imageEmpty}</p>
                  </div>
               ) : (
                 <div className="result-grid">
@@ -432,7 +395,7 @@ const HeroSection: React.FC = () => {
                           }}
                         />
                         <div className="card-rating-badge">
-                          <FaStar /> {formatRating(res.diemTrungBinh)}
+                          <ScoreBadge score={res.diemTrungBinh} withScale />
                         </div>
                       </div>
 
@@ -448,10 +411,10 @@ const HeroSection: React.FC = () => {
                         <div className="card-footer">
                           <span className="price-tag">
                             <FaUtensils className="icon-small" /> 
-                            {res.giaCa || "Đang cập nhật"}
+                            {res.giaCa || T.common.updating}
                           </span>
                           <span className="view-btn">
-                            Xem quán <FaStore />
+                            {T.hero.viewPlace} <FaStore />
                           </span>
                         </div>
                       </div>

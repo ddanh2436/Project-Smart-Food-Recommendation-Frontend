@@ -8,6 +8,8 @@ import {
   type Restaurant,
 } from "@/app/lib/api";
 import { useGeolocation, type Coords } from "@/app/hooks/useGeolocation";
+import { useTranslation } from "@/app/hooks/useTranslation";
+import type { Dict } from "@/app/lib/i18n";
 
 export interface ChatMessage {
   id: number;
@@ -21,33 +23,26 @@ export interface ChatMessage {
   failedQuery?: string;
 }
 
-export const CHAT_GREETINGS = [
-  "Chào bạn! 👋 Hôm nay bạn muốn ăn gì?",
-  "VietNomNom xin chào! 🍜 Bạn đang thèm món gì nào?",
-  "Hello! 🥘 Mình tìm quán theo món, giá hay khoảng cách đều được.",
-];
-
 /**
- * Starter prompts.
+ * Starter prompts, in the language showing.
  *
  * They double as documentation: price caps, areas and exclusions are all
  * supported but were invisible behind a placeholder that only said
- * "Nhập tên món...".
+ * "Nhập tên món...". The English set keeps the Vietnamese dish names
+ * transliterated rather than translated, because they are what the assistant
+ * searches for.
  */
-export const CHAT_SUGGESTIONS = [
-  "Phở ngon gần đây",
-  "Cơm tấm ở Quận 1",
-  "Lẩu dưới 200k",
-  "Cà phê yên tĩnh",
-  "Hải sản nhưng không cay",
-];
+export function chatSuggestions(t: Dict): string[] {
+  return t.chat.suggestions;
+}
 
-export function makeGreeting(): ChatMessage[] {
+function makeGreeting(t: Dict): ChatMessage[] {
+  const greetings = t.chat.greetings;
   return [
     {
       id: 1,
       sender: "bot",
-      text: CHAT_GREETINGS[Math.floor(Math.random() * CHAT_GREETINGS.length)],
+      text: greetings[Math.floor(Math.random() * greetings.length)],
       kind: "greeting",
     },
   ];
@@ -61,8 +56,13 @@ export function makeGreeting(): ChatMessage[] {
  * language systems drifted apart earlier in this codebase. One implementation
  * means a fix lands in both places.
  */
-export function useChatSession(lang: "vi" | "en" = "vi") {
-  const [messages, setMessages] = useState<ChatMessage[]>(makeGreeting);
+export function useChatSession() {
+  // The language is the app's, not a per-surface constant. Both chat surfaces
+  // used to hardcode "vi", so the assistant answered in Vietnamese even with
+  // the interface in English — although the API and the AI service have
+  // accepted `lang` from the start.
+  const { lang, t } = useTranslation();
+  const [messages, setMessages] = useState<ChatMessage[]>(() => makeGreeting(t));
   const [loading, setLoading] = useState(false);
   const { coords, status: geoStatus, request: requestLocation } =
     useGeolocation();
@@ -109,16 +109,13 @@ export function useChatSession(lang: "vi" | "en" = "vi") {
           : {
               id: Date.now() + 1,
               sender: "bot",
-              text:
-                lang === "en"
-                  ? "I couldn't reach the server. Please try again."
-                  : "Mình chưa kết nối được tới máy chủ. Bạn thử lại nhé!",
+              text: t.chat.offline,
               kind: "error",
               failedQuery: text,
             }
       );
     },
-    [append, coords, lang]
+    [append, coords, lang, t]
   );
 
   const sendImage = useCallback(
@@ -127,7 +124,7 @@ export function useChatSession(lang: "vi" | "en" = "vi") {
       append({
         id: Date.now(),
         sender: "user",
-        text: lang === "en" ? "Sent a photo" : "Đã gửi một hình ảnh",
+        text: t.chat.sentPhoto,
         imageUrl: previewUrl,
       });
       setLoading(true);
@@ -139,20 +136,14 @@ export function useChatSession(lang: "vi" | "en" = "vi") {
             ? {
                 id: Date.now() + 1,
                 sender: "bot",
-                text:
-                  lang === "en"
-                    ? `I think this is **${result.detectedFood}** 😋 Here are the best places for it:`
-                    : `Mình đoán đây là món **${result.detectedFood}** 😋 Dưới đây là các quán ngon nhất:`,
+                text: `${t.chat.detectedPrefix} **${result.detectedFood}** ${t.chat.detectedSuffix}`,
                 results: result.data,
                 kind: "results",
               }
             : {
                 id: Date.now() + 1,
                 sender: "bot",
-                text:
-                  lang === "en"
-                    ? "That photo is hard to read. Try a clearer shot, or type the dish name 🤔"
-                    : "Ảnh hơi khó nhận diện. Bạn chụp rõ hơn hoặc gõ tên món giúp mình nhé! 🤔",
+                text: t.chat.imageUnclear,
                 kind: "not_found",
               }
         );
@@ -160,10 +151,7 @@ export function useChatSession(lang: "vi" | "en" = "vi") {
         append({
           id: Date.now() + 1,
           sender: "bot",
-          text:
-            lang === "en"
-              ? "Something went wrong reading that image."
-              : "Lỗi khi xử lý ảnh. Bạn thử lại sau nhé!",
+          text: t.chat.imageError,
           kind: "error",
         });
       } finally {
@@ -171,7 +159,7 @@ export function useChatSession(lang: "vi" | "en" = "vi") {
         URL.revokeObjectURL(previewUrl);
       }
     },
-    [append, coords, lang]
+    [append, coords, t]
   );
 
   /**
@@ -202,9 +190,11 @@ export function useChatSession(lang: "vi" | "en" = "vi") {
     );
   }, [requestLocation, send]);
 
-  const reset = useCallback(() => setMessages(makeGreeting()), []);
+  const reset = useCallback(() => setMessages(makeGreeting(t)), [t]);
 
   return {
+    lang,
+    t,
     messages,
     loading,
     coords,

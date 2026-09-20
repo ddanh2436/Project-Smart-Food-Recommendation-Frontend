@@ -1,53 +1,65 @@
 /**
- * Rating presentation.
+ * Rating presentation, on the 0–10 scale the data is actually stored in.
  *
- * Scores are stored on a 0–10 scale because that is what the source site
- * publishes, but a 10-point scale reads as invented in a restaurant context —
- * a badge showing "10.0" looks like placeholder data rather than a real
- * verdict. Diners are used to five stars, so everything user-facing is
- * converted at the edge while the stored value and all ranking stay on 0–10.
+ * An earlier pass halved every score at the edge to show five stars. That made
+ * the interface disagree with itself rather than agree: the filter menu still
+ * offered "Xuất sắc (> 9.0)", the modal on the home page still printed 9.6, the
+ * per-criterion bars were still 0–10 in the database, and the AI assistant's own
+ * replies say "9.6/10 điểm". A diner comparing a card badge reading 4.8 with a
+ * filter labelled "> 9.0" has no way to tell these describe the same number.
  *
- * Conversion is a straight halving, so the ordering is identical and no
- * information is lost.
+ * So there is one scale everywhere now, and it is the stored one. Nothing is
+ * converted, which also means nothing can drift out of step again.
  */
 
-/** Convert a stored 0–10 score to the 0–5 scale shown to users. */
-export function toFiveScale(score?: number | null): number | null {
-  if (score === undefined || score === null) return null;
-  if (!Number.isFinite(score) || score <= 0) return null;
-  return Math.min(score, 10) / 2;
-}
+import type { Dict } from "@/app/lib/i18n";
+
+/** The top of the scale. Scores are stored and displayed as 0–10. */
+export const RATING_MAX = 10;
 
 /**
- * Format a stored 0–10 score as a five-point rating, e.g. `9.6` → `"4.8"`.
+ * Format a stored score for display, e.g. `9.55` → `"9.6"`.
  * Returns an em dash for a missing score so a card never prints "N/A".
  */
 export function formatRating(score?: number | null, fallback = "—"): string {
-  const five = toFiveScale(score);
-  return five === null ? fallback : five.toFixed(1);
+  if (score === undefined || score === null) return fallback;
+  if (!Number.isFinite(score) || score <= 0) return fallback;
+  return Math.min(score, RATING_MAX).toFixed(1);
 }
 
-/** `"4.8/5"`, for places that need the scale spelled out. */
-export function formatRatingOutOfFive(
-  score?: number | null,
-  fallback = "Chưa có đánh giá"
-): string {
-  const five = toFiveScale(score);
-  return five === null ? fallback : `${five.toFixed(1)}/5`;
-}
-
-/** Percentage fill for a progress bar, still driven by the 0–10 value. */
+/** Percentage fill for a progress bar. */
 export function ratingPercent(score?: number | null): number {
   if (score === undefined || score === null || !Number.isFinite(score)) return 0;
-  return Math.max(0, Math.min(100, score * 10));
+  return Math.max(0, Math.min(100, (score / RATING_MAX) * 100));
+}
+
+/**
+ * Word for a score, e.g. 9.2 → "Xuất sắc".
+ *
+ * Six near-identical copies of this ladder were written inline in the six home
+ * page sections, each with slightly different thresholds and its own hardcoded
+ * Vietnamese — one of them even shortened "Trung bình" to "T.Bình" to fit. One
+ * ladder, translated once.
+ */
+export function ratingLabel(score: number | undefined | null, t: Dict): string {
+  if (score === undefined || score === null || !Number.isFinite(score)) {
+    return t.common.noScore;
+  }
+  const words = t.restaurantPage.ratingText;
+  if (score >= 9) return words.excellent;
+  if (score >= 8) return words.veryGood;
+  if (score >= 7) return words.good;
+  if (score >= 6) return words.fair;
+  if (score >= 5) return words.average;
+  return words.poor;
 }
 
 /**
  * How many reviews a score rests on, phrased for display.
  *
  * Listings are ordered by a review-count-adjusted score, so the count is what
- * makes the ordering legible: 4.8 from thirty reviews is a different claim
- * from 5.0 from one.
+ * makes the ordering legible: 9.6 from thirty reviews is a different claim
+ * from 10.0 from one.
  */
 export function formatReviewCount(
   count?: number | null,

@@ -1,0 +1,111 @@
+/* --------------------------------------------------------------------------
+   Score display and input, on the 0–10 scale.
+   Replaces the star widgets; see components/Score/Score.tsx for why.
+   -------------------------------------------------------------------------- */
+
+.score-badge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.score-badge .score-value {
+  font-weight: 700;
+}
+
+/* The denominator is deliberately quieter than the score: it is there to fix
+   the scale in the reader's mind, not to compete with the number. */
+.score-badge .score-scale {
+  font-size: 0.72em;
+  font-weight: 600;
+  opacity: 0.6;
+}
+
+.score-badge.empty {
+  font-weight: 500;
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+
+/* --- Input ---------------------------------------------------------------- */
+
+.score-input {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.score-input-row {
+  display: flex;
+  gap: 4px;
+}
+
+.score-step {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #44403c;
+  border-radius: 8px;
+  background: #1c1917;
+  color: #a8a29e;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.score-step:hover {
+  border-color: #f59e0b;
+  color: #fbbf24;
+}
+
+/* Every step up to the chosen one is tinted, so the row still reads as a
+   magnitude at a glance and not just as ten separate buttons. */
+.score-step.filled {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.45);
+  color: #fbbf24;
+}
+
+.score-step.selected {
+  background: linear-gradient(135deg, #f59e0b, #ea580c);
+  border-color: #f59e0b;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.35);
+}
+
+.score-step:focus-visible {
+  outline: 2px solid #fbbf24;
+  outline-offset: 2px;
+}
+
+.score-input-value {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 15px;
+  color: #fbbf24;
+  font-variant-numeric: tabular-nums;
+}
+
+.score-input-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #a8a29e;
+}
+
+@media (max-width: 560px) {
+  /* Ten targets across a phone leaves each one too narrow, so the row wraps
+     into two rows of five rather than shrinking below a usable size. */
+  .score-input-row {
+    flex-wrap: wrap;
+    max-width: 200px;
+  }
+  .score-step {
+    width: 34px;
+    height: 34px;
+  }
+}

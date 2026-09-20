@@ -4,10 +4,10 @@ import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link"; 
 import { getTopRestaurants, type Restaurant } from "@/app/lib/api";
-import { formatRating, formatReviewCount } from "@/app/lib/rating";
-import FiveStar from "@/components/FiveStar/FiveStar"; // Import hàm API mới
+import { formatReviewCount, ratingLabel } from "@/app/lib/rating";
+import { ScoreBadge } from "@/components/Score/Score";
 import "./TopRatingSection.css"; // Tái sử dụng CSS của Top Rated
-import { useAuth } from "@/app/contexts/AuthContext";
+import { useTranslation } from "@/app/hooks/useTranslation";
 
 // Giữ nguyên các Icon SVG như cũ
 const ChevronLeft = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>;
@@ -21,7 +21,7 @@ const XIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" 
 // six near-identical copies, and it marks optional fields as optional.
 
 const TopSpaceSection = () => {
-  const { T } = useAuth();
+  const { lang, t: T } = useTranslation();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRes, setSelectedRes] = useState<Restaurant | null>(null);
@@ -52,16 +52,7 @@ const TopSpaceSection = () => {
   }, []);
 
   // Logic Rating Label (Có thể tái sử dụng hoặc import từ utils)
-  const getRatingLabel = (score?: number) => {
-    if (!score && score !== 0) return "N/A";
-    if (score >= 9.0) return "Xuất sắc";
-    if (score >= 8.0) return "Rất tốt";
-    if (score >= 7.0) return "Tốt";
-    if (score >= 6.0) return "Khá";
-    if (score >= 5.0) return "Trung bình";
-    return "Cần cải thiện";
-  };
-
+  
   const handleScrollButton = (direction: 'left' | 'right') => {
     if (sliderRef.current) {
       const scrollAmount = 340;
@@ -114,23 +105,23 @@ const TopSpaceSection = () => {
                     />
                     {/* === THAY ĐỔI 3: Hiển thị điểm KHÔNG GIAN lên Badge (Màu khác nếu muốn) === */}
                     <div className="rating-badge" style={{backgroundColor: '#00b894'}}>
-                        <><FiveStar /> {formatRating(res.diemKhongGian)}</>
+                        <ScoreBadge score={res.diemKhongGian} />
                     </div>
                   </div>
                   <div className="card-content">
                     <h3 className="restaurant-name">{res.tenQuan}</h3>
                       <p className="card-tag-row">
-                        <span className="card-category">Không gian</span>
-                        {formatReviewCount(res.reviewCount) && (
+                        <span className="card-category">{T.restaurantPage.labels.space}</span>
+                        {formatReviewCount(res.reviewCount, lang) && (
                           <span className="card-review-count">
-                            {formatReviewCount(res.reviewCount)}
+                            {formatReviewCount(res.reviewCount, lang)}
                           </span>
                         )}
                       </p>
                     <p className="restaurant-address"><MapPinIcon /> {res.diaChi}</p>
                     <div className="card-meta-row">
-                        <div className="meta-item price"><MoneyIcon /><span>{res.giaCa || "Đang cập nhật"}</span></div>
-                        <div className="meta-item hours"><ClockIcon /><span>{res.gioMoCua || "Đang cập nhật"}</span></div>
+                        <div className="meta-item price"><MoneyIcon /><span>{res.giaCa || T.common.updating}</span></div>
+                        <div className="meta-item hours"><ClockIcon /><span>{res.gioMoCua || T.common.updating}</span></div>
                     </div>
                   </div>
                 </div>
@@ -159,10 +150,10 @@ const TopSpaceSection = () => {
                   {/* Hiển thị điểm Không gian chính trong Modal */}
                   <div className="modal-rating-overlay" style={{background: 'rgba(0, 184, 148, 0.9)'}}>
                     <span className="big-score">
-                        {selectedRes.diemKhongGian ? selectedRes.diemKhongGian.toFixed(1) : "N/A"}
+                        <ScoreBadge score={selectedRes.diemKhongGian} withScale />
                     </span>
                     <span className="score-label">
-                      {getRatingLabel(selectedRes.diemKhongGian)}
+                      {ratingLabel(selectedRes.diemKhongGian, T)}
                     </span>
                   </div>
                 </div>
@@ -172,20 +163,20 @@ const TopSpaceSection = () => {
                   <p className="modal-address"><MapPinIcon /> {selectedRes.diaChi}</p>
                   
                   <div className="modal-meta-grid">
-                    <div className="modal-meta-item"><ClockIcon /> {selectedRes.gioMoCua || "Đang cập nhật"}</div>
-                    <div className="modal-meta-item highlight"><MoneyIcon /> {selectedRes.giaCa || "Đang cập nhật"}</div>
+                    <div className="modal-meta-item"><ClockIcon /> {selectedRes.gioMoCua || T.common.updating}</div>
+                    <div className="modal-meta-item highlight"><MoneyIcon /> {selectedRes.giaCa || T.common.updating}</div>
                   </div>
 
                   <hr className="modal-divider" />
 
-                  <h4 className="detail-rating-heading">Đánh giá chi tiết</h4>
+                  <h4 className="detail-rating-heading">{T.restaurantPage.filterRating}</h4>
                   <div className="rating-bars">
                     {/* Highlight dòng Không gian */}
-                    <RatingRow label="Không gian" score={selectedRes.diemKhongGian} highlight={true} />
-                    <RatingRow label="Chất lượng" score={selectedRes.diemChatLuong} />
-                    <RatingRow label="Vị trí" score={selectedRes.diemViTri} />
-                    <RatingRow label="Phục vụ" score={selectedRes.diemPhucVu} />
-                    <RatingRow label="Giá cả" score={selectedRes.diemGiaCa} />
+                    <RatingRow label={T.restaurantPage.labels.space} score={selectedRes.diemKhongGian} highlight={true} />
+                    <RatingRow label={T.restaurantPage.labels.quality} score={selectedRes.diemChatLuong} />
+                    <RatingRow label={T.restaurantPage.labels.location} score={selectedRes.diemViTri} />
+                    <RatingRow label={T.restaurantPage.labels.service} score={selectedRes.diemPhucVu} />
+                    <RatingRow label={T.restaurantPage.labels.price} score={selectedRes.diemGiaCa} />
                   </div>
 
                   <Link 

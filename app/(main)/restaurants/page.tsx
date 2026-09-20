@@ -5,17 +5,23 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getRestaurants, type Restaurant as ApiRestaurant } from "@/app/lib/api";
-import { formatRating, formatReviewCount } from "@/app/lib/rating";
-import FiveStar from "@/components/FiveStar/FiveStar";
+import { formatReviewCount } from "@/app/lib/rating";
+import { ScoreBadge } from "@/components/Score/Score";
 import { useGeolocation } from "@/app/hooks/useGeolocation";
-import { useAuth } from "@/app/contexts/AuthContext";
+import { useTranslation } from "@/app/hooks/useTranslation";
 import "./RestaurantsPage.css";
 import dynamic from "next/dynamic";
 
 // Import component bản đồ (Dynamic để tránh lỗi SSR)
 const RoutingMap = dynamic(() => import("@/components/RoutingMap/RoutingMap"), {
   ssr: false,
-  loading: () => <div style={{ padding: '20px', textAlign: 'center', background: '#f5f5f5', borderRadius: '8px' }}>Đang tải bản đồ...</div>,
+  // Rendered before the component mounts, so it cannot read the language;
+  // a spinner says the same thing in both languages.
+  loading: () => (
+    <div className="map-inline-loading" role="status" aria-label="Loading map">
+      <span className="map-inline-spinner" />
+    </div>
+  ),
 });
 
 // Các Icons (Giữ nguyên)
@@ -56,150 +62,21 @@ const RatingRow = ({ label, score }: { label: string, score?: number }) => (
   </div>
 );
 
-// --- TỪ ĐIỂN SONG NGỮ (Giữ nguyên) ---
-const DICT = {
-    vi: {
-        pageTitle: "Khám phá Nhà hàng",
-        pageSubtitle: "Bộ sưu tập những địa điểm ẩm thực tốt nhất",
-        hanoiTitle: "Ẩm thực Hà Nội",
-        hanoiSubtitle: "Đang hiển thị các địa điểm nổi bật tại thủ đô Hà Nội",
-        hcmcTitle: "Ẩm thực TP.HCM",
-        hcmcSubtitle: "Đang hiển thị các địa điểm nổi bật tại TP. Hồ Chí Minh",
-        viewAllAreas: "Xem tất cả khu vực",
-        advancedFilter: "Bộ lọc nâng cao",
-        filteringBy: "Đang lọc theo:",
-        sortBy: "Sắp xếp",
-        orderBy: "Thứ tự",
-        rating: "Điểm số",
-        openNow: "Đang mở cửa",
-        clearFilter: "Xóa bộ lọc",
-        criteria: "Tiêu chí:",
-        order: "Thứ tự:",
-        status: "Trạng thái:",
-        apply: "Lọc kết quả",
-        reset: "Reset",
-        close: "Đóng",
-        loading: "Đang tải dữ liệu trang",
-        noResultTitle: "Không tìm thấy kết quả",
-        noResultDesc: "Rất tiếc, chúng tôi không tìm thấy nhà hàng nào phù hợp.",
-        clearAndRetry: "Xóa bộ lọc & Thử lại",
-        prev: "Trước",
-        next: "Sau",
-        page: "Trang",
-        showMap: "Xem đường đi đến quán",
-        hideMap: "Ẩn bản đồ chỉ đường",
-        noMapData: "Rất tiếc, quán này chưa có dữ liệu tọa độ để chỉ đường.",
-        detailRating: "Đánh giá chi tiết",
-        viewDetail: "Xem chi tiết đầy đủ",
-        priceUpdate: "Đang cập nhật",
-        routeTooltip: "Chỉ đường tới quán",
-        
-        // Labels
-        l_newest: "Mới nhất",
-        l_distance: "Gần tôi nhất",
-        l_quality: "Chất lượng món ăn",
-        l_space: "Không gian đẹp",
-        l_location: "Vị trí thuận lợi",
-        l_service: "Phục vụ tốt",
-        l_price: "Giá cả hợp lý",
-        l_all: "Tất cả",
-        l_excellent: "Xuất sắc",
-        l_verygood: "Rất tốt",
-        l_good: "Tốt",
-        l_fair: "Khá",
-        l_average: "Trung bình",
-        l_poor: "Cần cải thiện",
-        l_cheap: "Bình dân",
-        l_desc: "Cao đến Thấp",
-        l_asc: "Thấp đến Cao",
-        
-        // Modal Criteria
-        c_quality: "Chất lượng",
-        c_location: "Vị trí",
-        c_space: "Không gian",
-        c_service: "Phục vụ",
-        c_price: "Giá cả"
-    },
-    en: {
-        pageTitle: "Discover Restaurants",
-        pageSubtitle: "Collection of the best culinary locations",
-        hanoiTitle: "Hanoi Cuisine",
-        hanoiSubtitle: "Displaying highlights in Hanoi capital",
-        hcmcTitle: "HCMC Cuisine",
-        hcmcSubtitle: "Displaying highlights in Ho Chi Minh City",
-        viewAllAreas: "View all areas",
-        advancedFilter: "Advanced Filters",
-        filteringBy: "Filtering by:",
-        sortBy: "Sort by",
-        orderBy: "Order",
-        rating: "Rating",
-        openNow: "Open Now",
-        clearFilter: "Clear filters",
-        criteria: "Criteria:",
-        order: "Order:",
-        status: "Status:",
-        apply: "Apply Filter",
-        reset: "Reset",
-        close: "Close",
-        loading: "Loading data page",
-        noResultTitle: "No results found",
-        noResultDesc: "Sorry, we couldn't find any suitable restaurants.",
-        clearAndRetry: "Clear Filter & Retry",
-        prev: "Prev",
-        next: "Next",
-        page: "Page",
-        showMap: "Show directions",
-        hideMap: "Hide map",
-        noMapData: "Sorry, coordinates are not available for this restaurant.",
-        detailRating: "Detailed Reviews",
-        viewDetail: "View full details",
-        priceUpdate: "Updating",
-        routeTooltip: "Get directions",
-
-        // Labels
-        l_newest: "Newest",
-        l_distance: "Nearest to me",
-        l_quality: "Food Quality",
-        l_space: "Beautiful Space",
-        l_location: "Good Location",
-        l_service: "Good Service",
-        l_price: "Reasonable Price",
-        l_all: "All",
-        l_excellent: "Excellent",
-        l_verygood: "Very Good",
-        l_good: "Good",
-        l_fair: "Fair",
-        l_average: "Average",
-        l_poor: "Need Improvement",
-        l_cheap: "Budget",
-        l_desc: "High to Low",
-        l_asc: "Low to High",
-
-        // Modal Criteria
-        c_quality: "Quality",
-        c_location: "Location",
-        c_space: "Space",
-        c_service: "Service",
-        c_price: "Price"
-    }
-};
-
+// Copy lives in app/lib/i18n.ts under `restaurants`, with the same key names.
 function RestaurantsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   /**
-   * Language comes from AuthContext, the single source of truth.
+   * Language and copy both come from the shared hook.
    *
    * This page used to keep its own state, read a different storage key
-   * (`app-language`) and listen for the Header's own event, so a reload could
-   * leave it showing a different language from the rest of the app. DICT here is
-   * keyed 'vi'/'en' while the context uses 'vn'/'en', so only the key is mapped.
+   * (`app-language`), listen for the Header's own event and carry its own
+   * dictionary, so a reload could leave it showing a different language from the
+   * rest of the app.
    */
-  const { currentLang } = useAuth();
-  const lang: 'vi' | 'en' = currentLang === 'en' ? 'en' : 'vi';
-
-  const t = DICT[lang]; // Shortcut for translation
+  const { lang, t: T } = useTranslation();
+  const t = T.restaurants;
 
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -598,13 +475,13 @@ function RestaurantsContent() {
                         <Image src={res.avatarUrl || "/assets/image/pho.png"} alt={res.tenQuan} width={400} height={300} className="card-image" unoptimized={true} />
                         
                         <div className={`rating-badge ${categoryClass}`}>
-                          <><FiveStar /> {formatRating(displayScore)}</>
-                          </div>
+                          <ScoreBadge score={displayScore} />
+                        </div>
                         {/* Results are ordered by a review-count-adjusted
                             score, so show the evidence behind the number. */}
                         {typeof res.reviewCount === "number" && res.reviewCount > 0 && (
                           <div className="review-count-badge">
-                            {res.reviewCount} {lang === 'vi' ? 'đánh giá' : 'reviews'}
+                            {formatReviewCount(res.reviewCount, lang)}
                           </div>
                         )}
                       </div>
@@ -657,7 +534,7 @@ function RestaurantsContent() {
                 <div className="modal-image-col">
                   <Image src={selectedRes.avatarUrl || "/assets/image/pho.png"} alt={selectedRes.tenQuan} width={900} height={700} className="modal-main-img" unoptimized={true} />
                   <div className="modal-rating-overlay">
-                    <span className="big-score"><><FiveStar size={18} /> {formatRating(selectedRes.diemTrungBinh)}</></span>
+                    <span className="big-score"><ScoreBadge score={selectedRes.diemTrungBinh} withScale /></span>
                     <span className="score-label">{getRatingLabel(selectedRes.diemTrungBinh)}</span>
                   </div>
                 </div>

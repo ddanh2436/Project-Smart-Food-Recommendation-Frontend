@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { useTranslation } from "@/app/hooks/useTranslation";
 import "leaflet/dist/leaflet.css";
 import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 import "leaflet-routing-machine";
@@ -109,6 +110,7 @@ const RoutingControl = ({ userLocation, restaurantLocation, onRouteFound }: any)
 
 // --- 3. MAIN COMPONENT ---
 export default function RoutingMap({ userLocation, restaurantLocation }: RoutingMapProps) {
+  const { t, lang } = useTranslation();
   const [isReady, setIsReady] = useState(false);
   const [routeInfo, setRouteInfo] = useState<RouteInfo | null>(null);
   const [showSteps, setShowSteps] = useState(false); // State để bật tắt list chỉ dẫn
@@ -122,22 +124,29 @@ export default function RoutingMap({ userLocation, restaurantLocation }: Routing
   const centerLon = userLocation ? (userLocation.lon + restaurantLocation.lon) / 2 : restaurantLocation.lon;
 
   const formatDist = (m: number) => m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`;
-  const formatTime = (s: number) => `${Math.round(s / 60)} phút`;
+  const formatTime = (s: number) => `${Math.round(s / 60)} ${t.common.minutes}`;
 
-  // Helper dịch tiếng Việt
+  /**
+   * OSRM returns its turn instructions in English.
+   *
+   * They are rewritten word by word for Vietnamese and left untouched for
+   * English, where they were previously mangled: the rule replacing "onto" with
+   * "vào" ran unconditionally, so an English reader was shown "Turn right vào
+   * Nguyễn Huệ".
+   */
   const translateInstruction = (text: string) => {
-    let t = text;
-    t = t.replace(/Head/g, "Đi về hướng");
-    t = t.replace(/Turn left/g, "Rẽ trái");
-    t = t.replace(/Turn right/g, "Rẽ phải");
-    t = t.replace(/Make a U-turn/g, "Quay đầu");
-    t = t.replace(/Continue/g, "Tiếp tục");
-    t = t.replace(/onto/g, "vào");
-    t = t.replace(/Destination/g, "Điểm đến");
-    return t;
+    if (lang === "en") return text;
+    return text
+      .replace(/Head/g, "Đi về hướng")
+      .replace(/Turn left/g, "Rẽ trái")
+      .replace(/Turn right/g, "Rẽ phải")
+      .replace(/Make a U-turn/g, "Quay đầu")
+      .replace(/Continue/g, "Tiếp tục")
+      .replace(/onto/g, "vào")
+      .replace(/Destination/g, "Điểm đến");
   };
 
-  if (!isReady || !restaurantLocation.lat) return <div style={{height: 350, background: '#111', color: '#666', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>Đang tải bản đồ...</div>;
+  if (!isReady || !restaurantLocation.lat) return <div style={{height: 350, background: '#111', color: '#666', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>{t.map.loading}</div>;
 
   return (
     <div style={{ position: 'relative', width: "100%", height: "450px", borderRadius: "12px", overflow: "hidden", border: "1px solid #333" }}>
@@ -186,12 +195,12 @@ export default function RoutingMap({ userLocation, restaurantLocation }: Routing
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{display: 'flex', gap: '15px', alignItems: 'center'}}>
                         <div style={{textAlign: 'center'}}>
-                            <div style={{fontSize: '11px', color: '#aaa', textTransform: 'uppercase'}}>Khoảng cách</div>
+                            <div style={{fontSize: '11px', color: '#aaa', textTransform: 'uppercase'}}>{t.map.distance}</div>
                             <div style={{fontSize: '20px', fontWeight: 'bold', color: '#FFC107'}}>{formatDist(routeInfo.totalDistance)}</div>
                         </div>
                         <div style={{width: 1, height: 30, background: '#444'}}></div>
                         <div style={{textAlign: 'center'}}>
-                            <div style={{fontSize: '11px', color: '#aaa', textTransform: 'uppercase'}}>Thời gian</div>
+                            <div style={{fontSize: '11px', color: '#aaa', textTransform: 'uppercase'}}>{t.map.duration}</div>
                             <div style={{fontSize: '20px', fontWeight: 'bold', color: 'white'}}>{formatTime(routeInfo.totalTime)}</div>
                         </div>
                     </div>
@@ -204,7 +213,7 @@ export default function RoutingMap({ userLocation, restaurantLocation }: Routing
                             padding: '8px 15px', borderRadius: '20px', cursor: 'pointer', fontSize: '13px'
                         }}
                     >
-                        {showSteps ? "Ẩn chỉ dẫn ▲" : "Xem đường đi ▼"}
+                        {showSteps ? `${t.map.hideSteps} ▲` : `${t.map.showSteps} ▼`}
                     </button>
                 </div>
 
@@ -234,7 +243,7 @@ export default function RoutingMap({ userLocation, restaurantLocation }: Routing
                 display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid #444'
             }}>
                 <div className="spinner" style={{width: 15, height: 15, border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite'}}></div>
-                <span style={{fontSize: '13px'}}>Đang tìm đường...</span>
+                <span style={{fontSize: '13px'}}>{t.map.routing}</span>
                 <style>{`@keyframes spin {to{transform: rotate(360deg)}}`}</style>
             </div>
         )}

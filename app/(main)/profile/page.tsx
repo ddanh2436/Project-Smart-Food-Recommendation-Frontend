@@ -38,6 +38,8 @@ const langData = {
     logoutConfirmMessage: "Are you sure you want to log out?",
     logoutYes: "Yes, Log Out",
     logoutCancel: "Cancel",
+    logoutSuccess: "Logged out successfully.",
+    backHome: "Back to home",
   },
   vn: {
     loading: "Đang tải hồ sơ...",
@@ -65,6 +67,8 @@ const langData = {
     logoutConfirmMessage: "Bạn có chắc chắn muốn đăng xuất không?",
     logoutYes: "Đăng xuất",
     logoutCancel: "Hủy bỏ",
+    logoutSuccess: "Đăng xuất thành công!",
+    backHome: "Quay lại trang chủ",
   }
 };
 
@@ -139,7 +143,11 @@ export default function ProfilePage() {
     if (!isLoading && !user) {
         const timer = setTimeout(() => {
             router.replace('/auth');
-            toast.error("Vui lòng đăng nhập để truy cập trang này.");
+            toast.error(
+              currentLang === 'en'
+                ? "Please log in to open this page."
+                : "Vui lòng đăng nhập để truy cập trang này."
+            );
         }, 0); 
         return () => clearTimeout(timer);
     }
@@ -163,7 +171,7 @@ export default function ProfilePage() {
     setShowLogoutModal(false);
     await logout();
     setUser(null);
-    toast.success(currentLang === 'en' ? "Logout successful!" : "Đăng xuất thành công!");
+    toast.success(T.logoutSuccess);
     router.push("/");
   };
   
@@ -224,7 +232,7 @@ export default function ProfilePage() {
 
   return (
     <div className="profile-page-background">
-      <Link href="/" className="global-back-button" aria-label="Quay lại trang chủ">
+      <Link href="/" className="global-back-button" aria-label={T.backHome}>
         <ArrowLeftIcon />
       </Link>
       

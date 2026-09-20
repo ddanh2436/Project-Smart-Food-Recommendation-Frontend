@@ -194,8 +194,14 @@
   background: rgba(0, 0, 0, 0.35);
   border: 1px dashed rgba(255, 255, 255, 0.12);
   font-size: 0.84rem;
-  font-style: italic;
-  line-height: 1.55;
+  /*
+    Upright, not italic. No italic of this family is loaded, so the browser was
+    slanting the upright face itself - and a synthetic slant drags the tone mark
+    off the vowel it belongs to, which is how "ở đây quán hơi ồn" stops being
+    readable at this size. The curly quotes around the text already mark it as
+    somebody's words.
+  */
+  line-height: 1.6;
   color: #d6d3d1;
 }
 

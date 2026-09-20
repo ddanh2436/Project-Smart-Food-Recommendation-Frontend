@@ -1,15 +1,11 @@
 /* app/(main)/about-us/AboutUsPage.css */
 
 /* 1. IMPORT FONT */
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600&display=swap");
 
 .about-us-page-wrapper {
   background-color: #0c0c0c;
   color: #f0f0f0;
-  font-family: "Lato", sans-serif;
+  font-family: var(--font-ui);
   position: relative;
   overflow-x: hidden;
   padding-top: 0; 
@@ -84,7 +80,7 @@
 }
 
 .about-hero-title {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-display);
   font-size: 5rem;
   font-weight: 700;
   color: #ffffff;
@@ -94,7 +90,7 @@
 }
 
 .about-hero-desc {
-  font-family: 'Be Vietnam Pro', sans-serif;
+  font-family: var(--font-ui);
   font-size: 1.2rem;
   line-height: 1.8;
   color: #e0e0e0;
@@ -108,7 +104,7 @@
   background-color: transparent;
   border: 1px solid #e9a004;
   color: #e9a004;
-  font-family: 'Lato', sans-serif;
+  font-family: var(--font-ui);
   font-size: 0.95rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -223,7 +219,7 @@
   align-items: center;
   justify-content: center;
   color: #666;
-  font-family: "Lato", sans-serif;
+  font-family: var(--font-ui);
   font-size: 1.2rem;
   position: relative;
   z-index: 1;
@@ -294,7 +290,7 @@
   color: #e9a004; 
   
   /* [ĐỔI FONT] Sử dụng Cormorant Garamond để giống với Tiêu đề ở chế độ mặc định (Tiếng Anh) */
-  font-family: "Cormorant Garamond", serif; 
+  font-family: var(--font-display); 
   font-size: 1.8rem;
   font-weight: 700;
   text-align: center;
@@ -364,7 +360,7 @@
   color: #e9a004;
   letter-spacing: 3px;
   text-transform: uppercase;
-  font-family: "Lato", sans-serif;
+  font-family: var(--font-ui);
   display: inline-block;
   margin-bottom: 1rem;
   position: relative;
@@ -382,7 +378,7 @@
 }
 
 .section-title {
-  font-family: "Cormorant Garamond", serif;
+  font-family: var(--font-display);
   font-size: 4rem;
   font-weight: 700;
   color: #ffffff;
@@ -396,7 +392,7 @@ p {
   line-height: 1.8;
   color: #d1d1d1;
   margin-bottom: 2.5rem;
-  font-family: "Lato", sans-serif;
+  font-family: var(--font-ui);
   font-weight: 300;
 }
 
@@ -405,7 +401,7 @@ p {
   text-decoration: none;
   font-weight: 600;
   font-size: 0.9rem;
-  font-family: "Lato", sans-serif;
+  font-family: var(--font-ui);
   display: inline-block;
   padding: 0.8rem 2rem;
   border: 1px solid #e9a004;
@@ -519,21 +515,21 @@ p {
 /* === LANGUAGE SPECIFIC === */
 .about-us-page-wrapper.lang-vn {
   /* [SỬA ĐỔI] Áp dụng Be Vietnam Pro làm font chính cho chế độ Tiếng Việt */
-  font-family: "Be Vietnam Pro", sans-serif !important;
+  font-family: var(--font-ui) !important;
 }
 
 /* [CẬP NHẬT] Gom các class sử dụng font tiêu đề Tiếng Việt (Playfair Display) vào cùng 1 chỗ */
 .lang-vn .section-title,
 .lang-vn .about-hero-title,
 .lang-vn .image-placeholder p { 
-  font-family: "Playfair Display", serif !important;
+  font-family: var(--font-display) !important;
   line-height: 1.3;
 }
 
 /* [FIX LỖI MẤT CÂN BẰNG ĐỘ ĐẬM] Tăng font-weight lên 500 */
 .lang-vn p,
 .lang-vn .about-hero-desc {
-  font-family: "Be Vietnam Pro", sans-serif !important;
+  font-family: var(--font-ui) !important;
   font-size: 1.05rem;
   line-height: 1.8;
   font-weight: 500 !important; /* Đã tăng lên 500 để cân bằng hơn */
@@ -543,7 +539,7 @@ p {
 .lang-vn .discover-subtitle,
 .lang-vn .cta-link,
 .lang-vn .btn-hero-gold {
-  font-family: "Be Vietnam Pro", sans-serif !important;
+  font-family: var(--font-ui) !important;
   font-weight: 600;
   letter-spacing: 1px;
 }
@@ -579,7 +575,7 @@ p {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   
   color: #fff;
-  font-family: 'Be Vietnam Pro', sans-serif;
+  font-family: var(--font-ui);
   font-size: 0.9rem;
   font-weight: 500;
   
@@ -594,7 +590,7 @@ p {
   margin: 0 !important;
   padding: 0;
   color: #fff;
-  font-family: 'Be Vietnam Pro', sans-serif;
+  font-family: var(--font-ui);
   /* [CẬP NHẬT] Giảm cỡ chữ */
   font-size: 0.8rem;
   font-weight: 500; /* Tăng độ dày chữ lên xíu cho rõ */
@@ -635,7 +631,7 @@ p {
 
 .image-caption {
   margin-top: 1rem;
-  font-family: "Cormorant Garamond", serif; /* Font kiểu cổ điển hợp lịch sử */
+  font-family: var(--font-display); /* Font kiểu cổ điển hợp lịch sử */
   font-size: 1.1rem;
   font-style: italic;
   color: #e9a004; /* Màu vàng kim */

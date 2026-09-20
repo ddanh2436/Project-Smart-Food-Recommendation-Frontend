@@ -4,8 +4,10 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { getSimilarRestaurants, type Restaurant } from "@/app/lib/api";
-import { formatRating, formatReviewCount } from "@/app/lib/rating";
-import FiveStar from "@/components/FiveStar/FiveStar";
+import { formatReviewCount } from "@/app/lib/rating";
+import { ScoreBadge } from "@/components/Score/Score";
+import { useTranslation } from "@/app/hooks/useTranslation";
+import { tagLabel } from "@/app/lib/restaurant";
 
 /**
  * "Other places like this one", at the end of a detail page.
@@ -22,6 +24,7 @@ export default function SimilarPlaces({
   restaurantId: string;
   district?: string;
 }) {
+  const { t, lang } = useTranslation();
   const [places, setPlaces] = useState<Restaurant[]>([]);
   const [basedOn, setBasedOn] = useState<string[]>([]);
   // Starts true, so the effect never has to set it synchronously on mount;
@@ -47,7 +50,7 @@ export default function SimilarPlaces({
   if (loading) {
     return (
       <section className="similar-section" aria-busy="true">
-        <h3 className="section-heading">Quán tương tự</h3>
+        <h3 className="section-heading">{t.detail.similarHeading}</h3>
         <div className="similar-rail">
           {[0, 1, 2, 3].map((index) => (
             <div key={index} className="similar-skeleton" />
@@ -59,23 +62,30 @@ export default function SimilarPlaces({
 
   if (places.length === 0) return null;
 
-  const where = district ? ` tại ${district}` : "";
-  const subject = basedOn[0] ? `"${basedOn[0]}"` : "tương tự";
+  // The heading names the shared attribute the server ranked on, so the reader
+  // can see why these places are grouped together rather than trusting a label.
+  const subject = basedOn[0] ? tagLabel(basedOn[0], lang) : null;
+  const heading = subject
+    ? `${subject} — ${t.detail.similarHeading}`
+    : t.detail.similarHeading;
+  const where = district ? ` ${t.detail.similarIn} ${district}` : "";
 
   return (
     <section className="similar-section">
       <h3 className="section-heading">
-        Quán {subject} khác{where}
+        {heading}
+        {where}
       </h3>
       <p className="similar-sub">
-        Dựa trên các đặc điểm chung: {basedOn.slice(0, 3).join(" · ")}
+        {t.detail.similarBasedOn}{" "}
+        {basedOn.slice(0, 3).map((tag) => tagLabel(tag, lang)).join(" · ")}
       </p>
 
       {/* A horizontal rail rather than a grid: this is a secondary suggestion
           at the end of the page and should not add another full screen. */}
       <ul className="similar-rail">
         {places.map((place) => {
-          const reviews = formatReviewCount(place.reviewCount);
+          const reviews = formatReviewCount(place.reviewCount, lang);
           return (
             <li key={place._id} className="similar-card">
               <Link href={`/restaurants/${place._id}`} className="similar-link">
@@ -93,7 +103,7 @@ export default function SimilarPlaces({
                     }}
                   />
                   <span className="similar-score">
-                    <FiveStar /> {formatRating(place.diemTrungBinh)}
+                    <ScoreBadge score={place.diemTrungBinh} />
                   </span>
                 </div>
 
@@ -104,7 +114,7 @@ export default function SimilarPlaces({
                   </p>
                   <div className="similar-meta">
                     <span className="similar-price">
-                      {place.giaCa || "Đang cập nhật"}
+                      {place.giaCa || t.common.updating}
                     </span>
                     {reviews && (
                       <span className="similar-reviews">{reviews}</span>

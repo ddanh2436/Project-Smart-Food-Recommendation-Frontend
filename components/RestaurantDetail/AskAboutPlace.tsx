@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { FaRobot } from "react-icons/fa";
 import type { Restaurant } from "@/app/lib/api";
 import { cuisineTags, parseTags } from "@/app/lib/restaurant";
+import { useTranslation } from "@/app/hooks/useTranslation";
 
 /**
  * Quick questions about this specific restaurant.
@@ -22,20 +23,39 @@ export default function AskAboutPlace({
   restaurant: Restaurant;
 }) {
   const router = useRouter();
+  const { t, lang } = useTranslation();
   const tags = parseTags(restaurant.tags);
   const district = tags[1] ?? "";
   const dish = cuisineTags(tags)[0] ?? "";
 
-  const prompts = [
-    dish && district
-      ? `${dish} ngon ở ${district}`
-      : dish
-        ? `${dish} ngon`
-        : "Quán ngon gần đây",
-    district ? `Quán ${district} phù hợp hẹn hò` : "Quán phù hợp hẹn hò",
-    dish ? `${dish} rẻ dưới 100k` : "Quán ăn rẻ dưới 100k",
-    district ? `Quán ăn gia đình ở ${district}` : "Quán ăn cho gia đình",
-  ].filter(Boolean) as string[];
+  /**
+   * The chips are search queries, not display text, so they stay Vietnamese in
+   * both languages: the dish and district come from the record itself and the
+   * assistant matches against a Vietnamese index. Translating "phở" to "pho"
+   * here would send the assistant a term its data has never seen.
+   */
+  const prompts =
+    lang === "en"
+      ? ([
+          dish && district
+            ? `${dish} ngon ở ${district}`
+            : dish
+              ? `Good ${dish}`
+              : "Good places near me",
+          district ? `${district} for a date` : "Somewhere for a date",
+          dish ? `${dish} under 100k` : "Cheap eats under 100k",
+          district ? `Family places in ${district}` : "Somewhere for the family",
+        ].filter(Boolean) as string[])
+      : ([
+          dish && district
+            ? `${dish} ngon ở ${district}`
+            : dish
+              ? `${dish} ngon`
+              : "Quán ngon gần đây",
+          district ? `Quán ${district} phù hợp hẹn hò` : "Quán phù hợp hẹn hò",
+          dish ? `${dish} rẻ dưới 100k` : "Quán ăn rẻ dưới 100k",
+          district ? `Quán ăn gia đình ở ${district}` : "Quán ăn cho gia đình",
+        ].filter(Boolean) as string[]);
 
   const ask = (question: string) => {
     // The full chat page accepts an opening question on the query string, so
@@ -50,10 +70,8 @@ export default function AskAboutPlace({
           <FaRobot />
         </span>
         <div>
-          <h3 className="ask-ai-title">Hỏi NomNom Assistant</h3>
-          <p className="ask-ai-sub">
-            Tìm quán tương tự, so sánh giá hoặc lọc theo nhu cầu của bạn
-          </p>
+          <h3 className="ask-ai-title">{t.detail.askTitle}</h3>
+          <p className="ask-ai-sub">{t.detail.askSub}</p>
         </div>
       </div>
 

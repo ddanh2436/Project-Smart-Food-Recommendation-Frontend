@@ -4,10 +4,10 @@ import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link"; 
 import { getTopRestaurants, type Restaurant } from "@/app/lib/api";
-import { formatRating, formatReviewCount } from "@/app/lib/rating";
-import FiveStar from "@/components/FiveStar/FiveStar"; 
+import { formatReviewCount, ratingLabel } from "@/app/lib/rating";
+import { ScoreBadge } from "@/components/Score/Score";
 import "./TopRatingSection.css"; 
-import { useAuth } from "@/app/contexts/AuthContext";
+import { useTranslation } from "@/app/hooks/useTranslation";
 
 // Các Icon
 const ChevronLeft = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>;
@@ -20,17 +20,9 @@ const XIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" 
 // `Restaurant` is imported from app/lib/api: one shared shape instead of
 // six near-identical copies, and it marks optional fields as optional.
 
-  const getRatingLabel = (score?: number) => {
-  if (!score) return "";
-  if (score >= 9.0) return "Xuất sắc";
-  if (score >= 8.0) return "Rất tốt"; // Hoặc "Giỏi"
-  if (score >= 7.0) return "Tốt";
-  if (score >= 5.0) return "T.Bình";
-  return "Kém";
-  };
-
+  
 const TopQualitySection = () => {
-  const { T } = useAuth();
+  const { lang, t: T } = useTranslation();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRes, setSelectedRes] = useState<Restaurant | null>(null);
@@ -109,16 +101,16 @@ const TopQualitySection = () => {
                         draggable={false}
                       />
                       <div className="rating-badge" style={{ backgroundColor: '#e17055' }}>
-                        <><FiveStar /> {formatRating(res.diemChatLuong)}</>
+                        <ScoreBadge score={res.diemChatLuong} />
                       </div>
                     </div>
                     <div className="card-content">
                       <h3 className="restaurant-name">{res.tenQuan}</h3>
                       <p className="card-tag-row">
-                        <span className="card-category">Chất lượng</span>
-                        {formatReviewCount(res.reviewCount) && (
+                        <span className="card-category">{T.restaurantPage.labels.quality}</span>
+                        {formatReviewCount(res.reviewCount, lang) && (
                           <span className="card-review-count">
-                            {formatReviewCount(res.reviewCount)}
+                            {formatReviewCount(res.reviewCount, lang)}
                           </span>
                         )}
                       </p>
@@ -146,9 +138,14 @@ const TopQualitySection = () => {
                   <Image src={selectedRes.avatarUrl || "/assets/image/pho.png"} alt={selectedRes.tenQuan} width={900} height={700} className="modal-main-img" unoptimized={true} />
                   <div className="modal-rating-overlay" style={{background: 'rgba(225, 112, 85, 0.9)'}}>
                     <span className="big-score">
-                        {selectedRes.diemChatLuong ? selectedRes.diemChatLuong.toFixed(1) : "N/A"}
+                        <ScoreBadge score={selectedRes.diemChatLuong} withScale />
                     </span>
-                    <span className="score-label">{T.restaurantPage.labels.quality}</span>
+                    {/* The word for the score, as in the other five sections.
+                        This one repeated the criterion name the heading already
+                        gave, so the badge said "Chất lượng" under "Chất lượng". */}
+                    <span className="score-label">
+                      {ratingLabel(selectedRes.diemChatLuong, T)}
+                    </span>
                   </div>
                 </div>
 
@@ -157,8 +154,8 @@ const TopQualitySection = () => {
                   <p className="modal-address"><MapPinIcon /> {selectedRes.diaChi}</p>
                   
                   <div className="modal-meta-grid">
-                    <div className="modal-meta-item"><ClockIcon /> {selectedRes.gioMoCua || "Đang cập nhật"}</div>
-                    <div className="modal-meta-item highlight"><MoneyIcon /> {selectedRes.giaCa || "Đang cập nhật"}</div>
+                    <div className="modal-meta-item"><ClockIcon /> {selectedRes.gioMoCua || T.common.updating}</div>
+                    <div className="modal-meta-item highlight"><MoneyIcon /> {selectedRes.giaCa || T.common.updating}</div>
                   </div>
 
                   <hr className="modal-divider" />

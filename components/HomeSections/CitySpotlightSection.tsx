@@ -3,11 +3,10 @@
 
 import React from 'react';
 import './CitySpotlightSection.css';
-import { useAuth } from '@/app/contexts/AuthContext';
+import { useTranslation } from '@/app/hooks/useTranslation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { formatRating, formatReviewCount } from "@/app/lib/rating";
-import FiveStar from "@/components/FiveStar/FiveStar";
+import { ScoreBadge } from "@/components/Score/Score";
 
 export interface Restaurant {
   id: string;
@@ -40,10 +39,9 @@ const CitySpotlightSection: React.FC<CitySpotlightProps> = ({
   restaurants,
   reverseLayout = false,
 }) => {
-  // Language from AuthContext instead of a private copy read from its own
+  // Language from the shared hook instead of a private copy read from its own
   // storage key, which could disagree with the header after a reload.
-  const { currentLang } = useAuth();
-  const lang: 'vi' | 'en' = currentLang === 'en' ? 'en' : 'vi';
+  const { lang } = useTranslation();
 
   const t = (vi: string, en: string) => (lang === 'vi' ? vi : en);
   const displayRestaurants = restaurants.slice(0, 3);
@@ -106,7 +104,7 @@ const CitySpotlightSection: React.FC<CitySpotlightProps> = ({
                             <span className="dish-name">{t(res.dish, res.dishEn)}</span>
                         </div>
                         <div className="res-meta-row">
-                           <div className="res-rating">⭐ <><FiveStar /> {formatRating(res.rating)}</></div>
+                           <div className="res-rating"><ScoreBadge score={res.rating} withScale /></div>
                            <span className="dot">•</span>
                            <div className="res-address">{res.address}</div>
                         </div>

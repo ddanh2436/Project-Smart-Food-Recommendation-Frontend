@@ -1,6 +1,5 @@
 /* components/HeroSection/HeroSection.css */
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;700&family=Nunito:wght@300;400;600;700&display=swap');
 
 :root {
   --primary-gold: #e9a004;
@@ -17,7 +16,7 @@
   align-items: center;
   background-color: #050505;
   overflow: hidden;
-  font-family: 'Nunito', sans-serif;
+  font-family: var(--font-ui);
 }
 
 /* BACKGROUND */
@@ -84,7 +83,7 @@
 }
 
 .hero-title {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-display);
   font-size: 4.2rem;
   font-weight: 700;
   line-height: 1.1;
@@ -124,7 +123,7 @@
 }
 .search-input-group input {
   border: none; outline: none; width: 100%; font-size: 0.95rem;
-  padding: 10px 0; color: #333; background: transparent; font-family: 'Nunito', sans-serif;
+  padding: 10px 0; color: #333; background: transparent; font-family: var(--font-ui);
 }
 
 /* Actions */
@@ -268,7 +267,7 @@
 
 .panel-title {
   color: var(--primary-gold);
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-display);
   font-size: 1.2rem;
   font-weight: 700;
 }
@@ -320,7 +319,7 @@
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-family: 'Nunito', sans-serif;
+  font-family: var(--font-ui);
 }
 
 .choice-tag:hover {
@@ -860,7 +859,7 @@
 .slider-viewport { width: 100%; height: 100%; overflow: hidden; position: relative; }
 .slider-track { display: flex; width: 400%; height: 100%; animation: slideHorizontal 16s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
 .slider-card { width: 25%; height: 100%; display: flex; flex-direction: column; justify-content: center; padding-right: 10px; }
-.slider-card h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; color: var(--primary-gold); margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.4rem; }
+.slider-card h3 { font-family: var(--font-display); font-size: 1.6rem; color: var(--primary-gold); margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.4rem; }
 .slider-card ul { list-style: none; padding: 0; margin: 0; }
 .slider-card li { padding: 8px 0; font-size: 0.95rem; color: #eee; border-bottom: 1px dashed rgba(255,255,255,0.1); transition: padding-left 0.2s ease, color 0.2s ease; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .slider-card li:hover { color: var(--primary-gold); padding-left: 8px; }

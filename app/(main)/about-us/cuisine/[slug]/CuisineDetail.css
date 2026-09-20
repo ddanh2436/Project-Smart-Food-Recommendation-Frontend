@@ -1,8 +1,6 @@
 /* app/(main)/about-us/cuisine/[slug]/CuisineDetail.css */
 
 /* 1. IMPORT CẢ 2 FONT */
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600&display=swap");
 
 .cuisine-detail-page {
   background-color: #0c0c0c;
@@ -14,7 +12,7 @@
   padding: 120px 20px 60px 20px;
   
   /* Font mặc định cho toàn trang là Be Vietnam Pro (cho các nút, tag, menu...) */
-  font-family: "Be Vietnam Pro", sans-serif;
+  font-family: var(--font-ui);
   color: #fff;
 }
 
@@ -42,7 +40,7 @@
   align-items: center;
   gap: 8px;
   /* Giữ font sans-serif cho nút điều hướng */
-  font-family: "Be Vietnam Pro", sans-serif;
+  font-family: var(--font-ui);
 }
 .back-btn:hover { color: #e9a004; }
 
@@ -80,12 +78,12 @@
   font-weight: 600; /* Đậm hơn chút để rõ */
   display: block;
   margin-bottom: 1rem;
-  font-family: "Be Vietnam Pro", sans-serif; /* Dùng font hiện đại cho text nhỏ */
+  font-family: var(--font-ui); /* Dùng font hiện đại cho text nhỏ */
 }
 
 /* 2. TIÊU ĐỀ CHÍNH (Tên món) -> QUAY VỀ FONT CŨ */
 .detail-title {
-  font-family: "Cormorant Garamond", serif; /* Font cũ sang trọng */
+  font-family: var(--font-display); /* Font cũ sang trọng */
   font-size: 4.5rem; /* Kích thước lớn */
   font-weight: 700;
   line-height: 1;
@@ -95,7 +93,7 @@
 
 /* 3. ĐOẠN MÔ TẢ -> DÙNG FONT MỚI ĐỂ DỄ ĐỌC */
 .detail-desc {
-  font-family: "Be Vietnam Pro", sans-serif;
+  font-family: var(--font-ui);
   font-size: 1.1rem;
   line-height: 1.8;
   color: #e0e0e0; /* Màu sáng hơn xíu để đỡ bị chìm */
@@ -114,7 +112,7 @@
   font-weight: 500;
   color: #ddd;
   transition: all 0.3s;
-  font-family: "Be Vietnam Pro", sans-serif;
+  font-family: var(--font-ui);
 }
 .feature-tag:hover {
   border-color: #e9a004;
@@ -130,7 +128,7 @@
 
 /* Tiêu đề Lịch sử -> Font Cũ */
 .history-heading {
-  font-family: "Cormorant Garamond", serif; /* Giống tiêu đề chính */
+  font-family: var(--font-display); /* Giống tiêu đề chính */
   font-size: 3rem;
   font-weight: 700;
   color: #e9a004;
@@ -139,7 +137,7 @@
 
 /* Nội dung Lịch sử -> Font Mới đậm đà */
 .history-desc {
-  font-family: "Be Vietnam Pro", sans-serif;
+  font-family: var(--font-ui);
   font-size: 1.05rem;
   line-height: 1.8;
   color: #d0d0d0;
@@ -162,7 +160,7 @@
 /* Chú thích ảnh -> Font Cũ (Style nghiêng) */
 .history-caption {
   margin-top: 12px;
-  font-family: "Cormorant Garamond", serif; /* Font cũ cho chú thích nghệ thuật */
+  font-family: var(--font-display); /* Font cũ cho chú thích nghệ thuật */
   font-style: italic;
   font-size: 1.1rem; /* Tăng size lên chút */
   color: #aaa;
@@ -211,7 +209,7 @@
 
 /* Tiêu đề lớn (dùng Font Cũ Cormorant Garamond) */
 .recipe-heading {
-  font-family: "Cormorant Garamond", serif;
+  font-family: var(--font-display);
   font-size: 3rem;
   font-weight: 700;
   color: #e9a004;
@@ -233,7 +231,7 @@
 
 /* Tiêu đề nhỏ (Nguyên liệu / Các bước) */
 .recipe-subheading {
-  font-family: "Be Vietnam Pro", sans-serif;
+  font-family: var(--font-ui);
   font-size: 1.5rem;
   font-weight: 600;
   color: #fff;
@@ -253,7 +251,7 @@
 .ingredients-list li {
   margin-bottom: 12px;
   font-size: 1rem;
-  font-family: "Be Vietnam Pro", sans-serif;
+  font-family: var(--font-ui);
   font-weight: 400;
   color: #d0d0d0;
   padding-left: 20px;
@@ -289,7 +287,7 @@
 .step-num {
   background-color: #e9a004;
   color: #000;
-  font-family: "Be Vietnam Pro", sans-serif;
+  font-family: var(--font-ui);
   font-weight: 700;
   width: 28px;
   height: 28px;
@@ -304,7 +302,7 @@
 
 .steps-list p {
   margin: 0;
-  font-family: "Be Vietnam Pro", sans-serif;
+  font-family: var(--font-ui);
   font-size: 1rem;
   line-height: 1.6;
   color: #e0e0e0;

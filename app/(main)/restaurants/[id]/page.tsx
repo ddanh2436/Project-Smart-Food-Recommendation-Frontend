@@ -17,16 +17,22 @@ import {
   type Review,
   type ReviewInsights as ReviewInsightsData,
 } from "@/app/lib/api";
-import { formatRating, ratingPercent, toFiveScale } from "@/app/lib/rating";
+import {
+  RATING_MAX,
+  formatRating,
+  formatReviewCount,
+  ratingPercent,
+} from "@/app/lib/rating";
 import { cuisineTags, parseTags } from "@/app/lib/restaurant";
 import { useGeolocation } from "@/app/hooks/useGeolocation";
+import { useTranslation } from "@/app/hooks/useTranslation";
 
 import ReviewOverview from "@/components/ReviewOverview/ReviewOverview";
 import ReviewAspects from "@/components/ReviewAspects/ReviewAspects";
 import ReviewList from "@/components/RestaurantDetail/ReviewList";
 import SimilarPlaces from "@/components/RestaurantDetail/SimilarPlaces";
 import AskAboutPlace from "@/components/RestaurantDetail/AskAboutPlace";
-import { StarDisplay, StarInput } from "@/components/RestaurantDetail/StarRating";
+import { ScoreInput } from "@/components/Score/Score";
 import {
   AmenityTags,
   DistanceLine,
@@ -38,21 +44,24 @@ import "./RestaurantDetail.css";
 import "@/components/RestaurantDetail/RestaurantDetail.css";
 
 // Leaflet touches `window` on import, so it must stay out of the server bundle.
-const RoutingMap = dynamic(
-  () => import("@/components/RoutingMap/RoutingMap"),
-  {
-    ssr: false,
-    loading: () => <div className="map-loading">Đang tải bản đồ...</div>,
-  }
-);
+// The placeholder carries no words: it renders before this component's language
+// is known.
+const RoutingMap = dynamic(() => import("@/components/RoutingMap/RoutingMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="map-inline-loading" role="status" aria-label="Loading map">
+      <span className="map-inline-spinner" />
+    </div>
+  ),
+});
 
-/** The five detailed criteria, still scored 0–10 in the data. */
+/** The five detailed criteria, all scored 0–10 like every other score here. */
 const CRITERIA = [
-  { key: "diemChatLuong", label: "Chất lượng" },
-  { key: "diemViTri", label: "Vị trí" },
-  { key: "diemKhongGian", label: "Không gian" },
-  { key: "diemPhucVu", label: "Phục vụ" },
-  { key: "diemGiaCa", label: "Giá cả" },
+  { key: "diemChatLuong", labelKey: "quality" },
+  { key: "diemViTri", labelKey: "location" },
+  { key: "diemKhongGian", labelKey: "space" },
+  { key: "diemPhucVu", labelKey: "service" },
+  { key: "diemGiaCa", labelKey: "price" },
 ] as const;
 
 function RatingBar({ label, score }: { label: string; score?: number }) {
@@ -60,8 +69,6 @@ function RatingBar({ label, score }: { label: string; score?: number }) {
     <div className="rating-bar-item">
       <div className="rating-bar-header">
         <span className="r-label">{label}</span>
-        {/* Shown on the same five-point scale as everything else on the page;
-            the bar still fills from the stored 0–10 value. */}
         <span className="r-score">{formatRating(score)}</span>
       </div>
       <div className="progress-bg">
@@ -77,6 +84,7 @@ function RatingBar({ label, score }: { label: string; score?: number }) {
 export default function RestaurantDetailPage() {
   const { id } = useParams();
   const { coords } = useGeolocation();
+  const { t, lang } = useTranslation();
 
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -85,10 +93,10 @@ export default function RestaurantDetailPage() {
   const [loading, setLoading] = useState(true);
   const [showMap, setShowMap] = useState(false);
 
-  // Review form. Held on the five-point scale the input uses, and doubled back
-  // to the stored 0–10 scale only when submitting.
+  // Review form. Held on the 0–10 scale the API stores, so nothing is converted
+  // on the way in or out.
   const [comment, setComment] = useState("");
-  const [stars, setStars] = useState(5);
+  const [score, setScore] = useState(9);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -109,10 +117,12 @@ export default function RestaurantDetailPage() {
 
           // Loaded after the page is interactive: the digest runs sentiment
           // inference over every review, so awaiting it inline would hold the
-          // whole page on a cold AI service.
+          // whole page on a cold AI service. `lang` reaches the AI service, so
+          // the aspect labels and the headline come back in the language the
+          // rest of the page is in.
           if (fetched.length > 0) {
             setInsightsLoading(true);
-            getReviewInsights(data.urlGoc)
+            getReviewInsights(data.urlGoc, lang)
               .then((result) => !cancelled && setInsights(result))
               .finally(() => !cancelled && setInsightsLoading(false));
           }
@@ -127,24 +137,24 @@ export default function RestaurantDetailPage() {
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [id, lang]);
 
   const handleSubmit = async () => {
     const text = comment.trim();
     if (!text) {
-      toast.error("Vui lòng nhập nội dung đánh giá!");
+      toast.error(t.reviews.errEmpty);
       return;
     }
     if (text.length < 10) {
-      toast.error("Đánh giá cần ít nhất 10 ký tự để AI phân tích chính xác.");
+      toast.error(t.reviews.errShort);
       return;
     }
     if (text.length > 3000) {
-      toast.error("Đánh giá quá dài (tối đa 3000 ký tự).");
+      toast.error(t.reviews.errLong);
       return;
     }
     if (!restaurant?.urlGoc) {
-      toast.error("Thiếu dữ liệu nhà hàng, không thể lưu đánh giá.");
+      toast.error(t.reviews.errMissing);
       return;
     }
 
@@ -153,14 +163,13 @@ export default function RestaurantDetailPage() {
       const created = await createReview({
         tenQuan: restaurant.tenQuan,
         urlGoc: restaurant.urlGoc,
-        // The API stores 0–10; the form collects 0–5.
-        diemReview: Math.round(stars * 2),
+        diemReview: score,
         noiDung: text,
       });
       setReviews((prev) => [created, ...prev]);
       setComment("");
-      setStars(5);
-      toast.success("Cảm ơn bạn! Đánh giá đã được ghi nhận.");
+      setScore(9);
+      toast.success(t.reviews.thanks);
     } catch (error) {
       toast.error(describeError(error));
     } finally {
@@ -169,15 +178,14 @@ export default function RestaurantDetailPage() {
   };
 
   if (loading) {
-    return <div className="loading-screen">Đang tải dữ liệu nhà hàng...</div>;
+    return <div className="loading-screen">{t.detail.loading}</div>;
   }
   if (!restaurant) {
-    return <div className="loading-screen">Không tìm thấy nhà hàng này.</div>;
+    return <div className="loading-screen">{t.detail.notFound}</div>;
   }
 
   const tags = parseTags(restaurant.tags);
   const dishes = cuisineTags(tags);
-  const fiveScore = toFiveScale(restaurant.diemTrungBinh);
 
   return (
     <div className="detail-page-wrapper">
@@ -201,15 +209,19 @@ export default function RestaurantDetailPage() {
               <h1>{restaurant.tenQuan}</h1>
 
               <div className="hero-rating">
-                {/* One scale across the whole page: header, criteria, reviews
-                    and the review form all read out of five. */}
-                <span className="hero-score">{formatRating(restaurant.diemTrungBinh)}</span>
-                <StarDisplay value={fiveScore ?? 0} size={18} />
-                {restaurant.reviewCount ? (
+                {/* One scale across the whole page — header, criteria, reviews
+                    and the review form all read out of ten, which is what the
+                    database stores and what the filters on the listing page
+                    already asked for. */}
+                <span className="hero-score">
+                  {formatRating(restaurant.diemTrungBinh)}
+                </span>
+                <span className="hero-score-scale">/{RATING_MAX}</span>
+                {formatReviewCount(restaurant.reviewCount, lang) && (
                   <span className="hero-review-count">
-                    {restaurant.reviewCount} đánh giá
+                    {formatReviewCount(restaurant.reviewCount, lang)}
                   </span>
-                ) : null}
+                )}
               </div>
 
               <p className="hero-address">
@@ -243,15 +255,15 @@ export default function RestaurantDetailPage() {
         <div className="detail-content">
           <section className="left-col">
             <div className="info-box">
-              <h2 className="section-heading">Thông tin chung</h2>
+              <h2 className="section-heading">{t.detail.generalInfo}</h2>
 
               <div className="info-row">
                 <div className="info-icon">
                   <FaMoneyBillWave />
                 </div>
                 <div>
-                  <span className="info-label">Mức giá</span>
-                  <span>{restaurant.giaCa || "Đang cập nhật"}</span>
+                  <span className="info-label">{t.detail.priceLabel}</span>
+                  <span>{restaurant.giaCa || t.common.updating}</span>
                 </div>
               </div>
 
@@ -260,8 +272,8 @@ export default function RestaurantDetailPage() {
                   <FaRegClock />
                 </div>
                 <div>
-                  <span className="info-label">Giờ mở cửa</span>
-                  <span>{restaurant.gioMoCua || "Đang cập nhật"}</span>
+                  <span className="info-label">{t.detail.hoursLabel}</span>
+                  <span>{restaurant.gioMoCua || t.common.updating}</span>
                 </div>
               </div>
 
@@ -275,11 +287,14 @@ export default function RestaurantDetailPage() {
 
           <aside className="right-col">
             <div className="rating-box">
-              <h2 className="section-heading">Chi tiết đánh giá</h2>
-              {CRITERIA.map(({ key, label }) => (
+              <h2 className="section-heading">
+                {t.detail.ratingBreakdown}{" "}
+                <span className="section-scale">({t.detail.outOfTen})</span>
+              </h2>
+              {CRITERIA.map(({ key, labelKey }) => (
                 <RatingBar
                   key={key}
-                  label={label}
+                  label={t.restaurantPage.labels[labelKey]}
                   score={restaurant[key] as number | undefined}
                 />
               ))}
@@ -290,13 +305,13 @@ export default function RestaurantDetailPage() {
         {/* ------------------------------ Map ------------------------------ */}
         <section className="map-section" id="map-section">
           <div className="map-head">
-            <h2 className="section-heading">Vị trí &amp; chỉ đường</h2>
+            <h2 className="section-heading">{t.detail.locationHeading}</h2>
             <button
               type="button"
               className="btn-toggle-map"
               onClick={() => setShowMap((open) => !open)}
             >
-              {showMap ? "Ẩn bản đồ" : "Hiện bản đồ"}
+              {showMap ? t.detail.hideMap : t.detail.showMap}
             </button>
           </div>
 
@@ -312,9 +327,7 @@ export default function RestaurantDetailPage() {
                 />
               </div>
             ) : (
-              <p className="map-missing">
-                Quán này chưa có toạ độ nên không thể chỉ đường.
-              </p>
+              <p className="map-missing">{t.detail.mapMissing}</p>
             )
           ) : (
             <button
@@ -328,7 +341,7 @@ export default function RestaurantDetailPage() {
               <span>
                 <strong>{restaurant.diaChi}</strong>
                 <br />
-                Nhấn để xem bản đồ và đường đi
+                {t.detail.mapPreviewHint}
               </span>
             </button>
           )}
@@ -337,21 +350,20 @@ export default function RestaurantDetailPage() {
         {/* ---------------------------- Reviews ---------------------------- */}
         <section className="reviews-container">
           <h2 className="section-heading">
-            Đánh giá từ cộng đồng ({reviews.length})
+            {t.reviews.heading} ({reviews.length})
           </h2>
 
           <div className="write-review-box">
-            <h3>Viết đánh giá của bạn</h3>
+            <h3>{t.reviews.writeTitle}</h3>
             <div className="rating-select-row">
-              <span className="rating-select-label">Chấm điểm:</span>
-              {/* Five stars with halves, replacing a row of ten that was hard
-                  to hit accurately on a phone. */}
-              <StarInput value={stars} onChange={setStars} />
+              <span className="rating-select-label">{t.reviews.scoreLabel}</span>
+              {/* Numbered 1–10, the scale the review is stored on. */}
+              <ScoreInput value={score} onChange={setScore} />
             </div>
 
             <textarea
               className="review-textarea"
-              placeholder="Chia sẻ trải nghiệm của bạn về món ăn, không gian, phục vụ..."
+              placeholder={t.reviews.placeholder}
               rows={4}
               maxLength={3000}
               value={comment}
@@ -366,7 +378,7 @@ export default function RestaurantDetailPage() {
                 onClick={handleSubmit}
                 disabled={submitting}
               >
-                {submitting ? "Đang gửi..." : "Gửi đánh giá"}
+                {submitting ? t.reviews.submitting : t.reviews.submit}
               </button>
             </div>
           </div>
