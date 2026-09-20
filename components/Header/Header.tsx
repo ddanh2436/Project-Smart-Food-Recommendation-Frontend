@@ -7,6 +7,7 @@ import { toast } from "react-hot-toast";
 import { useAuth } from "@/app/contexts/AuthContext"; 
 import Image from "next/image";
 import Link from 'next/link';
+import { logout } from '@/app/lib/api';
 
 // --- Icons (Giữ nguyên) ---
 const DropdownArrow = () => (
@@ -95,34 +96,35 @@ const Header: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // [CHỈNH SỬA] Logic chuyển đổi ngôn ngữ không cần Context mới
+  /**
+   * Switch language.
+   *
+   * `setLang` from AuthContext now owns persistence and the change event. This
+   * function used to write its own 'vi'/'en' value to a second storage key and
+   * fire its own event, which is why the header and the rest of the app could
+   * end up showing different languages.
+   */
   const handleLangSwitch = (lang: 'en' | 'vn') => {
-    setLang(lang); // Cập nhật state nội bộ của Header (nếu AuthContext có hỗ trợ)
+    setLang(lang);
     setIsLangDropdownOpen(false);
-    
-    // 1. Chuẩn hóa mã: AuthContext dùng 'vn', còn logic chung ta sẽ dùng 'vi' cho chuẩn ISO
-    const storageLang = lang === 'vn' ? 'vi' : 'en';
-
-    // 2. Lưu vào LocalStorage
-    localStorage.setItem('app-language', storageLang);
-
-    // 3. Bắn sự kiện Custom Event để các trang khác (như RestaurantsPage) nghe thấy
-    if (typeof window !== 'undefined') {
-        // Tạo sự kiện custom
-        const event = new CustomEvent('language-change', { detail: storageLang });
-        window.dispatchEvent(event);
-    }
-    
-    toast.success(lang === 'en' ? "Language switched to English" : "Đã chuyển sang Tiếng Việt");
+    toast.success(
+      lang === 'en' ? "Language switched to English" : "Đã chuyển sang Tiếng Việt"
+    );
   };
 
-  const handleConfirmLogout = () => {
-    setShowLogoutModal(false); 
+  /**
+   * Log out on the server as well as locally.
+   *
+   * This only cleared localStorage before, so the refresh token stayed valid in
+   * the database for its full 7-day lifetime — a token captured from a shared
+   * machine kept working long after the user thought they had signed out.
+   * `logout()` calls POST /auth/logout, which clears the stored hash, and
+   * clears local tokens even if that request fails.
+   */
+  const handleConfirmLogout = async () => {
+    setShowLogoutModal(false);
     setIsUserDropdownOpen(false);
-    if (typeof window !== 'undefined') {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-    }
+    await logout();
     setUser(null);
     toast.success(T.auth.logoutSuccess);
     router.push("/");

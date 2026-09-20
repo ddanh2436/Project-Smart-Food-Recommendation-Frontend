@@ -6,7 +6,7 @@ import { useAuth } from '@/app/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import './ProfilePage.css'; 
-import api from '@/app/lib/api'; 
+import { logout, updateProfile, describeError } from '@/app/lib/api';
 import { toast } from 'react-hot-toast'; 
 import Link from 'next/link';
 
@@ -158,12 +158,10 @@ export default function ProfilePage() {
     }
   }, [user]); 
   
-  const handleConfirmLogout = () => {
+  // Ends the session server-side too; see the note in Header.tsx.
+  const handleConfirmLogout = async () => {
     setShowLogoutModal(false);
-    if (typeof window !== 'undefined') {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-    }
+    await logout();
     setUser(null);
     toast.success(currentLang === 'en' ? "Logout successful!" : "Đăng xuất thành công!");
     router.push("/");
@@ -199,12 +197,14 @@ export default function ProfilePage() {
     e.preventDefault();
     setIsUpdating(true);
     try {
-      const response = await api.patch('/auth/profile', formData);
-      setUser(response.data); 
+      const updated = await updateProfile(formData);
+      setUser(updated);
       toast.success(T.updateSuccess);
     } catch (error) {
       console.error(error);
-      toast.error(T.updateFailed);
+      // Show the server's actual complaint (e.g. "bio must be shorter than 300
+      // characters") instead of a generic "update failed".
+      toast.error(describeError(error) || T.updateFailed);
     } finally {
       setIsUpdating(false);
     }

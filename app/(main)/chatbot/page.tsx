@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { chatWithBot, searchRestaurantsByImage } from "@/app/lib/api"; // [MỚI] Import thêm hàm search ảnh
+import { chatWithBot, searchRestaurantsByImage, type ChatTurn } from "@/app/lib/api";
+import { useGeolocation } from "@/app/hooks/useGeolocation"; // [MỚI] Import thêm hàm search ảnh
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FaPaperPlane, FaRobot, FaMapMarkerAlt, FaStar, FaEraser, FaChevronLeft, FaStore, FaMagic, FaImage, FaSpinner } from "react-icons/fa";
@@ -15,30 +16,42 @@ interface Message {
   imageUrl?: string; // [MỚI] Để hiển thị preview ảnh user gửi
 }
 
+const GREETINGS = [
+  "Chào bạn! 👋 Hôm nay chúng ta sẽ khám phá món ngon nào đây?",
+  "Hello! 🥘 Đang đói bụng phải không? Gửi tên món hoặc hình ảnh để mình tìm quán nhé!",
+  "VietNomNom xin chào! 🍜 Phở, cơm, hay lẩu? Mình cân được hết!",
+  "Hi there! ✨ Bạn có thể gửi ảnh món ăn để mình nhận diện giúp bạn nha!",
+];
+
+/**
+ * Pick an opening line.
+ *
+ * Used as a lazy useState initializer rather than a setState inside an effect.
+ * The effect version ran after the first paint, so the panel rendered empty and
+ * then immediately re-rendered with the greeting — a cascading render that React
+ * now warns about (react-hooks/set-state-in-effect).
+ */
+function initialGreeting(): Message[] {
+  return [
+    {
+      id: 1,
+      sender: "bot",
+      text: GREETINGS[Math.floor(Math.random() * GREETINGS.length)],
+    },
+  ];
+}
+
 export default function ChatbotPage() {
   const router = useRouter();
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(initialGreeting);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null); // [MỚI] Ref cho input file
 
-  // 1. Random câu chào
-  useEffect(() => {
-    const greetings = [
-      "Chào bạn! 👋 Hôm nay chúng ta sẽ khám phá món ngon nào đây?",
-      "Hello! 🥘 Đang đói bụng phải không? Gửi tên món hoặc hình ảnh để mình tìm quán nhé!",
-      "VietNomNom xin chào! 🍜 Phở, cơm, hay lẩu? Mình cân được hết!",
-      "Hi there! ✨ Bạn có thể gửi ảnh món ăn để mình nhận diện giúp bạn nha!",
-    ];
-    
-    if (messages.length === 0) {
-      const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
-      setMessages([
-        { id: 1, sender: "bot", text: randomGreeting }
-      ]);
-    }
-  }, []);
+  // Real device location, used for "near me" style questions. Null until the
+  // browser grants it; the backend then simply ranks without distance.
+  const { coords } = useGeolocation();
 
   // 2. Auto scroll
   useEffect(() => {
@@ -59,7 +72,17 @@ export default function ChatbotPage() {
     setMessages(prev => [...prev, userMsg]);
     setLoading(true);
 
-    const res = await chatWithBot(userText, "10.7769", "106.7009");
+    /**
+     * The coordinates here were hardcoded to a point in District 1, so every
+     * "near me" request was answered relative to that spot regardless of where
+     * the user actually was. `history` is new too: without it the assistant had
+     * no way to resolve a follow-up like "rẻ hơn" or "còn gì khác".
+     */
+    const history: ChatTurn[] = messages
+      .filter((m) => m.text)
+      .map((m) => ({ role: m.sender, text: m.text }));
+
+    const res = await chatWithBot(userText, { history, coords });
 
     setLoading(false);
 
@@ -95,7 +118,7 @@ export default function ChatbotPage() {
 
     // 2. Gọi API Search by Image
     try {
-      const res = await searchRestaurantsByImage(file);
+      const res = await searchRestaurantsByImage(file, coords ?? undefined);
       
       setLoading(false);
 

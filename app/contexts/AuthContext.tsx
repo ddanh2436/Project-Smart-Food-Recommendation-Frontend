@@ -160,6 +160,24 @@ interface User {
 }
 
 type Lang = 'en' | 'vn';
+
+/** The only key and event used for the language preference. */
+export const LANG_STORAGE_KEY = 'vnn:lang';
+export const LANG_CHANGE_EVENT = 'vnn:lang-change';
+
+/** Read the stored language outside a React tree (e.g. in a plain function). */
+export function readStoredLang(): Lang {
+  if (typeof window === 'undefined') return 'vn';
+  try {
+    const saved = localStorage.getItem(LANG_STORAGE_KEY);
+    if (saved === 'vn' || saved === 'en') return saved;
+    const legacy = localStorage.getItem('app-language');
+    if (legacy === 'en') return 'en';
+  } catch {
+    /* ignore */
+  }
+  return 'vn';
+}
 type Translations = typeof embeddedTranslations.vn;
 
 interface AuthContextType {
@@ -204,17 +222,45 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    const savedLang = localStorage.getItem('appLang') as Lang;
-    if (savedLang && ['vn', 'en'].includes(savedLang)) {
-        setCurrentLang(savedLang);
+    /**
+     * One storage key, one set of values.
+     *
+     * There were previously two independent language systems: this context
+     * stored 'vn'|'en' under `appLang`, while the Header wrote 'vi'|'en' under
+     * `app-language` and broadcast a `language-change` event that only some
+     * pages listened for. So switching language updated the header but not the
+     * restaurants page, and after a reload the two disagreed. Everything now
+     * reads and writes LANG_STORAGE_KEY through setLang below.
+     */
+    try {
+      const saved = localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
+      if (saved && (saved === 'vn' || saved === 'en')) {
+        setCurrentLang(saved);
+      } else {
+        // Migrate a value written by the old Header ('vi' instead of 'vn').
+        const legacy = localStorage.getItem('app-language');
+        if (legacy === 'vi') setCurrentLang('vn');
+        else if (legacy === 'en') setCurrentLang('en');
+      }
+    } catch {
+      /* storage blocked: fall back to the default language */
     }
-    
+
     loadUser();
   }, []);
 
   const setLang = (lang: Lang) => {
     setCurrentLang(lang);
-    localStorage.setItem('appLang', lang);
+    try {
+      localStorage.setItem(LANG_STORAGE_KEY, lang);
+      // Components that are not inside this provider's render tree (or that
+      // read storage directly) still get notified.
+      window.dispatchEvent(
+        new CustomEvent(LANG_CHANGE_EVENT, { detail: lang })
+      );
+    } catch {
+      /* non-fatal: the choice just will not persist */
+    }
   };
   
   const T = embeddedTranslations[currentLang]; 

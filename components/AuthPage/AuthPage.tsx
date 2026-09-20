@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect } from "react";
 import "./AuthPage.css"; 
-import api from "@/app/lib/api";
+import { login, register, getProfile, describeError } from "@/app/lib/api";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import Image from "next/image";
@@ -43,7 +43,8 @@ const langData = {
         errEmail: "Please enter email",
         errInvalidEmail: "Invalid email",
         errPassword: "Please enter password",
-        errPasswordLength: "Password must be at least 6 characters",
+        errPasswordLength: "Password must be at least 8 characters",
+        errUsernameFormat: "3-30 characters: letters, numbers, . - _ only",
         errConfirmPassword: "Please confirm password",
         errPasswordMismatch: "Passwords do not match",
         errAuthFailed: "Authentication failed. Please try again.",
@@ -74,7 +75,8 @@ const langData = {
         errEmail: "Vui lòng nhập email",
         errInvalidEmail: "Email không hợp lệ",
         errPassword: "Vui lòng nhập mật khẩu",
-        errPasswordLength: "Mật khẩu phải có ít nhất 6 ký tự",
+        errPasswordLength: "Mật khẩu phải có ít nhất 8 ký tự",
+        errUsernameFormat: "3-30 ký tự, chỉ gồm chữ, số và . - _",
         errConfirmPassword: "Vui lòng xác nhận mật khẩu",
         errPasswordMismatch: "Mật khẩu không khớp",
         errAuthFailed: "Xác thực thất bại. Vui lòng thử lại.",
@@ -130,7 +132,11 @@ const AuthForm: React.FC = () => {
     const newErrors: { [key: string]: string } = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (isRegisterForm) {
-      if (!username) newErrors.username = T.errUsername;
+      if (!username) {
+        newErrors.username = T.errUsername;
+      } else if (!/^[\w.-]{3,30}$/.test(username)) {
+        newErrors.username = T.errUsernameFormat;
+      }
     }
     if (!email) {
       newErrors.email = T.errEmail;
@@ -139,7 +145,11 @@ const AuthForm: React.FC = () => {
     }
     if (!password) {
       newErrors.password = T.errPassword;
-    } else if (password.length < 6) {
+    } else if (isRegisterForm && password.length < 8) {
+      // The API enforces 8 characters on registration. Checking 6 here meant a
+      // 7-character password passed the form and then failed server-side with a
+      // raw validation error. Login is not length-checked at all, so accounts
+      // created under the old 6-character rule can still sign in.
       newErrors.password = T.errPasswordLength;
     }
     if (isRegisterForm) {
@@ -168,48 +178,26 @@ const AuthForm: React.FC = () => {
 
     try {
       if (isRegisterForm) {
-        // --- GỌI API ĐĂNG KÝ ---
-        const response = await api.post("/auth/register", {
-          username,
-          email,
-          password,
-        });
-        toast.success(T.successRegister);
-        toggleForm(false);
-      } else {
-        // --- GỌI API ĐĂNG NHẬP ---
-        const loginResponse = await api.post("/auth/login", {
-          email,
-          password,
-        });
-        
+        // Register already returns a token pair, so sign the user straight in
+        // rather than making them fill the login form again.
+        await register(username, email, password);
+        const profile = await getProfile();
+        setUser(profile);
         toast.success(T.successLogin);
-        if (typeof window !== 'undefined') {
-            localStorage.setItem("accessToken", loginResponse.data.accessToken);
-            localStorage.setItem("refreshToken", loginResponse.data.refreshToken);
-        }
-
-        const profileResponse = await api.get("/auth/profile");
-        setUser(profileResponse.data);
+        router.push("/");
+      } else {
+        await login(email, password);
+        const profile = await getProfile();
+        setUser(profile);
+        toast.success(T.successLogin);
         router.push("/");
       }
-    } catch (error: any) {
-      // --- XỬ LÝ LỖI (Dùng T cho thông báo lỗi) ---
-      console.error("Lỗi xác thực:", error);
-      let errorMessage = T.errUnknown;
-      if (error.response && error.response.data) {
-        const serverError = error.response.data.message;
-        if (typeof serverError === "string") {
-          errorMessage = serverError;
-        } else if (Array.isArray(serverError)) {
-          errorMessage = serverError.join(", ");
-        }
-      } else {
-        errorMessage = T.errServer;
-      }
+    } catch (error: unknown) {
+      // describeError unwraps Nest's validation-message array, which used to
+      // render as "[object Object]".
+      const errorMessage = describeError(error);
       toast.error(errorMessage);
       setErrors({ api: errorMessage });
-      // ----------------------------------------------------
     } finally {
       setIsLoading(false);
     }

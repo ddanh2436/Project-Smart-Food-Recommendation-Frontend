@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link"; 
-import { getTopSpaceRestaurants } from "@/app/lib/api"; // Import hàm API mới
+import { getTopRestaurants, type Restaurant } from "@/app/lib/api"; // Import hàm API mới
 import "./TopRatingSection.css"; // Tái sử dụng CSS của Top Rated
 import { useAuth } from "@/app/contexts/AuthContext";
 
@@ -15,20 +15,8 @@ const MoneyIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="no
 const MapPinIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>;
 const XIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
 
-interface Restaurant {
-  _id: string;
-  tenQuan: string;
-  diaChi: string;
-  gioMoCua: string;
-  giaCa: string;
-  diemTrungBinh: number;
-  avatarUrl: string;
-  diemKhongGian: number; // Trường quan trọng cho section này
-  diemViTri: number;
-  diemChatLuong: number;
-  diemPhucVu: number;
-  diemGiaCa: number;
-}
+// `Restaurant` is imported from app/lib/api: one shared shape instead of
+// six near-identical copies, and it marks optional fields as optional.
 
 const TopSpaceSection = () => {
   const { T } = useAuth();
@@ -50,7 +38,7 @@ const TopSpaceSection = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getTopSpaceRestaurants(10);
+        const data = await getTopRestaurants("diemKhongGian", 10);
         setRestaurants(data);
       } catch (error) {
         console.error("Failed to fetch top space:", error);
@@ -62,7 +50,7 @@ const TopSpaceSection = () => {
   }, []);
 
   // Logic Rating Label (Có thể tái sử dụng hoặc import từ utils)
-  const getRatingLabel = (score: number) => {
+  const getRatingLabel = (score?: number) => {
     if (!score && score !== 0) return "N/A";
     if (score >= 9.0) return "Xuất sắc";
     if (score >= 8.0) return "Rất tốt";
@@ -215,7 +203,7 @@ const TopSpaceSection = () => {
 };
 
 // Cập nhật Component con RatingRow để hỗ trợ highlight
-const RatingRow = ({ label, score, highlight = false }: { label: string, score: number, highlight?: boolean }) => (
+const RatingRow = ({ label, score, highlight = false }: { label: string, score?: number, highlight?: boolean }) => (
   <div className="rating-row">
     <span className={`rating-label ${highlight ? 'font-bold text-green-600' : ''}`}>{label}</span>
     <div className="rating-bar-bg">
