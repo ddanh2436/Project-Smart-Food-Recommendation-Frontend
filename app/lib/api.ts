@@ -186,6 +186,12 @@ export interface Restaurant {
   distance?: number;
 
   /**
+   * Cuisine and attribute tags, stored by the crawler as the string form of a
+   * Python list. Parse with `parseTags` from app/lib/restaurant before use.
+   */
+  tags?: string | string[];
+
+  /**
    * How many reviews back this restaurant's scores, and the review-count
    * adjusted scores the API orders by.
    *
@@ -220,6 +226,8 @@ export interface Review {
   noiDung: string;
   aiSentimentLabel?: string;
   aiSentimentScore?: number;
+  /** Set for reviews written through this site; absent for crawled ones. */
+  authorId?: string;
   authorName?: string;
   createdAt?: string;
 }
@@ -326,6 +334,28 @@ export async function getTopRestaurants(
 export async function getRestaurantById(id: string): Promise<Restaurant> {
   const response = await api.get<Restaurant>(`/restaurants/${id}`);
   return response.data;
+}
+
+export interface SimilarPlaces {
+  data: Restaurant[];
+  basedOn: string[];
+  district: string | null;
+}
+
+/** Comparable places, for the suggestions at the end of a detail page. */
+export async function getSimilarRestaurants(
+  id: string,
+  limit = 8
+): Promise<SimilarPlaces> {
+  try {
+    const response = await api.get<SimilarPlaces>(
+      `/restaurants/${id}/similar?limit=${limit}`
+    );
+    return response.data ?? { data: [], basedOn: [], district: null };
+  } catch (error) {
+    console.error("Failed to fetch similar restaurants:", describeError(error));
+    return { data: [], basedOn: [], district: null };
+  }
 }
 
 export async function getNearbyRestaurants(
@@ -533,3 +563,44 @@ export function describeError(error: unknown): string {
 }
 
 export default api;
+
+
+// ---------------------------------------------------------------------------
+// Saved restaurants
+//
+// Kept in localStorage rather than behind an account. Saving is useful the
+// moment someone lands on a page, and gating it behind sign-up would mean
+// most visitors never get it; there is also no favourites collection on the
+// backend to write to. The trade-off is that the list is per-browser.
+// ---------------------------------------------------------------------------
+const SAVED_KEY = "vnn:saved-restaurants";
+
+export function getSavedIds(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(SAVED_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.filter((id) => typeof id === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+export function isSaved(id: string): boolean {
+  return getSavedIds().includes(id);
+}
+
+/** Add or remove a restaurant. Returns the new saved state. */
+export function toggleSaved(id: string): boolean {
+  if (typeof window === "undefined") return false;
+  const current = getSavedIds();
+  const next = current.includes(id)
+    ? current.filter((saved) => saved !== id)
+    : [id, ...current].slice(0, 200);
+  try {
+    window.localStorage.setItem(SAVED_KEY, JSON.stringify(next));
+  } catch {
+    /* storage blocked: the toggle just will not persist */
+  }
+  return next.includes(id);
+}

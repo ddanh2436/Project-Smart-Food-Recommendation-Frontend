@@ -1,0 +1,761 @@
+/* ==========================================================================
+   Restaurant detail — styles for the components added to this page.
+   Kept beside the components rather than appended to the page stylesheet so
+   each piece can be found from the file that uses it.
+   ========================================================================== */
+
+/* ---- Hero -------------------------------------------------------------- */
+.hero-kicker {
+  margin: 0 0 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fbbf24;
+}
+
+.hero-rating {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 10px 0;
+}
+
+.hero-score {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+  color: #fbbf24;
+}
+
+.hero-review-count {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.hero-address {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 6px 0;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.hero-status {
+  margin: 10px 0 4px;
+}
+
+.distance-line {
+  margin: 6px 0 14px;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+/* ---- Open status badge -------------------------------------------------- */
+.open-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.open-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.open-badge.open {
+  background: rgba(22, 163, 74, 0.18);
+  border-color: rgba(34, 197, 94, 0.45);
+  color: #4ade80;
+}
+.open-badge.open .open-dot {
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.22);
+}
+
+.open-badge.closing-soon {
+  background: rgba(245, 158, 11, 0.18);
+  border-color: rgba(251, 191, 36, 0.5);
+  color: #fbbf24;
+}
+.open-badge.closing-soon .open-dot {
+  background: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.22);
+}
+
+.open-badge.closed {
+  background: rgba(220, 38, 38, 0.16);
+  border-color: rgba(248, 113, 113, 0.45);
+  color: #f87171;
+}
+.open-badge.closed .open-dot {
+  background: #ef4444;
+}
+
+.open-detail {
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.hours-plain {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+/* ---- Quick actions ------------------------------------------------------ */
+.quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.qa-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.qa-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.45);
+  transform: translateY(-1px);
+}
+
+.qa-btn:focus-visible {
+  outline: 2px solid #fbbf24;
+  outline-offset: 2px;
+}
+
+.qa-primary {
+  background: linear-gradient(135deg, #f0ad10, #d98800);
+  border-color: transparent;
+  color: #1c1917;
+}
+.qa-primary:hover {
+  filter: brightness(1.08);
+  background: linear-gradient(135deg, #f0ad10, #d98800);
+}
+
+.qa-saved {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.5);
+}
+
+/* ---- Amenities ---------------------------------------------------------- */
+.amenity-groups {
+  margin-top: 18px;
+  display: grid;
+  gap: 16px;
+}
+
+.amenity-label {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #a8a29e;
+}
+
+.amenity-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.amenity-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(233, 160, 4, 0.1);
+  border: 1px solid rgba(233, 160, 4, 0.26);
+  color: #e7e5e4;
+  font-size: 0.82rem;
+}
+
+/* ---- Map ---------------------------------------------------------------- */
+.map-section {
+  margin: 28px 0;
+}
+
+.map-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-toggle-map {
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(233, 160, 4, 0.4);
+  background: rgba(233, 160, 4, 0.1);
+  color: #fbbf24;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.map-frame {
+  height: 380px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  margin-top: 14px;
+}
+
+.map-loading,
+.map-missing {
+  padding: 24px;
+  text-align: center;
+  color: #a8a29e;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 14px;
+}
+
+/* A preview tile instead of the raw coordinate pair that used to sit in the
+   information panel, which told a diner nothing usable. */
+.map-preview {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 18px 20px;
+  text-align: left;
+  border-radius: 14px;
+  border: 1px dashed rgba(233, 160, 4, 0.35);
+  background: rgba(233, 160, 4, 0.06);
+  color: #e7e5e4;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.map-preview:hover {
+  background: rgba(233, 160, 4, 0.12);
+}
+
+.map-preview-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(233, 160, 4, 0.18);
+  color: #fbbf24;
+  font-size: 1.1rem;
+}
+
+/* ---- Stars -------------------------------------------------------------- */
+.star-display,
+.star-input-row {
+  display: inline-flex;
+  gap: 2px;
+  line-height: 1;
+}
+
+.star-slot,
+.star-slot-interactive {
+  position: relative;
+  display: inline-block;
+  color: rgba(255, 255, 255, 0.22);
+}
+
+.star-slot-interactive {
+  font-size: 30px;
+}
+
+.star-empty {
+  display: block;
+}
+
+.star-fill {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  color: #fbbf24;
+}
+
+.star-hit {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+.star-hit:focus-visible {
+  outline: 2px solid #fbbf24;
+  outline-offset: 2px;
+}
+
+.star-input {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.star-input-value {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 1rem;
+  color: #fbbf24;
+}
+
+.star-input-label {
+  font-size: 0.85rem;
+  color: #a8a29e;
+  font-weight: 500;
+}
+
+.rating-select-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.rating-select-label {
+  font-size: 0.9rem;
+  color: #d6d3d1;
+}
+
+.review-counter {
+  font-size: 0.78rem;
+  color: #78716c;
+}
+
+.review-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* ---- Review list -------------------------------------------------------- */
+.review-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 22px 0 16px;
+}
+
+.review-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: #d6d3d1;
+  font-size: 0.83rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.review-filter:hover {
+  border-color: rgba(233, 160, 4, 0.5);
+  color: #fbbf24;
+}
+.review-filter.active {
+  background: rgba(233, 160, 4, 0.16);
+  border-color: rgba(233, 160, 4, 0.55);
+  color: #fbbf24;
+}
+.review-filter-count {
+  opacity: 0.65;
+  font-weight: 500;
+}
+
+/* A vertical list, not a grid: review lengths vary so much that a grid left a
+   large gap under any short one while its neighbours set the row height. */
+.review-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.review-row {
+  display: flex;
+  gap: 14px;
+  padding: 18px 20px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.review-avatar {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: #fff;
+}
+
+.review-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.review-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.review-author {
+  font-weight: 700;
+  color: #fafaf9;
+  font-size: 0.95rem;
+}
+
+.review-verified {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.18);
+  border: 1px solid rgba(96, 165, 250, 0.4);
+  color: #93c5fd;
+}
+
+.review-sentiment {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+.review-sentiment.pos {
+  background: rgba(34, 197, 94, 0.16);
+  color: #4ade80;
+  border-color: rgba(34, 197, 94, 0.35);
+}
+.review-sentiment.neg {
+  background: rgba(239, 68, 68, 0.16);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.35);
+}
+.review-sentiment.neu {
+  background: rgba(255, 255, 255, 0.07);
+  color: #a8a29e;
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.review-score {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.review-score-value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fbbf24;
+}
+
+.review-text {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.68;
+  color: #d6d3d1;
+  white-space: pre-line;
+}
+.review-text.clamped {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.review-more {
+  margin-top: 8px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #fbbf24;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.no-reviews {
+  padding: 26px;
+  text-align: center;
+  color: #a8a29e;
+}
+
+/* ---- Ask AI ------------------------------------------------------------- */
+.ask-ai-box {
+  margin-top: 20px;
+  padding: 20px 22px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(233, 160, 4, 0.1), rgba(0, 0, 0, 0.25));
+  border: 1px solid rgba(233, 160, 4, 0.24);
+}
+
+.ask-ai-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.ask-ai-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(233, 160, 4, 0.18);
+  color: #fbbf24;
+  font-size: 1.15rem;
+}
+
+.ask-ai-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fafaf9;
+}
+
+.ask-ai-sub {
+  margin: 2px 0 0;
+  font-size: 0.83rem;
+  color: #a8a29e;
+}
+
+.ask-ai-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ask-ai-chip {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(233, 160, 4, 0.35);
+  background: rgba(0, 0, 0, 0.3);
+  color: #fbbf24;
+  font-size: 0.83rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.ask-ai-chip:hover {
+  background: rgba(233, 160, 4, 0.18);
+}
+
+/* ---- Similar places ----------------------------------------------------- */
+.similar-section {
+  margin: 36px 0 20px;
+}
+
+.similar-sub {
+  margin: 4px 0 16px;
+  font-size: 0.86rem;
+  color: #a8a29e;
+}
+
+/* A horizontal rail: this is a secondary suggestion at the end of the page
+   and should not add another full screen of grid. */
+.similar-rail {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  margin: 0;
+  list-style: none;
+  scroll-snap-type: x mandatory;
+}
+
+.similar-card {
+  flex: 0 0 236px;
+  scroll-snap-align: start;
+}
+
+.similar-link {
+  display: block;
+  height: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  text-decoration: none;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.similar-link:hover {
+  border-color: rgba(233, 160, 4, 0.45);
+  transform: translateY(-3px);
+}
+
+.similar-image {
+  position: relative;
+  height: 130px;
+}
+.similar-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.similar-score {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fbbf24;
+  font-size: 0.76rem;
+  font-weight: 700;
+  backdrop-filter: blur(4px);
+}
+
+.similar-info {
+  padding: 12px 14px;
+}
+
+.similar-name {
+  margin: 0 0 4px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fafaf9;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.5em;
+}
+
+.similar-address {
+  margin: 0 0 8px;
+  font-size: 0.76rem;
+  color: #a8a29e;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.similar-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.74rem;
+}
+
+.similar-price {
+  color: #fbbf24;
+}
+
+.similar-reviews {
+  color: #78716c;
+}
+
+.similar-skeleton {
+  flex: 0 0 236px;
+  height: 232px;
+  border-radius: 14px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(255, 255, 255, 0.09) 37%,
+    rgba(255, 255, 255, 0.04) 63%
+  );
+  background-size: 400% 100%;
+  animation: detail-shimmer 1.4s ease infinite;
+}
+
+@keyframes detail-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .similar-skeleton {
+    animation: none;
+  }
+  .qa-btn:hover,
+  .similar-link:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-score {
+    font-size: 1.6rem;
+  }
+  .quick-actions .qa-btn {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+  .map-frame {
+    height: 300px;
+  }
+  .review-row {
+    padding: 14px;
+    gap: 10px;
+  }
+  .star-slot-interactive {
+    font-size: 26px;
+  }
+}

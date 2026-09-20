@@ -3,370 +3,381 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
+import dynamic from "next/dynamic";
+import toast from "react-hot-toast";
+import { FaMapMarkerAlt, FaMoneyBillWave, FaRegClock } from "react-icons/fa";
+
 import {
   getRestaurantById,
   getReviewsByUrl,
   getReviewInsights,
   createReview,
   describeError,
+  type Restaurant,
+  type Review,
   type ReviewInsights as ReviewInsightsData,
-  type Restaurant as ApiRestaurant,
 } from "@/app/lib/api";
-import "./RestaurantDetail.css";
-import toast from "react-hot-toast";
+import { formatRating, ratingPercent, toFiveScale } from "@/app/lib/rating";
+import { cuisineTags, parseTags } from "@/app/lib/restaurant";
+import { useGeolocation } from "@/app/hooks/useGeolocation";
 
-// [IMPORT] Component hiển thị nhãn cảm xúc từng bình luận
-import SentimentBadge from "@/components/SentimentBadge/SentimentBadge"; 
-
-// [IMPORT] Component hiển thị biểu đồ tổng quan đánh giá
 import ReviewOverview from "@/components/ReviewOverview/ReviewOverview";
 import ReviewAspects from "@/components/ReviewAspects/ReviewAspects";
-import { formatRating, formatReviewCount } from "@/app/lib/rating";
-import FiveStar from "@/components/FiveStar/FiveStar";
+import ReviewList from "@/components/RestaurantDetail/ReviewList";
+import SimilarPlaces from "@/components/RestaurantDetail/SimilarPlaces";
+import AskAboutPlace from "@/components/RestaurantDetail/AskAboutPlace";
+import { StarDisplay, StarInput } from "@/components/RestaurantDetail/StarRating";
+import {
+  AmenityTags,
+  DistanceLine,
+  OpenStatusBadge,
+  QuickActions,
+} from "@/components/RestaurantDetail/InfoPanels";
 
-// --- ICONS ---
-const MapIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>;
-const ClockIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>;
-const MoneyIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>;
-const GlobeIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"></path></svg>;
-const LinkIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>;
-const StarIcon = ({ filled }: { filled?: boolean }) => <svg width="16" height="16" viewBox="0 0 24 24" fill={filled ? "#f97316" : "none"} stroke={filled ? "#f97316" : "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>;
+import "./RestaurantDetail.css";
+import "@/components/RestaurantDetail/RestaurantDetail.css";
 
-// Icon người dùng ẩn danh
-const UserIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" width="40" height="40">
-    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
-  </svg>
+// Leaflet touches `window` on import, so it must stay out of the server bundle.
+const RoutingMap = dynamic(
+  () => import("@/components/RoutingMap/RoutingMap"),
+  {
+    ssr: false,
+    loading: () => <div className="map-loading">Đang tải bản đồ...</div>,
+  }
 );
 
-// [THÊM MỚI] Component chọn sao (Star Rating Input)
-const StarRatingInput = ({ rating, setRating }: { rating: number, setRating: (r: number) => void }) => {
+/** The five detailed criteria, still scored 0–10 in the data. */
+const CRITERIA = [
+  { key: "diemChatLuong", label: "Chất lượng" },
+  { key: "diemViTri", label: "Vị trí" },
+  { key: "diemKhongGian", label: "Không gian" },
+  { key: "diemPhucVu", label: "Phục vụ" },
+  { key: "diemGiaCa", label: "Giá cả" },
+] as const;
+
+function RatingBar({ label, score }: { label: string; score?: number }) {
   return (
-    <div className="star-input-wrapper">
-      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
-        <button
-          key={star}
-          type="button"
-          className={`star-btn ${star <= rating ? "active" : ""}`}
-          onClick={() => setRating(star)}
-          title={`${star} điểm`}
-        >
-          ★
-        </button>
-      ))}
-      <span className="rating-text-value">{rating}/10</span>
+    <div className="rating-bar-item">
+      <div className="rating-bar-header">
+        <span className="r-label">{label}</span>
+        {/* Shown on the same five-point scale as everything else on the page;
+            the bar still fills from the stored 0–10 value. */}
+        <span className="r-score">{formatRating(score)}</span>
+      </div>
+      <div className="progress-bg">
+        <div
+          className="progress-fill"
+          style={{ width: `${ratingPercent(score)}%` }}
+        />
+      </div>
     </div>
   );
-};
-
-// The API shape, shared rather than redeclared. Optional fields stay
-// optional so the UI is forced to handle missing crawler data.
-type RestaurantDetail = ApiRestaurant;
-
-interface Review {
-  _id: string;
-  tenQuan: string;
-  urlGoc: string;
-  diemReview: number;
-  noiDung: string;
-  aiSentimentLabel?: string; 
-  aiSentimentScore?: number;
 }
 
 export default function RestaurantDetailPage() {
   const { id } = useParams();
-  const [res, setRes] = useState<RestaurantDetail | null>(null);
+  const { coords } = useGeolocation();
+
+  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  // [THÊM STATE CHO FORM BÌNH LUẬN]
-  const [userComment, setUserComment] = useState("");
-  const [userRating, setUserRating] = useState(10);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Aspect-level AI digest of the reviews ("food praised, service criticised").
   const [insights, setInsights] = useState<ReviewInsightsData | null>(null);
   const [insightsLoading, setInsightsLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [showMap, setShowMap] = useState(false);
+
+  // Review form. Held on the five-point scale the input uses, and doubled back
+  // to the stored 0–10 scale only when submitting.
+  const [comment, setComment] = useState("");
+  const [stars, setStars] = useState(5);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!id) return;
+    let cancelled = false;
 
-    const fetchData = async () => {
+    (async () => {
       try {
         setLoading(true);
-        const restaurantData = await getRestaurantById(id as string);
-        setRes(restaurantData);
+        const data = await getRestaurantById(id as string);
+        if (cancelled) return;
+        setRestaurant(data);
 
-        if (restaurantData && restaurantData.urlGoc) {
-          const reviewsData = await getReviewsByUrl(restaurantData.urlGoc);
-          setReviews(reviewsData);
+        if (data?.urlGoc) {
+          const fetched = await getReviewsByUrl(data.urlGoc);
+          if (cancelled) return;
+          setReviews(fetched);
 
           // Loaded after the page is interactive: the digest runs sentiment
           // inference over every review, so awaiting it inline would hold the
           // whole page on a cold AI service.
-          if (reviewsData.length > 0) {
+          if (fetched.length > 0) {
             setInsightsLoading(true);
-            getReviewInsights(restaurantData.urlGoc)
-              .then(setInsights)
-              .finally(() => setInsightsLoading(false));
+            getReviewInsights(data.urlGoc)
+              .then((result) => !cancelled && setInsights(result))
+              .finally(() => !cancelled && setInsightsLoading(false));
           }
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error loading restaurant:", error);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
-    };
+    })();
 
-    fetchData();
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
-  // [THÊM HÀM XỬ LÝ GỬI BÌNH LUẬN]
-  const handleSubmitReview = async () => {
-    const comment = userComment.trim();
-    if (!comment) {
-      toast.error("Vui lòng nhập nội dung bình luận!");
+  const handleSubmit = async () => {
+    const text = comment.trim();
+    if (!text) {
+      toast.error("Vui lòng nhập nội dung đánh giá!");
       return;
     }
-    // The API requires at least 10 characters; checking here avoids a round
-    // trip that comes back as a raw validation error.
-    if (comment.length < 10) {
-      toast.error("Bình luận cần ít nhất 10 ký tự để AI phân tích chính xác.");
+    if (text.length < 10) {
+      toast.error("Đánh giá cần ít nhất 10 ký tự để AI phân tích chính xác.");
       return;
     }
-    if (comment.length > 3000) {
-      toast.error("Bình luận quá dài (tối đa 3000 ký tự).");
+    if (text.length > 3000) {
+      toast.error("Đánh giá quá dài (tối đa 3000 ký tự).");
       return;
     }
-    if (!res || !res.urlGoc) {
-      toast.error("Dữ liệu nhà hàng bị thiếu URL gốc, không thể lưu bình luận.");
+    if (!restaurant?.urlGoc) {
+      toast.error("Thiếu dữ liệu nhà hàng, không thể lưu đánh giá.");
       return;
     }
 
-    setIsSubmitting(true);
+    setSubmitting(true);
     try {
-      // 1. Gọi API tạo review (Hàm này đã được thêm vào api.ts ở bước trước)
-      const newReview = await createReview({
-        tenQuan: res.tenQuan,
-        urlGoc: res.urlGoc,
-        diemReview: userRating,
-        noiDung: userComment,
+      const created = await createReview({
+        tenQuan: restaurant.tenQuan,
+        urlGoc: restaurant.urlGoc,
+        // The API stores 0–10; the form collects 0–5.
+        diemReview: Math.round(stars * 2),
+        noiDung: text,
       });
-
-      // 2. Cập nhật UI ngay lập tức: Thêm review mới vào đầu danh sách
-      // Backend trả về review đã có kết quả AI phân tích (aiSentimentLabel)
-      setReviews([newReview, ...reviews]);
-
-      // 3. Reset form
-      setUserComment("");
-      setUserRating(10);
-      toast.success("Cảm ơn bạn! Bình luận đã được ghi nhận.");
-      
+      setReviews((prev) => [created, ...prev]);
+      setComment("");
+      setStars(5);
+      toast.success("Cảm ơn bạn! Đánh giá đã được ghi nhận.");
     } catch (error) {
-      console.error(error);
-      // Show what the server actually objected to (e.g. "at least 10
-      // characters") rather than a generic failure message.
       toast.error(describeError(error));
     } finally {
-      setIsSubmitting(false);
+      setSubmitting(false);
     }
   };
 
-  if (loading) return <div className="loading-screen">Đang tải dữ liệu nhà hàng...</div>;
-  if (!res) return <div className="loading-screen">Không tìm thấy nhà hàng này.</div>;
+  if (loading) {
+    return <div className="loading-screen">Đang tải dữ liệu nhà hàng...</div>;
+  }
+  if (!restaurant) {
+    return <div className="loading-screen">Không tìm thấy nhà hàng này.</div>;
+  }
+
+  const tags = parseTags(restaurant.tags);
+  const dishes = cuisineTags(tags);
+  const fiveScore = toFiveScale(restaurant.diemTrungBinh);
 
   return (
     <div className="detail-page-wrapper">
       <div className="container">
-        
-        {/* --- HERO SECTION --- */}
-        <div className="detail-hero">
-          <Image 
-            src={res.avatarUrl || "/assets/image/pho.png"} 
-            alt={res.tenQuan || "Restaurant Image"} 
-            width={1200} height={600} 
+        {/* ------------------------------ Hero ----------------------------- */}
+        <header className="detail-hero">
+          <Image
+            src={restaurant.avatarUrl || "/assets/image/pho.png"}
+            alt={restaurant.tenQuan}
+            width={1600}
+            height={700}
             className="detail-hero-img"
-            unoptimized={true}
+            unoptimized
+            priority
           />
           <div className="hero-overlay">
             <div className="hero-content">
-              <h1>{res.tenQuan}</h1>
-              <div className="hero-rating">
-                <div className="hero-score">
-                  <><FiveStar size={22} /> {formatRating(res.diemTrungBinh)}</>
-                </div>
-                <div className="hero-address">
-                  <MapIcon /> {res.diaChi}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* --- MAIN INFO GRID --- */}
-        <div className="detail-content">
-          <div className="left-col">
-            <div className="info-box">
-              <h3 className="section-heading">Thông tin chung</h3>
-              <div className="info-row">
-                <div className="info-icon"><MoneyIcon /></div>
-                <div>
-                  <span className="info-label">Mức giá:</span>
-                  <span>{res.giaCa || "Đang cập nhật"}</span>
-                </div>
-              </div>
-              <div className="info-row">
-                <div className="info-icon"><ClockIcon /></div>
-                <div>
-                  <span className="info-label">Giờ mở cửa:</span>
-                  <span>{res.gioMoCua || "Đang cập nhật"}</span>
-                </div>
-              </div>
-              <div className="info-row">
-                <div className="info-icon"><GlobeIcon /></div>
-                <div>
-                  <span className="info-label">Tọa độ GPS:</span>
-                  <span>{res.lat && res.lon ? `${res.lat}, ${res.lon}` : "Chưa có tọa độ"}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="right-col">
-            <div className="rating-box">
-              <h3>Chi tiết đánh giá</h3>
-              <RatingBar label="Chất lượng" score={res.diemChatLuong} />
-              <RatingBar label="Vị trí" score={res.diemViTri} />
-              <RatingBar label="Không gian" score={res.diemKhongGian} />
-              <RatingBar label="Phục vụ" score={res.diemPhucVu} />
-              <RatingBar label="Giá cả" score={res.diemGiaCa} />
-
-              {res.urlGoc && (
-                <a href={res.urlGoc} target="_blank" rel="noopener noreferrer" className="btn-foody">
-                   Xem trên Foody <LinkIcon />
-                </a>
+              {dishes.length > 0 && (
+                <p className="hero-kicker">{dishes.slice(0, 3).join(" · ")}</p>
               )}
+              <h1>{restaurant.tenQuan}</h1>
+
+              <div className="hero-rating">
+                {/* One scale across the whole page: header, criteria, reviews
+                    and the review form all read out of five. */}
+                <span className="hero-score">{formatRating(restaurant.diemTrungBinh)}</span>
+                <StarDisplay value={fiveScore ?? 0} size={18} />
+                {restaurant.reviewCount ? (
+                  <span className="hero-review-count">
+                    {restaurant.reviewCount} đánh giá
+                  </span>
+                ) : null}
+              </div>
+
+              <p className="hero-address">
+                <FaMapMarkerAlt /> {restaurant.diaChi}
+              </p>
+
+              <div className="hero-status">
+                <OpenStatusBadge hours={restaurant.gioMoCua} />
+              </div>
+
+              <DistanceLine restaurant={restaurant} coords={coords} />
+
+              <QuickActions
+                restaurant={restaurant}
+                coords={coords}
+                onShowMap={() => {
+                  setShowMap(true);
+                  document
+                    .getElementById("map-section")
+                    ?.scrollIntoView({ behavior: "smooth", block: "center" });
+                }}
+              />
             </div>
           </div>
+        </header>
+
+        {/* --------------------------- Information -------------------------- */}
+        {/* No tab bar above this: the page shows both panels side by side, and
+            an underlined tab strip over a split layout implied the two were
+            alternatives rather than both already visible. */}
+        <div className="detail-content">
+          <section className="left-col">
+            <div className="info-box">
+              <h2 className="section-heading">Thông tin chung</h2>
+
+              <div className="info-row">
+                <div className="info-icon">
+                  <FaMoneyBillWave />
+                </div>
+                <div>
+                  <span className="info-label">Mức giá</span>
+                  <span>{restaurant.giaCa || "Đang cập nhật"}</span>
+                </div>
+              </div>
+
+              <div className="info-row">
+                <div className="info-icon">
+                  <FaRegClock />
+                </div>
+                <div>
+                  <span className="info-label">Giờ mở cửa</span>
+                  <span>{restaurant.gioMoCua || "Đang cập nhật"}</span>
+                </div>
+              </div>
+
+              {/* The raw coordinate pair that used to sit here told a diner
+                  nothing; the map and the directions button do the job. */}
+              <AmenityTags tags={tags} />
+            </div>
+
+            <AskAboutPlace restaurant={restaurant} />
+          </section>
+
+          <aside className="right-col">
+            <div className="rating-box">
+              <h2 className="section-heading">Chi tiết đánh giá</h2>
+              {CRITERIA.map(({ key, label }) => (
+                <RatingBar
+                  key={key}
+                  label={label}
+                  score={restaurant[key] as number | undefined}
+                />
+              ))}
+            </div>
+          </aside>
         </div>
 
-        {/* --- REVIEW SECTION --- */}
-        <div className="reviews-container">
-          <h3 className="section-heading">
-            Đánh giá từ cộng đồng ({reviews.length})
-          </h3>
+        {/* ------------------------------ Map ------------------------------ */}
+        <section className="map-section" id="map-section">
+          <div className="map-head">
+            <h2 className="section-heading">Vị trí &amp; chỉ đường</h2>
+            <button
+              type="button"
+              className="btn-toggle-map"
+              onClick={() => setShowMap((open) => !open)}
+            >
+              {showMap ? "Ẩn bản đồ" : "Hiện bản đồ"}
+            </button>
+          </div>
 
-          {/* [THÊM MỚI] KHU VỰC NHẬP BÌNH LUẬN */}
+          {showMap ? (
+            restaurant.lat && restaurant.lon ? (
+              <div className="map-frame">
+                <RoutingMap
+                  userLocation={coords}
+                  restaurantLocation={{
+                    lat: restaurant.lat,
+                    lon: restaurant.lon,
+                  }}
+                />
+              </div>
+            ) : (
+              <p className="map-missing">
+                Quán này chưa có toạ độ nên không thể chỉ đường.
+              </p>
+            )
+          ) : (
+            <button
+              type="button"
+              className="map-preview"
+              onClick={() => setShowMap(true)}
+            >
+              <span className="map-preview-pin">
+                <FaMapMarkerAlt />
+              </span>
+              <span>
+                <strong>{restaurant.diaChi}</strong>
+                <br />
+                Nhấn để xem bản đồ và đường đi
+              </span>
+            </button>
+          )}
+        </section>
+
+        {/* ---------------------------- Reviews ---------------------------- */}
+        <section className="reviews-container">
+          <h2 className="section-heading">
+            Đánh giá từ cộng đồng ({reviews.length})
+          </h2>
+
           <div className="write-review-box">
-            <h4>Viết đánh giá của bạn</h4>
-            <div className="review-inputs">
-              <div className="rating-select-row">
-                <span>Chấm điểm:</span>
-                <StarRatingInput rating={userRating} setRating={setUserRating} />
-              </div>
-              
-              <textarea
-                className="review-textarea"
-                placeholder="Chia sẻ trải nghiệm của bạn về món ăn, không gian, phục vụ..."
-                rows={4}
-                value={userComment}
-                onChange={(e) => setUserComment(e.target.value)}
-              />
-              
-              <div className="review-actions">
-                <button 
-                  className="btn-submit-review" 
-                  onClick={handleSubmitReview}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? "Đang gửi..." : "Gửi đánh giá"}
-                </button>
-              </div>
+            <h3>Viết đánh giá của bạn</h3>
+            <div className="rating-select-row">
+              <span className="rating-select-label">Chấm điểm:</span>
+              {/* Five stars with halves, replacing a row of ten that was hard
+                  to hit accurately on a phone. */}
+              <StarInput value={stars} onChange={setStars} />
+            </div>
+
+            <textarea
+              className="review-textarea"
+              placeholder="Chia sẻ trải nghiệm của bạn về món ăn, không gian, phục vụ..."
+              rows={4}
+              maxLength={3000}
+              value={comment}
+              onChange={(event) => setComment(event.target.value)}
+            />
+
+            <div className="review-actions">
+              <span className="review-counter">{comment.length}/3000</span>
+              <button
+                type="button"
+                className="btn-submit-review"
+                onClick={handleSubmit}
+                disabled={submitting}
+              >
+                {submitting ? "Đang gửi..." : "Gửi đánh giá"}
+              </button>
             </div>
           </div>
-          {/* ---------------------------------- */}
 
-          {/* Tổng quan cảm xúc + phân tích theo từng khía cạnh (AI) */}
           <ReviewOverview reviews={reviews} />
           <ReviewAspects data={insights} loading={insightsLoading} />
+          <ReviewList reviews={reviews} />
+        </section>
 
-          <div className="reviews-list">
-            {reviews.length > 0 ? (
-              reviews.map((review, index) => (
-                <ReviewItem key={index} review={review} />
-              ))
-            ) : (
-              <div className="no-reviews">
-                <p>Chưa có bình luận nào được thu thập cho nhà hàng này.</p>
-              </div>
-            )}
-          </div>
-        </div>
-
+        <SimilarPlaces restaurantId={restaurant._id} district={tags[1]} />
       </div>
     </div>
   );
 }
-
-// --- SUB COMPONENTS ---
-
-const RatingBar = ({ label, score }: { label: string, score?: number }) => (
-  <div className="rating-bar-item">
-    <div className="rating-bar-header">
-      <span className="r-label">{label}</span>
-      <span className="r-score">
-        {(score !== undefined && score !== null) ? score.toFixed(1) : "-"}
-      </span>
-    </div>
-    <div className="progress-bg">
-      <div className="progress-fill" style={{ width: `${(score || 0) * 10}%` }}></div>
-    </div>
-  </div>
-);
-
-const ReviewItem = ({ review }: { review: Review }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  
-  const CHARACTER_LIMIT = 150;
-  const isLongText = review.noiDung && review.noiDung.length > CHARACTER_LIMIT;
-
-  return (
-    <div className="review-card">
-      <div className="review-header">
-        <div className="review-avatar">
-          <UserIcon />
-        </div>
-        <div className="review-meta">
-          <span className="review-author">Thực khách Foody</span>
-          
-          <div className="review-rating-row" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-             <div className="review-score-badge">
-                <span>{review.diemReview}</span> <StarIcon filled />
-             </div>
-
-             {/* Hiển thị Badge Cảm Xúc từ AI */}
-             <SentimentBadge 
-                label={review.aiSentimentLabel || ''} 
-                score={review.aiSentimentScore} 
-             />
-          </div>
-
-        </div>
-      </div>
-      <div className="review-body">
-        <p className={!isExpanded && isLongText ? "review-text-truncated" : "review-text-full"}>
-          "{review.noiDung}"
-        </p>
-        
-        {isLongText && (
-          <button 
-            className="btn-read-more" 
-            onClick={() => setIsExpanded(!isExpanded)}
-          >
-            {isExpanded ? "Thu gọn" : "Xem thêm"}
-          </button>
-        )}
-      </div>
-    </div>
-  );
-};

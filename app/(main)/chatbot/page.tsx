@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import {
   FaPaperPlane,
   FaMapMarkerAlt,
@@ -54,8 +55,9 @@ function RichText({ text }: { text: string }) {
   );
 }
 
-export default function ChatbotPage() {
+function ChatbotContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [input, setInput] = useState("");
   const [atBottom, setAtBottom] = useState(true);
 
@@ -83,6 +85,25 @@ export default function ChatbotPage() {
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  /**
+   * Opening question passed in on the query string.
+   *
+   * The restaurant page links here with `?q=...` so its quick-ask chips land
+   * the user in a conversation rather than an empty input. Guarded by a ref so
+   * React's StrictMode double-mount does not ask it twice.
+   */
+  const askedRef = useRef(false);
+  useEffect(() => {
+    if (askedRef.current) return;
+    const question = searchParams.get("q");
+    if (!question?.trim()) return;
+    askedRef.current = true;
+    void sendMessage(question);
+    // Drop the parameter so a refresh does not re-ask it.
+    router.replace("/chatbot");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   // Follow new messages only when the user is already at the bottom, so
   // scrolling back to read earlier results is not interrupted.
@@ -415,5 +436,23 @@ export default function ChatbotPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * `useSearchParams` requires a Suspense boundary in the App Router, so the
+ * page shell wraps the content that reads it.
+ */
+export default function ChatbotPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-[100dvh] items-center justify-center bg-stone-950 text-stone-400">
+          Đang tải trợ lý...
+        </div>
+      }
+    >
+      <ChatbotContent />
+    </Suspense>
   );
 }
