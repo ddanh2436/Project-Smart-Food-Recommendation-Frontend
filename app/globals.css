@@ -26,3 +26,31 @@ body {
   margin  : 0;
   padding : 0;
 }
+
+/* --------------------------------------------------------------------------
+   Review-count badge
+   Sits under the score badge on a restaurant card. Listings are ordered by a
+   review-count-adjusted score, so this is what explains the ordering: a 10.0
+   from one review is not the same claim as a 9.0 from thirty.
+   -------------------------------------------------------------------------- */
+.review-count-badge {
+  position: absolute;
+  top: 46px;
+  right: 10px;
+  z-index: 2;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.72);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .review-count-badge { font-size: 10px; top: 42px; }
+}
