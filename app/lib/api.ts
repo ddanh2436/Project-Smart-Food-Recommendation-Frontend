@@ -385,6 +385,15 @@ export async function getNearbyRestaurants(
   }
 }
 
+/**
+ * How far to trust a photo recognition.
+ *
+ * The model knows five dishes, so most photos land short of a confident
+ * answer. `confident` and `uncertain` name a dish; `group` says only what kind
+ * of food it looks like; `none` names nothing.
+ */
+export type ImageTier = "confident" | "uncertain" | "group" | "none";
+
 export interface ImageSearchResult {
   data: Restaurant[];
   detectedFood: string | null;
@@ -394,6 +403,11 @@ export interface ImageSearchResult {
     original_name: string;
     confidence: number;
   }>;
+  tier?: ImageTier;
+  /** The kind of food, when the dish itself is not certain. */
+  group?: "soup" | "dry" | null;
+  /** Dishes worth offering next, as Vietnamese search terms. */
+  suggestions?: string[];
   total: number;
   message?: string;
 }

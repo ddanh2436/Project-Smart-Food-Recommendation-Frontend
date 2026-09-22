@@ -142,6 +142,8 @@ const vi = {
     detected: "AI nhận diện:",
     imageEmpty: "Chưa có quán nào trong hệ thống bán món này.",
     imageFailed: "Chưa nhận diện được món trong ảnh. Bạn thử ảnh rõ hơn nhé.",
+    imageGroupSoup: "Nhìn giống một món nước, nhưng mình chưa nhận ra chính xác. Bạn thử gõ tên món nhé.",
+    imageGroupDry: "Nhìn giống một món khô, nhưng mình chưa nhận ra chính xác. Bạn thử gõ tên món nhé.",
     imageError: "Có lỗi khi xử lý ảnh. Bạn thử lại sau nhé.",
     viewPlace: "Xem quán",
     regions: ["Miền Bắc", "Miền Trung", "Miền Nam"],
@@ -383,7 +385,11 @@ const vi = {
     sentPhoto: "Đã gửi một hình ảnh",
     detectedPrefix: "Mình đoán đây là món",
     detectedSuffix: "😋 Dưới đây là các quán ngon nhất:",
-    imageUnclear: "Ảnh hơi khó nhận diện. Bạn chụp rõ hơn hoặc gõ tên món giúp mình nhé! 🤔",
+    imageUnclear: "Ảnh hơi khó nhận diện. Bạn chụp rõ hơn hoặc chọn nhanh một món bên dưới nhé! 🤔",
+    imageMaybe: "Mình đoán đây là món",
+    imageMaybeSuffix: "nhưng chưa chắc lắm. Dưới đây là các quán bán món này — nếu mình đoán sai, bạn chọn lại giúp nhé:",
+    imageGroupSoup: "Nhìn ảnh thì giống một món nước, nhưng mình chưa nhận ra chính xác là món gì. Bạn chọn nhanh một món nhé:",
+    imageGroupDry: "Nhìn ảnh thì giống một món khô, nhưng mình chưa nhận ra chính xác là món gì. Bạn chọn nhanh một món nhé:",
     imageError: "Lỗi khi xử lý ảnh. Bạn thử lại sau nhé!",
   },
 
@@ -520,6 +526,8 @@ const en: typeof vi = {
     detected: "AI detected:",
     imageEmpty: "No place in our database serves this dish yet.",
     imageFailed: "We could not identify the dish. Try a clearer photo.",
+    imageGroupSoup: "That looks like a noodle soup, but I could not tell which one. Try typing the dish name.",
+    imageGroupDry: "That looks like a dry dish, but I could not tell which one. Try typing the dish name.",
     imageError: "Something went wrong reading that image. Please try again.",
     viewPlace: "View place",
     regions: ["Northern Vietnam", "Central Vietnam", "Southern Vietnam"],
@@ -757,7 +765,14 @@ const en: typeof vi = {
     detectedPrefix: "I think this is",
     detectedSuffix: "😋 Here are the best places for it:",
     imageUnclear:
-      "That photo is hard to read. Try a clearer shot, or type the dish name. 🤔",
+      "That photo is hard to read. Try a clearer shot, or pick a dish below. 🤔",
+    imageMaybe: "I think this is",
+    imageMaybeSuffix:
+      "though I am not certain. Here are places that serve it — if I guessed wrong, pick again:",
+    imageGroupSoup:
+      "That looks like a noodle soup, but I could not tell which one. Pick a dish:",
+    imageGroupDry:
+      "That looks like a dry dish, but I could not tell which one. Pick a dish:",
     imageError: "Something went wrong reading that image. Please try again.",
   },
 

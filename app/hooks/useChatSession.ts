@@ -6,6 +6,7 @@ import {
   searchRestaurantsByImage,
   type ChatChip,
   type ChatTurn,
+  type ImageSearchResult,
   type Restaurant,
 } from "@/app/lib/api";
 import { useGeolocation, type Coords } from "@/app/hooks/useGeolocation";
@@ -53,6 +54,55 @@ function makeGreeting(t: Dict): ChatMessage[] {
       kind: "greeting",
     },
   ];
+}
+
+/**
+ * Word a photo recognition according to how much the model actually knows.
+ *
+ * The model recognises five dishes, so most photos of Vietnamese food fall
+ * short of a confident answer. Every one of those used to get the same dead
+ * end — "could not identify the dish", no results, nothing to do next — which
+ * left the user unable to tell a bad photo from an unsupported dish. Now the
+ * reply matches the tier, and every tier below `confident` offers dishes to
+ * tap, so there is always a way forward.
+ */
+function describeImageResult(
+  result: ImageSearchResult | null,
+  t: Dict
+): Pick<ChatMessage, "text" | "results" | "kind" | "chips"> {
+  const chips = (result?.suggestions ?? []).map((dish) => ({
+    label: dish,
+    query: dish,
+  }));
+
+  if (!result || result.tier === "none" || (!result.detectedFood && !result.tier)) {
+    return { text: t.chat.imageUnclear, kind: "not_found", chips };
+  }
+
+  if (result.tier === "group") {
+    const text =
+      result.group === "dry" ? t.chat.imageGroupDry : t.chat.imageGroupSoup;
+    return { text, kind: "not_found", chips };
+  }
+
+  if (result.tier === "uncertain" && result.detectedFood) {
+    return {
+      text: `${t.chat.imageMaybe} **${result.detectedFood}** ${t.chat.imageMaybeSuffix}`,
+      results: result.data,
+      kind: "results",
+      chips,
+    };
+  }
+
+  if (result.detectedFood) {
+    return {
+      text: `${t.chat.detectedPrefix} **${result.detectedFood}** ${t.chat.detectedSuffix}`,
+      results: result.data,
+      kind: "results",
+    };
+  }
+
+  return { text: t.chat.imageUnclear, kind: "not_found", chips };
 }
 
 /**
@@ -139,22 +189,7 @@ export function useChatSession() {
 
       try {
         const result = await searchRestaurantsByImage(file, coords ?? undefined);
-        append(
-          result?.detectedFood
-            ? {
-                id: Date.now() + 1,
-                sender: "bot",
-                text: `${t.chat.detectedPrefix} **${result.detectedFood}** ${t.chat.detectedSuffix}`,
-                results: result.data,
-                kind: "results",
-              }
-            : {
-                id: Date.now() + 1,
-                sender: "bot",
-                text: t.chat.imageUnclear,
-                kind: "not_found",
-              }
-        );
+        append({ id: Date.now() + 1, sender: "bot", ...describeImageResult(result, t) });
       } catch {
         append({
           id: Date.now() + 1,
