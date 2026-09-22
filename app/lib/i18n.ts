@@ -122,6 +122,27 @@ const vi = {
     cardOverall: "Đánh giá tổng hợp",
   },
 
+  /** The "what should I eat right now" block on the home page. */
+  rightNow: {
+    title: "Ăn gì ngay bây giờ",
+    subCity: "Đang mở cửa, hợp với bữa này",
+    subNearby: "Đang mở cửa, hợp với bữa này, quanh chỗ bạn",
+    meals: {
+      breakfast: "Đang là bữa sáng",
+      lunch: "Đang là bữa trưa",
+      dinner: "Đang là bữa tối",
+      latenight: "Đang là bữa khuya",
+    } as Record<string, string>,
+    dice: "Hôm nay ăn gì?",
+    again: "Chọn lại",
+    pickBadge: "Gợi ý cho bạn",
+    becauseOpen: "Đang mở cửa",
+    becauseNear: "cách bạn",
+    becauseScore: "điểm",
+    pickedFrom: "Chọn ngẫu nhiên từ",
+    places: "quán đạt điều kiện",
+    noPick: "Chưa có quán nào quanh bạn đạt đủ điều kiện lúc này. Thử lại sau nhé.",
+  },
   hero: {
     discoverBtn: "Tìm theo bộ sưu tập",
     discoverClose: "Đóng bộ sưu tập",
@@ -142,6 +163,8 @@ const vi = {
     detected: "AI nhận diện:",
     imageEmpty: "Chưa có quán nào trong hệ thống bán món này.",
     imageFailed: "Chưa nhận diện được món trong ảnh. Bạn thử ảnh rõ hơn nhé.",
+    imageGroupSoup: "Nhìn giống một món nước, nhưng mình chưa nhận ra chính xác. Bạn thử gõ tên món nhé.",
+    imageGroupDry: "Nhìn giống một món khô, nhưng mình chưa nhận ra chính xác. Bạn thử gõ tên món nhé.",
     imageError: "Có lỗi khi xử lý ảnh. Bạn thử lại sau nhé.",
     viewPlace: "Xem quán",
     regions: ["Miền Bắc", "Miền Trung", "Miền Nam"],
@@ -231,6 +254,23 @@ const vi = {
     c_space: "Không gian",
     c_service: "Phục vụ",
     c_price: "Giá cả",
+  },
+  /** The side-by-side comparison page. */
+  compare: {
+    title: "So sánh hai quán",
+    loading: "Đang so sánh...",
+    failed: "Không so sánh được. Bạn thử chọn lại hai quán nhé.",
+    needTwo: "Cần ít nhất hai quán để so sánh.",
+    winsSuffix: "tiêu chí thắng",
+    allDraw: "Hai quán ngang nhau trên mọi tiêu chí so sánh được.",
+    draw: "Ngang nhau",
+    tieNote: "Chênh lệch dưới 0,2 điểm được tính là ngang nhau.",
+    aspectPrefix: "Đánh giá về",
+    distance: "Khoảng cách từ bạn",
+    noAspects:
+      "Chưa có đủ nhận xét để so sánh theo khía cạnh cho cặp quán này.",
+    back: "Quay lại",
+    compareAction: "So sánh",
   },
   detail: {
     loading: "Đang tải dữ liệu nhà hàng...",
@@ -335,6 +375,15 @@ const vi = {
     aspectsPositiveShare: "tích cực",
     aspectsMentions: "lượt nhắc",
     aspectsWarming: "Dịch vụ AI đang khởi động, số liệu có thể chưa đầy đủ.",
+    /** The six aspects aspect_index scores. Keyed by the AI service's own keys. */
+    aspectLabels: {
+      food: "Món ăn",
+      price: "Giá cả",
+      service: "Phục vụ",
+      space: "Không gian",
+      hygiene: "Vệ sinh",
+      parking: "Chỗ đậu xe",
+    } as Record<string, string>,
     verdict: {
       positive: "Được khen",
       negative: "Bị phàn nàn",
@@ -342,6 +391,21 @@ const vi = {
     },
   },
 
+  /** Wording for the facts behind a recommendation. */
+  reasons: {
+    heading: "Vì sao gợi ý quán này",
+    cautionHeading: "Cần lưu ý",
+    dish: "Đúng món bạn tìm",
+    district: "Đúng khu vực",
+    price: "Trong tầm giá",
+    rating: "điểm",
+    ratingFrom: "từ",
+    reviewsWord: "đánh giá",
+    distance: "cách bạn",
+    aspectGood: "được khen",
+    aspectBad: "bị chê",
+    mentionsWord: "lượt nhắc",
+  },
   chat: {
     title: "NomNom Assistant",
     openLabel: "Mở trợ lý tìm quán ăn",
@@ -359,6 +423,7 @@ const vi = {
     toBottom: "Xuống cuối",
     newMessages: "tin nhắn mới",
     suggestionsLabel: "Gợi ý câu hỏi",
+    narrowLabel: "Thu hẹp kết quả",
     imageLabel: "Gửi ảnh món ăn để nhận diện",
     imageTitle: "Gửi ảnh món ăn",
     inputLabel: "Nhập câu hỏi cho trợ lý",
@@ -382,7 +447,11 @@ const vi = {
     sentPhoto: "Đã gửi một hình ảnh",
     detectedPrefix: "Mình đoán đây là món",
     detectedSuffix: "😋 Dưới đây là các quán ngon nhất:",
-    imageUnclear: "Ảnh hơi khó nhận diện. Bạn chụp rõ hơn hoặc gõ tên món giúp mình nhé! 🤔",
+    imageUnclear: "Ảnh hơi khó nhận diện. Bạn chụp rõ hơn hoặc chọn nhanh một món bên dưới nhé! 🤔",
+    imageMaybe: "Mình đoán đây là món",
+    imageMaybeSuffix: "nhưng chưa chắc lắm. Dưới đây là các quán bán món này — nếu mình đoán sai, bạn chọn lại giúp nhé:",
+    imageGroupSoup: "Nhìn ảnh thì giống một món nước, nhưng mình chưa nhận ra chính xác là món gì. Bạn chọn nhanh một món nhé:",
+    imageGroupDry: "Nhìn ảnh thì giống một món khô, nhưng mình chưa nhận ra chính xác là món gì. Bạn chọn nhanh một món nhé:",
     imageError: "Lỗi khi xử lý ảnh. Bạn thử lại sau nhé!",
   },
 
@@ -499,6 +568,26 @@ const en: typeof vi = {
     cardOverall: "Overall score",
   },
 
+  rightNow: {
+    title: "What to eat right now",
+    subCity: "Open now, right for this meal",
+    subNearby: "Open now, right for this meal, near you",
+    meals: {
+      breakfast: "It is breakfast time",
+      lunch: "It is lunchtime",
+      dinner: "It is dinner time",
+      latenight: "It is late-night time",
+    } as Record<string, string>,
+    dice: "Pick one for me",
+    again: "Pick another",
+    pickBadge: "Our pick",
+    becauseOpen: "Open now",
+    becauseNear: "about",
+    becauseScore: "rated",
+    pickedFrom: "Chosen at random from",
+    places: "places that qualified",
+    noPick: "Nothing near you qualifies right now. Try again a bit later.",
+  },
   hero: {
     discoverBtn: "Browse collections",
     discoverClose: "Close collections",
@@ -519,6 +608,8 @@ const en: typeof vi = {
     detected: "AI detected:",
     imageEmpty: "No place in our database serves this dish yet.",
     imageFailed: "We could not identify the dish. Try a clearer photo.",
+    imageGroupSoup: "That looks like a noodle soup, but I could not tell which one. Try typing the dish name.",
+    imageGroupDry: "That looks like a dry dish, but I could not tell which one. Try typing the dish name.",
     imageError: "Something went wrong reading that image. Please try again.",
     viewPlace: "View place",
     regions: ["Northern Vietnam", "Central Vietnam", "Southern Vietnam"],
@@ -603,6 +694,21 @@ const en: typeof vi = {
     c_space: "Ambience",
     c_service: "Service",
     c_price: "Value",
+  },
+  compare: {
+    title: "Side by side",
+    loading: "Comparing...",
+    failed: "Could not compare those. Try picking two places again.",
+    needTwo: "Two restaurants are needed to compare.",
+    winsSuffix: "criteria won",
+    allDraw: "These two are level on every criterion we can compare.",
+    draw: "Level",
+    tieNote: "A gap under 0.2 counts as level.",
+    aspectPrefix: "Reviews on",
+    distance: "Distance from you",
+    noAspects: "Not enough reviews yet to compare these two by aspect.",
+    back: "Back",
+    compareAction: "Compare",
   },
   detail: {
     loading: "Loading restaurant...",
@@ -707,6 +813,14 @@ const en: typeof vi = {
     aspectsMentions: "mentions",
     aspectsWarming:
       "The AI service is still starting up, so these figures may be incomplete.",
+    aspectLabels: {
+      food: "Food",
+      price: "Price",
+      service: "Service",
+      space: "Ambience",
+      hygiene: "Hygiene",
+      parking: "Parking",
+    } as Record<string, string>,
     verdict: {
       positive: "Praised",
       negative: "Complained about",
@@ -714,6 +828,20 @@ const en: typeof vi = {
     },
   },
 
+  reasons: {
+    heading: "Why this one",
+    cautionHeading: "Worth knowing",
+    dish: "The dish you asked for",
+    district: "In the area you asked for",
+    price: "Within your budget",
+    rating: "rated",
+    ratingFrom: "from",
+    reviewsWord: "reviews",
+    distance: "about",
+    aspectGood: "praised for",
+    aspectBad: "criticised for",
+    mentionsWord: "mentions",
+  },
   chat: {
     title: "NomNom Assistant",
     openLabel: "Open the restaurant assistant",
@@ -731,6 +859,7 @@ const en: typeof vi = {
     toBottom: "Jump to latest",
     newMessages: "new messages",
     suggestionsLabel: "Suggested questions",
+    narrowLabel: "Narrow these results",
     imageLabel: "Send a dish photo to identify it",
     imageTitle: "Send a dish photo",
     inputLabel: "Type a question for the assistant",
@@ -755,7 +884,14 @@ const en: typeof vi = {
     detectedPrefix: "I think this is",
     detectedSuffix: "😋 Here are the best places for it:",
     imageUnclear:
-      "That photo is hard to read. Try a clearer shot, or type the dish name. 🤔",
+      "That photo is hard to read. Try a clearer shot, or pick a dish below. 🤔",
+    imageMaybe: "I think this is",
+    imageMaybeSuffix:
+      "though I am not certain. Here are places that serve it — if I guessed wrong, pick again:",
+    imageGroupSoup:
+      "That looks like a noodle soup, but I could not tell which one. Pick a dish:",
+    imageGroupDry:
+      "That looks like a dry dish, but I could not tell which one. Pick a dish:",
     imageError: "Something went wrong reading that image. Please try again.",
   },
 

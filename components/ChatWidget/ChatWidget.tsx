@@ -18,6 +18,7 @@ import {
 import { chatSuggestions, useChatSession } from "@/app/hooks/useChatSession";
 import { formatReviewCount } from "@/app/lib/rating";
 import { ScoreBadge } from "@/components/Score/Score";
+import ResultReasons from "./ResultReasons";
 
 /** Render **bold** segments without pulling in a markdown dependency. */
 function RichText({ text }: { text: string }) {
@@ -369,12 +370,38 @@ export default function ChatWidget() {
                                   </span>
                                 )}
                               </div>
+
+                              {/* The evidence behind the placement. */}
+                              <ResultReasons
+                                reasons={item.reasons}
+                                cautions={item.cautions}
+                                compact
+                              />
                             </div>
                           </Link>
                         </li>
                       );
                     })}
                   </ul>
+                )}
+
+                {/* Same quick replies as the full chat page: they narrow the
+                    search without making the user type the follow-up. */}
+                {msg.chips && msg.chips.length > 0 && (
+                  <div
+                    className="mt-2.5 flex w-full flex-wrap gap-1.5"
+                    aria-label={t.chat.narrowLabel}
+                  >
+                    {msg.chips.map((chip) => (
+                      <button
+                        key={chip.query}
+                        onClick={() => send(chip.query)}
+                        className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[12px] font-medium text-amber-300 transition-colors hover:border-amber-500/60 hover:bg-amber-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
+                      >
+                        {chip.label}
+                      </button>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>

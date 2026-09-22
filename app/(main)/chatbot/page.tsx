@@ -19,6 +19,7 @@ import {
 import { chatSuggestions, useChatSession } from "@/app/hooks/useChatSession";
 import { formatReviewCount } from "@/app/lib/rating";
 import { ScoreBadge } from "@/components/Score/Score";
+import ResultReasons from "@/components/ChatWidget/ResultReasons";
 
 /** The brand mark, used instead of a generic robot glyph. */
 function BrandAvatar({ size = 36 }: { size?: number }) {
@@ -305,11 +306,41 @@ function ChatbotContent() {
                                 </span>
                               )}
                             </div>
+
+                            {/* The evidence behind the placement, under
+                                the card it explains. */}
+                            <ResultReasons
+                              reasons={item.reasons}
+                              cautions={item.cautions}
+                              
+                            />
                           </div>
                         </Link>
                       </li>
                     ))}
                   </ul>
+                )}
+
+                {/* Quick replies that narrow the search. They sit under the
+                    results rather than replacing them, so a broad question
+                    still gets an answer and the chips are an offer, not a
+                    gate. Each carries a complete follow-up query composed by
+                    the assistant from what the question left unset. */}
+                {msg.chips && msg.chips.length > 0 && (
+                  <div
+                    className="mt-3 flex w-full flex-wrap gap-2"
+                    aria-label={t.chat.narrowLabel}
+                  >
+                    {msg.chips.map((chip) => (
+                      <button
+                        key={chip.query}
+                        onClick={() => send(chip.query)}
+                        className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-[13px] font-medium text-amber-300 transition-colors hover:border-amber-500/60 hover:bg-amber-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
+                      >
+                        {chip.label}
+                      </button>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>

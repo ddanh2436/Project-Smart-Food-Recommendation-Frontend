@@ -710,3 +710,45 @@
   color: #a8a29e;
   letter-spacing: 0;
 }
+
+/* The compare shortcut on a similar-places card. Sits over the corner of the
+   image rather than in the text column, where it would compete with the name
+   for the little width these cards have. */
+.similar-card {
+  position: relative;
+}
+
+.similar-compare {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(12, 10, 9, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #e7e5e4;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-decoration: none;
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.18s ease, border-color 0.18s ease;
+}
+
+/* Revealed on hover, but always reachable by keyboard: hiding it from focus
+   would put the feature out of reach for anyone not using a mouse. */
+.similar-card:hover .similar-compare,
+.similar-compare:focus-visible {
+  opacity: 1;
+}
+
+.similar-compare:hover {
+  border-color: #f59e0b;
+  color: #fbbf24;
+}
+
+@media (hover: none) {
+  /* No hover to reveal it on a touch screen. */
+  .similar-compare { opacity: 1; }
+}

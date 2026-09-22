@@ -145,8 +145,16 @@ const HeroSection: React.FC = () => {
     setIsUploading(true);
     try {
       const data = await searchRestaurantsByImage(file);
-      if (data && data.data) {
-        setImageResult(data); 
+      // The modal is worth opening only when a dish was actually named. The
+      // recogniser now also answers "looks like a noodle soup" and "no idea",
+      // and a modal headed by an empty dish name says less than a toast.
+      if (data?.detectedFood) {
+        setImageResult(data);
+      } else if (data?.tier === "group") {
+        toast(
+          data.group === "dry" ? T.hero.imageGroupDry : T.hero.imageGroupSoup,
+          { icon: "\u{1F914}" }
+        );
       } else {
         toast.error(T.hero.imageFailed);
       }

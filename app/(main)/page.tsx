@@ -7,6 +7,7 @@ import TopPriceSection from "@/components/HomeSections/TopPriceSection";
 import TopLocationSection from "@/components/HomeSections/TopLocationSection";
 // Import component mới
 import CitySpotlightSection from "@/components/HomeSections/CitySpotlightSection";
+import RightNowSection from "@/components/HomeSections/RightNowSection";
 
 // 1. Định nghĩa kiểu dữ liệu trả về từ Backend (Khớp với Schema NestJS của bạn)
 interface BackendRestaurant {
@@ -88,6 +89,10 @@ export default async function Home() {
   return (
     <main>
       <HeroSection />
+
+      {/* Directly under the hero: somebody who arrives hungry gets an answer
+          before any of the "top by criterion" rails, which are for browsing. */}
+      <RightNowSection />
       
       {/* --- Section Mới: Spotlight Hà Nội --- */}
       {/* Chỉ render nếu có dữ liệu để tránh section trống */}

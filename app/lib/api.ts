@@ -168,6 +168,16 @@ api.interceptors.response.use(
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+/** One fact behind a recommendation. `kind` decides how it is worded. */
+export interface ResultReason {
+  kind: "dish" | "district" | "price" | "rating" | "distance" | "aspect";
+  value: string | number;
+  /** Review count, for `rating` and `aspect`. */
+  count?: number;
+  /** Which aspect, for `aspect`. */
+  aspect?: string;
+}
+
 export interface Restaurant {
   _id: string;
   tenQuan: string;
@@ -191,6 +201,15 @@ export interface Restaurant {
    * Python list. Parse with `parseTags` from app/lib/restaurant before use.
    */
   tags?: string | string[];
+
+  /**
+   * Why the assistant put this in the answer, and what to know before going.
+   * Facts rather than sentences, so the wording stays in the interface: a
+   * reason is {kind:"rating", value:8.6, count:4}, never a phrase.
+   * Only present on assistant results.
+   */
+  reasons?: ResultReason[];
+  cautions?: ResultReason[];
 
   /**
    * How many reviews back this restaurant's scores, and the review-count
@@ -261,6 +280,12 @@ export interface ChatTurn {
   text: string;
 }
 
+/** A quick reply under a chat answer: `label` is shown, `query` is sent. */
+export interface ChatChip {
+  label: string;
+  query: string;
+}
+
 export interface ChatReply {
   reply: string;
   results: Restaurant[];
@@ -268,6 +293,9 @@ export interface ChatReply {
   intent?: Record<string, unknown>;
   totalMatches?: number;
   relaxedFilters?: string[];
+  /** Which of dish / area / price the question left unset. */
+  slotsMissing?: string[];
+  chips?: ChatChip[];
 }
 
 export interface RestaurantQuery {
@@ -337,6 +365,94 @@ export async function getRestaurantById(id: string): Promise<Restaurant> {
   return response.data;
 }
 
+/** "What should I eat right now" — one meal-aware block on the home page. */
+export interface NowSuggestions {
+  meal: "breakfast" | "lunch" | "dinner" | "latenight";
+  mealTag: string;
+  data: Restaurant[];
+  total: number;
+}
+
+export interface SurprisePick {
+  data: Restaurant | null;
+  meal: string;
+  mealTag: string;
+  matchedMeal: boolean;
+  poolSize: number;
+  /** Why this one qualified, as data, so the wording stays in the interface. */
+  reasons?: {
+    openNow: boolean;
+    score: number | null;
+    rawScore: number | null;
+    reviewCount: number;
+    distanceKm: number | null;
+  };
+}
+
+export async function getSuggestionsForNow(
+  coords?: { lat: number; lon: number } | null,
+  limit = 8
+): Promise<NowSuggestions | null> {
+  try {
+    const where = coords ? `&userLat=${coords.lat}&userLon=${coords.lon}` : "";
+    const response = await api.get<NowSuggestions>(
+      `/restaurants/suggestions?limit=${limit}${where}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Suggestions failed:", describeError(error));
+    return null;
+  }
+}
+
+export async function getSurprisePick(
+  coords?: { lat: number; lon: number } | null
+): Promise<SurprisePick | null> {
+  try {
+    const where = coords ? `?userLat=${coords.lat}&userLon=${coords.lon}` : "";
+    const response = await api.get<SurprisePick>(
+      `/restaurants/surprise${where}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Surprise pick failed:", describeError(error));
+    return null;
+  }
+}
+
+/** Two or three restaurants side by side, with the winner decided server-side. */
+export interface ComparisonRow {
+  key: string;
+  kind: "score" | "aspect" | "distance";
+  values: Array<number | null>;
+  /** Index of the winning place, or null for a draw. */
+  winner: number | null;
+}
+
+export interface Comparison {
+  places: Restaurant[];
+  rows: ComparisonRow[];
+  wins: number[];
+  tieMargin: number;
+}
+
+export async function compareRestaurants(
+  ids: string[],
+  coords?: { lat: number; lon: number } | null
+): Promise<Comparison | null> {
+  if (ids.length < 2) return null;
+  try {
+    const where = coords ? `&userLat=${coords.lat}&userLon=${coords.lon}` : "";
+    const response = await api.get<Comparison>(
+      `/restaurants/compare?ids=${ids.join(",")}${where}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Compare failed:", describeError(error));
+    return null;
+  }
+}
+
 export interface SimilarPlaces {
   data: Restaurant[];
   basedOn: string[];
@@ -376,6 +492,15 @@ export async function getNearbyRestaurants(
   }
 }
 
+/**
+ * How far to trust a photo recognition.
+ *
+ * The model knows five dishes, so most photos land short of a confident
+ * answer. `confident` and `uncertain` name a dish; `group` says only what kind
+ * of food it looks like; `none` names nothing.
+ */
+export type ImageTier = "confident" | "uncertain" | "group" | "none";
+
 export interface ImageSearchResult {
   data: Restaurant[];
   detectedFood: string | null;
@@ -385,6 +510,11 @@ export interface ImageSearchResult {
     original_name: string;
     confidence: number;
   }>;
+  tier?: ImageTier;
+  /** The kind of food, when the dish itself is not certain. */
+  group?: "soup" | "dry" | null;
+  /** Dishes worth offering next, as Vietnamese search terms. */
+  suggestions?: string[];
   total: number;
   message?: string;
 }
