@@ -168,6 +168,16 @@ api.interceptors.response.use(
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+/** One fact behind a recommendation. `kind` decides how it is worded. */
+export interface ResultReason {
+  kind: "dish" | "district" | "price" | "rating" | "distance" | "aspect";
+  value: string | number;
+  /** Review count, for `rating` and `aspect`. */
+  count?: number;
+  /** Which aspect, for `aspect`. */
+  aspect?: string;
+}
+
 export interface Restaurant {
   _id: string;
   tenQuan: string;
@@ -191,6 +201,15 @@ export interface Restaurant {
    * Python list. Parse with `parseTags` from app/lib/restaurant before use.
    */
   tags?: string | string[];
+
+  /**
+   * Why the assistant put this in the answer, and what to know before going.
+   * Facts rather than sentences, so the wording stays in the interface: a
+   * reason is {kind:"rating", value:8.6, count:4}, never a phrase.
+   * Only present on assistant results.
+   */
+  reasons?: ResultReason[];
+  cautions?: ResultReason[];
 
   /**
    * How many reviews back this restaurant's scores, and the review-count

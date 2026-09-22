@@ -391,6 +391,21 @@ const vi = {
     },
   },
 
+  /** Wording for the facts behind a recommendation. */
+  reasons: {
+    heading: "Vì sao gợi ý quán này",
+    cautionHeading: "Cần lưu ý",
+    dish: "Đúng món bạn tìm",
+    district: "Đúng khu vực",
+    price: "Trong tầm giá",
+    rating: "điểm",
+    ratingFrom: "từ",
+    reviewsWord: "đánh giá",
+    distance: "cách bạn",
+    aspectGood: "được khen",
+    aspectBad: "bị chê",
+    mentionsWord: "lượt nhắc",
+  },
   chat: {
     title: "NomNom Assistant",
     openLabel: "Mở trợ lý tìm quán ăn",
@@ -813,6 +828,20 @@ const en: typeof vi = {
     },
   },
 
+  reasons: {
+    heading: "Why this one",
+    cautionHeading: "Worth knowing",
+    dish: "The dish you asked for",
+    district: "In the area you asked for",
+    price: "Within your budget",
+    rating: "rated",
+    ratingFrom: "from",
+    reviewsWord: "reviews",
+    distance: "about",
+    aspectGood: "praised for",
+    aspectBad: "criticised for",
+    mentionsWord: "mentions",
+  },
   chat: {
     title: "NomNom Assistant",
     openLabel: "Open the restaurant assistant",

@@ -19,6 +19,7 @@ import {
 import { chatSuggestions, useChatSession } from "@/app/hooks/useChatSession";
 import { formatReviewCount } from "@/app/lib/rating";
 import { ScoreBadge } from "@/components/Score/Score";
+import ResultReasons from "@/components/ChatWidget/ResultReasons";
 
 /** The brand mark, used instead of a generic robot glyph. */
 function BrandAvatar({ size = 36 }: { size?: number }) {
@@ -305,6 +306,14 @@ function ChatbotContent() {
                                 </span>
                               )}
                             </div>
+
+                            {/* The evidence behind the placement, under
+                                the card it explains. */}
+                            <ResultReasons
+                              reasons={item.reasons}
+                              cautions={item.cautions}
+                              
+                            />
                           </div>
                         </Link>
                       </li>

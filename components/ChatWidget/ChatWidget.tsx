@@ -18,6 +18,7 @@ import {
 import { chatSuggestions, useChatSession } from "@/app/hooks/useChatSession";
 import { formatReviewCount } from "@/app/lib/rating";
 import { ScoreBadge } from "@/components/Score/Score";
+import ResultReasons from "./ResultReasons";
 
 /** Render **bold** segments without pulling in a markdown dependency. */
 function RichText({ text }: { text: string }) {
@@ -369,6 +370,13 @@ export default function ChatWidget() {
                                   </span>
                                 )}
                               </div>
+
+                              {/* The evidence behind the placement. */}
+                              <ResultReasons
+                                reasons={item.reasons}
+                                cautions={item.cautions}
+                                compact
+                              />
                             </div>
                           </Link>
                         </li>
