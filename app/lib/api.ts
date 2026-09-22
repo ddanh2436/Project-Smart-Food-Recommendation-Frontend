@@ -261,6 +261,12 @@ export interface ChatTurn {
   text: string;
 }
 
+/** A quick reply under a chat answer: `label` is shown, `query` is sent. */
+export interface ChatChip {
+  label: string;
+  query: string;
+}
+
 export interface ChatReply {
   reply: string;
   results: Restaurant[];
@@ -268,6 +274,9 @@ export interface ChatReply {
   intent?: Record<string, unknown>;
   totalMatches?: number;
   relaxedFilters?: string[];
+  /** Which of dish / area / price the question left unset. */
+  slotsMissing?: string[];
+  chips?: ChatChip[];
 }
 
 export interface RestaurantQuery {

@@ -376,6 +376,25 @@ export default function ChatWidget() {
                     })}
                   </ul>
                 )}
+
+                {/* Same quick replies as the full chat page: they narrow the
+                    search without making the user type the follow-up. */}
+                {msg.chips && msg.chips.length > 0 && (
+                  <div
+                    className="mt-2.5 flex w-full flex-wrap gap-1.5"
+                    aria-label={t.chat.narrowLabel}
+                  >
+                    {msg.chips.map((chip) => (
+                      <button
+                        key={chip.query}
+                        onClick={() => send(chip.query)}
+                        className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[12px] font-medium text-amber-300 transition-colors hover:border-amber-500/60 hover:bg-amber-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
+                      >
+                        {chip.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           ))}

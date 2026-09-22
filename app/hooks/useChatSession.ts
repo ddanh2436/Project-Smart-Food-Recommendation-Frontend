@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import {
   chatWithBot,
   searchRestaurantsByImage,
+  type ChatChip,
   type ChatTurn,
   type Restaurant,
 } from "@/app/lib/api";
@@ -21,6 +22,12 @@ export interface ChatMessage {
   kind?: string;
   /** Set on a bot message whose request failed, so the turn can be retried. */
   failedQuery?: string;
+  /**
+   * Quick replies that narrow the search, composed by the assistant from what
+   * the question left unset. Each carries a complete follow-up query, so
+   * tapping "Phở" after "quán ở Quận 1" asks for "Phở ở Quận 1".
+   */
+  chips?: ChatChip[];
 }
 
 /**
@@ -105,6 +112,7 @@ export function useChatSession() {
               text: reply.reply,
               results: reply.results,
               kind: reply.kind,
+              chips: reply.chips,
             }
           : {
               id: Date.now() + 1,
