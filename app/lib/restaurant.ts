@@ -201,6 +201,20 @@ function toMinutes(value: string): number | null {
 const CLOSING_SOON_MINUTES = 45;
 
 /**
+ * Minutes past midnight in Vietnam, whatever the reader's own clock says.
+ *
+ * `getHours()` reads the device's timezone, which is right for somebody in Ho
+ * Chi Minh City and wrong for everyone else: the opening hours on these records
+ * are local to the restaurant, so a reader in Tokyo was told a place had
+ * already closed two hours before it had. Vietnam is UTC+7 with no daylight
+ * saving since 1975, so the offset is a constant.
+ */
+function vietnamMinutes(now: Date): number {
+  const minutes = now.getUTCHours() * 60 + now.getUTCMinutes() + 7 * 60;
+  return ((minutes % 1440) + 1440) % 1440;
+}
+
+/**
  * Turn `"07:00 - 11:00 | 13:30 - 22:00"` into a live status.
  *
  * A static time range makes the reader do the arithmetic; the point of coming
@@ -214,7 +228,7 @@ export function getOpenStatus(
     return UNKNOWN_STATUS;
   }
 
-  const minutesNow = now.getHours() * 60 + now.getMinutes();
+  const minutesNow = vietnamMinutes(now);
   const windows: { start: number; end: number }[] = [];
 
   for (const part of hours.split(/[|,]/)) {

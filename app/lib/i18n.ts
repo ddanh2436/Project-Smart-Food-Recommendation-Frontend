@@ -122,6 +122,27 @@ const vi = {
     cardOverall: "Đánh giá tổng hợp",
   },
 
+  /** The "what should I eat right now" block on the home page. */
+  rightNow: {
+    title: "Ăn gì ngay bây giờ",
+    subCity: "Đang mở cửa, hợp với bữa này",
+    subNearby: "Đang mở cửa, hợp với bữa này, quanh chỗ bạn",
+    meals: {
+      breakfast: "Đang là bữa sáng",
+      lunch: "Đang là bữa trưa",
+      dinner: "Đang là bữa tối",
+      latenight: "Đang là bữa khuya",
+    } as Record<string, string>,
+    dice: "Hôm nay ăn gì?",
+    again: "Chọn lại",
+    pickBadge: "Gợi ý cho bạn",
+    becauseOpen: "Đang mở cửa",
+    becauseNear: "cách bạn",
+    becauseScore: "điểm",
+    pickedFrom: "Chọn ngẫu nhiên từ",
+    places: "quán đạt điều kiện",
+    noPick: "Chưa có quán nào quanh bạn đạt đủ điều kiện lúc này. Thử lại sau nhé.",
+  },
   hero: {
     discoverBtn: "Tìm theo bộ sưu tập",
     discoverClose: "Đóng bộ sưu tập",
@@ -506,6 +527,26 @@ const en: typeof vi = {
     cardOverall: "Overall score",
   },
 
+  rightNow: {
+    title: "What to eat right now",
+    subCity: "Open now, right for this meal",
+    subNearby: "Open now, right for this meal, near you",
+    meals: {
+      breakfast: "It is breakfast time",
+      lunch: "It is lunchtime",
+      dinner: "It is dinner time",
+      latenight: "It is late-night time",
+    } as Record<string, string>,
+    dice: "Pick one for me",
+    again: "Pick another",
+    pickBadge: "Our pick",
+    becauseOpen: "Open now",
+    becauseNear: "about",
+    becauseScore: "rated",
+    pickedFrom: "Chosen at random from",
+    places: "places that qualified",
+    noPick: "Nothing near you qualifies right now. Try again a bit later.",
+  },
   hero: {
     discoverBtn: "Browse collections",
     discoverClose: "Close collections",

@@ -346,6 +346,61 @@ export async function getRestaurantById(id: string): Promise<Restaurant> {
   return response.data;
 }
 
+/** "What should I eat right now" — one meal-aware block on the home page. */
+export interface NowSuggestions {
+  meal: "breakfast" | "lunch" | "dinner" | "latenight";
+  mealTag: string;
+  data: Restaurant[];
+  total: number;
+}
+
+export interface SurprisePick {
+  data: Restaurant | null;
+  meal: string;
+  mealTag: string;
+  matchedMeal: boolean;
+  poolSize: number;
+  /** Why this one qualified, as data, so the wording stays in the interface. */
+  reasons?: {
+    openNow: boolean;
+    score: number | null;
+    rawScore: number | null;
+    reviewCount: number;
+    distanceKm: number | null;
+  };
+}
+
+export async function getSuggestionsForNow(
+  coords?: { lat: number; lon: number } | null,
+  limit = 8
+): Promise<NowSuggestions | null> {
+  try {
+    const where = coords ? `&userLat=${coords.lat}&userLon=${coords.lon}` : "";
+    const response = await api.get<NowSuggestions>(
+      `/restaurants/suggestions?limit=${limit}${where}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Suggestions failed:", describeError(error));
+    return null;
+  }
+}
+
+export async function getSurprisePick(
+  coords?: { lat: number; lon: number } | null
+): Promise<SurprisePick | null> {
+  try {
+    const where = coords ? `?userLat=${coords.lat}&userLon=${coords.lon}` : "";
+    const response = await api.get<SurprisePick>(
+      `/restaurants/surprise${where}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Surprise pick failed:", describeError(error));
+    return null;
+  }
+}
+
 export interface SimilarPlaces {
   data: Restaurant[];
   basedOn: string[];
