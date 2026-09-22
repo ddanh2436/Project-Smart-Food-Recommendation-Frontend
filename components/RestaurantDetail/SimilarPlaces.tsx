@@ -122,6 +122,17 @@ export default function SimilarPlaces({
                   </div>
                 </div>
               </Link>
+
+              {/* Outside the Link, not inside it: a button nested in an anchor
+                  is invalid and the browser picks one of them at random. This
+                  is the natural moment to compare — you are looking at one
+                  place and weighing an alternative. */}
+              <Link
+                href={`/restaurants/compare?ids=${restaurantId},${place._id}`}
+                className="similar-compare"
+              >
+                {t.compare.compareAction}
+              </Link>
             </li>
           );
         })}

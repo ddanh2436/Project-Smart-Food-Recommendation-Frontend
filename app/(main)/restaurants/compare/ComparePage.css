@@ -1,0 +1,168 @@
+/* --------------------------------------------------------------------------
+   Side-by-side comparison
+   -------------------------------------------------------------------------- */
+
+.cmp-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 90px 24px 64px;
+  color: #e7e5e4;
+}
+
+.cmp-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: #a8a29e;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.cmp-back:hover {
+  color: #fbbf24;
+}
+
+.cmp-title {
+  margin: 14px 0 6px;
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* The answer, before the table. */
+.cmp-verdict {
+  margin: 0 0 26px;
+  padding: 12px 16px;
+  border-left: 3px solid #f59e0b;
+  border-radius: 0 10px 10px 0;
+  background: rgba(245, 158, 11, 0.08);
+  font-size: 1rem;
+  color: #fbbf24;
+}
+
+.cmp-verdict strong {
+  color: #fff;
+}
+
+.cmp-message {
+  padding: 120px 24px;
+  text-align: center;
+  color: #a8a29e;
+}
+
+/* Narrow screens scroll the table rather than shrinking the columns below
+   the width a restaurant name needs. */
+.cmp-scroll {
+  overflow-x: auto;
+}
+
+.cmp-table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+}
+
+.cmp-table th,
+.cmp-table td {
+  padding: 12px 14px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.cmp-table tbody th {
+  text-align: left;
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: #a8a29e;
+  white-space: nowrap;
+}
+
+.cmp-corner {
+  width: 34%;
+  border-bottom: none;
+}
+
+.cmp-head-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.cmp-head-link img {
+  width: 88px;
+  height: 66px;
+  object-fit: cover;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.cmp-head-name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #fff;
+}
+
+.cmp-head-meta {
+  font-size: 0.74rem;
+  font-weight: 400;
+  color: #78716c;
+}
+
+.cmp-head-badge {
+  margin-top: 2px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: #f59e0b;
+  color: #1c1917;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.cmp-table td {
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  color: #d6d3d1;
+}
+
+/* A win is tinted and ticked. Colour alone would not carry for a reader who
+   cannot distinguish it, so the tick does the work and the tint reinforces. */
+.cmp-win {
+  background: rgba(34, 197, 94, 0.1);
+  color: #4ade80;
+  font-weight: 700;
+}
+
+.cmp-tick {
+  margin-right: 6px;
+  font-size: 0.78em;
+  vertical-align: baseline;
+}
+
+.cmp-note {
+  margin: 14px 0 0;
+  font-size: 0.78rem;
+  color: #78716c;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 600px) {
+  .cmp-page { padding: 72px 16px 48px; }
+  .cmp-title { font-size: 1.7rem; }
+}

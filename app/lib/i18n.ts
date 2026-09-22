@@ -255,6 +255,23 @@ const vi = {
     c_service: "Phục vụ",
     c_price: "Giá cả",
   },
+  /** The side-by-side comparison page. */
+  compare: {
+    title: "So sánh hai quán",
+    loading: "Đang so sánh...",
+    failed: "Không so sánh được. Bạn thử chọn lại hai quán nhé.",
+    needTwo: "Cần ít nhất hai quán để so sánh.",
+    winsSuffix: "tiêu chí thắng",
+    allDraw: "Hai quán ngang nhau trên mọi tiêu chí so sánh được.",
+    draw: "Ngang nhau",
+    tieNote: "Chênh lệch dưới 0,2 điểm được tính là ngang nhau.",
+    aspectPrefix: "Đánh giá về",
+    distance: "Khoảng cách từ bạn",
+    noAspects:
+      "Chưa có đủ nhận xét để so sánh theo khía cạnh cho cặp quán này.",
+    back: "Quay lại",
+    compareAction: "So sánh",
+  },
   detail: {
     loading: "Đang tải dữ liệu nhà hàng...",
     notFound: "Không tìm thấy nhà hàng này.",
@@ -358,6 +375,15 @@ const vi = {
     aspectsPositiveShare: "tích cực",
     aspectsMentions: "lượt nhắc",
     aspectsWarming: "Dịch vụ AI đang khởi động, số liệu có thể chưa đầy đủ.",
+    /** The six aspects aspect_index scores. Keyed by the AI service's own keys. */
+    aspectLabels: {
+      food: "Món ăn",
+      price: "Giá cả",
+      service: "Phục vụ",
+      space: "Không gian",
+      hygiene: "Vệ sinh",
+      parking: "Chỗ đậu xe",
+    } as Record<string, string>,
     verdict: {
       positive: "Được khen",
       negative: "Bị phàn nàn",
@@ -654,6 +680,21 @@ const en: typeof vi = {
     c_service: "Service",
     c_price: "Value",
   },
+  compare: {
+    title: "Side by side",
+    loading: "Comparing...",
+    failed: "Could not compare those. Try picking two places again.",
+    needTwo: "Two restaurants are needed to compare.",
+    winsSuffix: "criteria won",
+    allDraw: "These two are level on every criterion we can compare.",
+    draw: "Level",
+    tieNote: "A gap under 0.2 counts as level.",
+    aspectPrefix: "Reviews on",
+    distance: "Distance from you",
+    noAspects: "Not enough reviews yet to compare these two by aspect.",
+    back: "Back",
+    compareAction: "Compare",
+  },
   detail: {
     loading: "Loading restaurant...",
     notFound: "We could not find this restaurant.",
@@ -757,6 +798,14 @@ const en: typeof vi = {
     aspectsMentions: "mentions",
     aspectsWarming:
       "The AI service is still starting up, so these figures may be incomplete.",
+    aspectLabels: {
+      food: "Food",
+      price: "Price",
+      service: "Service",
+      space: "Ambience",
+      hygiene: "Hygiene",
+      parking: "Parking",
+    } as Record<string, string>,
     verdict: {
       positive: "Praised",
       negative: "Complained about",

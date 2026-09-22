@@ -401,6 +401,39 @@ export async function getSurprisePick(
   }
 }
 
+/** Two or three restaurants side by side, with the winner decided server-side. */
+export interface ComparisonRow {
+  key: string;
+  kind: "score" | "aspect" | "distance";
+  values: Array<number | null>;
+  /** Index of the winning place, or null for a draw. */
+  winner: number | null;
+}
+
+export interface Comparison {
+  places: Restaurant[];
+  rows: ComparisonRow[];
+  wins: number[];
+  tieMargin: number;
+}
+
+export async function compareRestaurants(
+  ids: string[],
+  coords?: { lat: number; lon: number } | null
+): Promise<Comparison | null> {
+  if (ids.length < 2) return null;
+  try {
+    const where = coords ? `&userLat=${coords.lat}&userLon=${coords.lon}` : "";
+    const response = await api.get<Comparison>(
+      `/restaurants/compare?ids=${ids.join(",")}${where}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Compare failed:", describeError(error));
+    return null;
+  }
+}
+
 export interface SimilarPlaces {
   data: Restaurant[];
   basedOn: string[];
