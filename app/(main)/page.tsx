@@ -8,6 +8,7 @@ import TopLocationSection from "@/components/HomeSections/TopLocationSection";
 // Import component mới
 import CitySpotlightSection from "@/components/HomeSections/CitySpotlightSection";
 import RightNowSection from "@/components/HomeSections/RightNowSection";
+import FeaturedStrip from "@/components/HomeSections/FeaturedStrip";
 import { cuisineTags, parseTags, tagLabel } from "@/app/lib/restaurant";
 
 const firstDish = (tags?: string) => cuisineTags(parseTags(tags))[0];
@@ -96,6 +97,7 @@ export default async function Home() {
   return (
     <main>
       <HeroSection />
+      <FeaturedStrip />
 
       {/* Directly under the hero: somebody who arrives hungry gets an answer
           before any of the "top by criterion" rails, which are for browsing. */}

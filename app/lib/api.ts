@@ -374,6 +374,8 @@ export interface RestaurantQuery {
   userLon?: number | string;
   search?: string;
   city?: string;
+  /** One attribute tag, e.g. "Máy lạnh"; see FILTER_TAGS on the API. */
+  tag?: string;
 }
 
 const EMPTY_PAGE: RestaurantPage = {
