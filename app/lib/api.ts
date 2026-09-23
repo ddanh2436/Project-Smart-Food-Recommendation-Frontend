@@ -131,6 +131,12 @@ async function refreshAccessToken(): Promise<string | null> {
     tokenStore.save(response.data.accessToken, response.data.refreshToken);
     return response.data.accessToken;
   } catch {
+    // Another tab shares this storage and may have rotated the token while
+    // this request was in flight; the server refuses the old one. If a newer
+    // pair is already stored, use it rather than signing the user out.
+    if (tokenStore.refresh && tokenStore.refresh !== refreshToken) {
+      return tokenStore.access;
+    }
     return null;
   }
 }
