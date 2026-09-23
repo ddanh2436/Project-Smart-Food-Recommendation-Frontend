@@ -38,7 +38,7 @@ function passwordStrength(password: string): number {
 }
 
 /**
- * The sign-in and sign-up form, shared by the dialog and the /auth page.
+ * The sign-in and sign-up form of the /auth page.
  *
  * One form with two tabs replaced two forms behind a sliding panel. The slider
  * kept both forms in the DOM, so keyboard focus walked through the hidden one,
@@ -134,14 +134,10 @@ export default function AuthForm({
   const strength = passwordStrength(values.password);
 
   return (
-    <div className="auth-form">
-      <div className="auth-form__brand">
-        <span className="auth-form__logo" aria-hidden="true">🍜</span>
-        <span className="auth-form__name">VietNomNom</span>
-      </div>
-      <p className="auth-form__tagline">{T.brandTagline}</p>
-
+    <div className="auth-form" data-mode={mode}>
+      {/* The indicator is one element that slides between the two tabs. */}
       <div className="auth-form__tabs" role="tablist" aria-label="VietNomNom">
+        <span className="auth-form__tab-indicator" aria-hidden="true" />
         {(["login", "register"] as const).map((tab) => (
           <button
             key={tab}
@@ -158,7 +154,14 @@ export default function AuthForm({
         ))}
       </div>
 
-      <div id={`${id}-panel`} role="tabpanel" aria-labelledby={`${id}-tab-${mode}`}>
+      {/* Keyed by mode so the panel's entrance animation replays on switch. */}
+      <div
+        key={mode}
+        id={`${id}-panel`}
+        role="tabpanel"
+        aria-labelledby={`${id}-tab-${mode}`}
+        className="auth-form__panel"
+      >
         <p className="auth-form__lead">{isRegister ? T.registerLead : T.loginLead}</p>
 
         {/* Google's own wording and mark, per its sign-in branding rules. */}

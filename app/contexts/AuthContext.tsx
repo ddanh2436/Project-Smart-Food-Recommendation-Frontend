@@ -1,7 +1,7 @@
 // app/contexts/AuthContext.tsx
 "use client";
 
-import React, { createContext, useCallback, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 // [FIX] Import api từ lib thay vì dùng axios trực tiếp để đảm bảo BaseURL đúng (3001)
 import api from '@/app/lib/api'; 
 import { useRouter } from 'next/navigation';
@@ -46,10 +46,6 @@ interface AuthContextType {
   currentLang: Lang; 
   setLang: (lang: Lang) => void;
   T: Dict;
-  /** Which tab the sign-in dialog is open on, or null when it is closed. */
-  authModal: AuthMode | null;
-  openAuth: (mode?: AuthMode) => void;
-  closeAuth: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -58,11 +54,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentLang, setCurrentLang] = useState<Lang>('vn');
-  const [authModal, setAuthModal] = useState<AuthMode | null>(null);
-  // Stable identities: the dialog's effects depend on these, and a new
-  // function each render would re-run them and steal focus while typing.
-  const openAuth = useCallback((mode: AuthMode = 'login') => setAuthModal(mode), []);
-  const closeAuth = useCallback(() => setAuthModal(null), []);
   const router = useRouter();
 
   const loadUser = async () => {
@@ -152,10 +143,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       isLoading,
       currentLang, 
       setLang,     
-      T,
-      authModal,
-      openAuth,
-      closeAuth,
+      T
     }}>
       {children}
     </AuthContext.Provider>
