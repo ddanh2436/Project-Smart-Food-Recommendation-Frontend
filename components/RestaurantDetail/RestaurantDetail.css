@@ -234,10 +234,8 @@
 }
 
 .map-frame {
-  height: 380px;
-  border-radius: 14px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  /* The map sets its own height; a fixed, shorter frame cut off the route
+     card that sits along the map's bottom edge. */
   margin-top: 14px;
 }
 
@@ -693,9 +691,6 @@
     flex: 1 1 auto;
     justify-content: center;
   }
-  .map-frame {
-    height: 300px;
-  }
   .review-row {
     padding: 14px;
     gap: 10px;
@@ -763,4 +758,17 @@
 .write-review-box a.btn-submit-review {
   display: inline-block;
   text-decoration: none;
+}
+
+/* Under the score breakdown: what the numbers are adjusted for. */
+.rating-adjusted-note {
+  margin: 1rem 0 0;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: #a1a1aa;
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+.rating-adjusted-note strong {
+  color: #e4e4e7;
 }

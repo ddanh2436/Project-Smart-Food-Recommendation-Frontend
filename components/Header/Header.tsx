@@ -151,8 +151,8 @@ const Header: React.FC = () => {
               src="/assets/image/logo.png"
               alt="Logo" 
               className="logo-image"
-              width={131}
-              height={46}
+              width={93}
+              height={64}
             />
           </Link>
         </div>

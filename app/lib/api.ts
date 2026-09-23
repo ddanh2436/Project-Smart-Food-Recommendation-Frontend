@@ -141,6 +141,55 @@ async function refreshAccessToken(): Promise<string | null> {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Scores: show the one the listings are ordered by
+// ---------------------------------------------------------------------------
+// Every listing is ordered by a review-count adjusted score, but every card
+// printed the raw one. With most places holding about ten crawled reviews,
+// hundreds of them read "10.0" — a perfect score from ten diners ranked beside
+// one from thirty looked like the ranking was broken, and like every place was
+// perfect. The adjusted score is what the order means, so it is what is shown;
+// the raw figure stays on `rawScores` for the detail page to cite.
+const SCORE_KEYS = [
+  "diemTrungBinh",
+  "diemKhongGian",
+  "diemViTri",
+  "diemChatLuong",
+  "diemPhucVu",
+  "diemGiaCa",
+] as const;
+
+function withAdjustedScores(value: unknown, depth = 0): unknown {
+  if (depth > 4 || value === null || typeof value !== "object") return value;
+  if (Array.isArray(value)) return value.map((item) => withAdjustedScores(item, depth + 1));
+
+  const record = value as Record<string, unknown>;
+  if (typeof record.tenQuan === "string" && typeof record.diemTrungBinhAdj === "number") {
+    const rawScores: Record<string, number> = {};
+    const next: Record<string, unknown> = { ...record };
+    for (const key of SCORE_KEYS) {
+      const adjusted = record[`${key}Adj`];
+      if (typeof record[key] === "number") rawScores[key] = record[key] as number;
+      if (typeof adjusted === "number" && adjusted > 0) {
+        next[key] = Math.round(adjusted * 10) / 10;
+      }
+    }
+    next.rawScores = rawScores;
+    return next;
+  }
+
+  const next: Record<string, unknown> = {};
+  for (const [key, child] of Object.entries(record)) {
+    next[key] = withAdjustedScores(child, depth + 1);
+  }
+  return next;
+}
+
+api.interceptors.response.use((response) => {
+  response.data = withAdjustedScores(response.data);
+  return response;
+});
+
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
@@ -233,6 +282,16 @@ export interface Restaurant {
   diemChatLuongAdj?: number;
   diemPhucVuAdj?: number;
   diemGiaCaAdj?: number;
+  /**
+   * Per-aspect verdicts precomputed from the reviews (AI/aspect_index.py).
+   * Present on the detail endpoint for places with enough reviews.
+   */
+  aspects?: Record<
+    string,
+    { positive_ratio: number; mentions: number; verdict: "positive" | "negative" | "mixed" }
+  >;
+  /** The unadjusted scores, when the shown ones were replaced by adjusted. */
+  rawScores?: Partial<Record<"diemTrungBinh" | "diemKhongGian" | "diemViTri" | "diemChatLuong" | "diemPhucVu" | "diemGiaCa", number>>;
 }
 
 export interface RestaurantPage {

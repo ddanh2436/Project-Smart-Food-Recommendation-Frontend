@@ -193,6 +193,9 @@
 }
 .auth-showcase__brand {
   align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
   color: #fff;
   font-family: var(--font-display);
   font-size: 1.5rem;

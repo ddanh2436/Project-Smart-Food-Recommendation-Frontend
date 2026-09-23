@@ -112,7 +112,7 @@ function RestaurantsContent() {
    * the browser actually grants a position, and the UI hides distances until
    * then rather than inventing them.
    */
-  const { coords: userLocation, request: requestLocation } = useGeolocation();
+  const { coords: userLocation, status: geoStatus, request: requestLocation } = useGeolocation();
 
   // --- DEFINITIONS INSIDE COMPONENT TO USE LANGUAGE ---
   const SORT_OPTIONS = useMemo(() => [
@@ -560,10 +560,12 @@ function RestaurantsContent() {
                      </button>
 
                      {showMap && selectedRes.lat && selectedRes.lon && (
-                        <div style={{ height: '350px', width: '100%', marginTop: '15px', borderRadius: '10px', overflow: 'hidden', border: '1px solid #ddd' }}>
-                            <RoutingMap 
-                                userLocation={userLocation} 
-                                restaurantLocation={{ lat: selectedRes.lat, lon: selectedRes.lon }} 
+                        <div style={{ width: '100%', marginTop: '15px' }}>
+                            <RoutingMap
+                                userLocation={userLocation}
+                                restaurantLocation={{ lat: selectedRes.lat, lon: selectedRes.lon }}
+                                locationStatus={geoStatus}
+                                onRequestLocation={requestLocation}
                             />
                         </div>
                      )}

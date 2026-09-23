@@ -17,10 +17,16 @@ const AVATAR_COLOURS = [
   "#1d4ed8", "#a16207", "#be185d", "#15803d",
 ];
 
-function avatarFor(name: string) {
+/**
+ * Letter from the name, colour from `seed`. Crawled reviews carry no author,
+ * so every one of them is "a diner on Foody"; seeding the colour with the
+ * review's id keeps the list from reading as one person repeated, without
+ * inventing a name for anybody.
+ */
+function avatarFor(name: string, seed: string = name) {
   let hash = 0;
-  for (let index = 0; index < name.length; index += 1) {
-    hash = (hash * 31 + name.charCodeAt(index)) % 100000;
+  for (let index = 0; index < seed.length; index += 1) {
+    hash = (hash * 31 + seed.charCodeAt(index)) % 100000;
   }
   return {
     letter: name.trim().charAt(0).toUpperCase() || "?",
@@ -56,7 +62,7 @@ function ReviewItem({ review }: { review: Review }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const name = review.authorName?.trim() || t.reviews.diner;
-  const { letter, colour } = avatarFor(name);
+  const { letter, colour } = avatarFor(name, review._id);
   const isLong = (review.noiDung?.length ?? 0) > PREVIEW_LENGTH;
 
   const sentiment = POSITIVE.has(review.aiSentimentLabel ?? "")

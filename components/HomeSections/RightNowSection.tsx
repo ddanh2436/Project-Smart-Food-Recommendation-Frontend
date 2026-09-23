@@ -11,7 +11,7 @@ import {
   type SurprisePick,
 } from "@/app/lib/api";
 import { formatRating, formatReviewCount } from "@/app/lib/rating";
-import { cuisineTags, parseTags } from "@/app/lib/restaurant";
+import { cuisineTags, parseTags, placeLabel, tagLabel } from "@/app/lib/restaurant";
 import { useGeolocation } from "@/app/hooks/useGeolocation";
 import { useTranslation } from "@/app/hooks/useTranslation";
 import "./RightNowSection.css";
@@ -168,7 +168,10 @@ function RestaurantCard({
   lang: "vi" | "en";
 }) {
   const tags = parseTags(place.tags);
-  const caption = [cuisineTags(tags)[0], tags[1]].filter(Boolean).join(" • ");
+  const dish = cuisineTags(tags)[0];
+  const caption = [dish && tagLabel(dish, lang), tags[1] && placeLabel(tags[1], lang)]
+    .filter(Boolean)
+    .join(" • ");
   const reviews = formatReviewCount(place.reviewCount, lang);
 
   return (

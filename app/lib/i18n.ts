@@ -171,6 +171,7 @@ const vi = {
     locationSub: "Dễ tìm, dễ đến, gần trung tâm",
 
     cardOverall: "Đánh giá tổng hợp",
+    goodValueBadge: "Giá tốt",
   },
 
   /** The "what should I eat right now" block on the home page. */
@@ -331,6 +332,8 @@ const vi = {
     hoursLabel: "Giờ mở cửa",
     ratingBreakdown: "Chi tiết đánh giá",
     outOfTen: "trên thang 10",
+    adjustedNote: "Điểm đã được hiệu chỉnh theo số lượt đánh giá, để vài đánh giá tuyệt đối không vượt mặt cả một lịch sử dài.",
+    rawScoreLabel: "Điểm trung bình gốc:",
     locationHeading: "Vị trí & chỉ đường",
     showMap: "Hiện bản đồ",
     hideMap: "Ẩn bản đồ",
@@ -392,7 +395,7 @@ const vi = {
     filterMid: "6 - 8 điểm",
     filterLow: "Dưới 6 điểm",
     filterLabel: "Lọc đánh giá",
-    diner: "Thực khách",
+    diner: "Thực khách trên Foody",
     verified: "Đã xác thực",
     verifiedTitle: "Đánh giá từ tài khoản đã đăng nhập",
     scoreLevels: {
@@ -424,6 +427,7 @@ const vi = {
     summaryNeutral: "Ý kiến chia đều hai chiều, tuỳ khẩu vị từng người.",
     summaryNegative: "Đánh giá tiêu cực nhiều hơn tích cực, nên đọc kỹ trước khi đi.",
     aspectsTitle: "AI phân tích chi tiết",
+    aspectsLoading: "AI đang đọc các đánh giá của quán này...",
     aspectsPros: "Ưu điểm",
     aspectsCons: "Lưu ý",
     aspectsPositiveShare: "tích cực",
@@ -539,6 +543,14 @@ const vi = {
     duration: "Thời gian",
     showSteps: "Xem đường đi",
     hideSteps: "Ẩn chỉ dẫn",
+    needLocation: "Cho phép truy cập vị trí để xem đường đi từ chỗ bạn đến quán.",
+    locating: "Đang lấy vị trí của bạn... Hãy bấm \"Cho phép\" nếu trình duyệt hỏi.",
+    locationDenied: "Trình duyệt đang chặn vị trí nên chưa vẽ được đường đi. Bạn có thể bật lại quyền vị trí trong cài đặt trang, hoặc mở chỉ đường bằng Google Maps.",
+    allowLocation: "Cho phép vị trí",
+    locationUnavailable: "Chưa lấy được vị trí của bạn (thiết bị không phản hồi hoặc hết thời gian chờ).",
+    retry: "Thử lại",
+    routeFailed: "Máy chủ chỉ đường đang bận nên chưa vẽ được tuyến. Bạn có thể mở chỉ đường bằng Google Maps.",
+    openGoogle: "Mở Google Maps",
   },
 
   errors: {
@@ -661,8 +673,8 @@ const en: typeof vi = {
     topRatedSub: "High scores with enough reviews to trust them",
     qualityTitle: "Best food",
     qualitySub: "Where diners rate the cooking highest",
-    spaceTitle: "Best rooms",
-    spaceSub: "The places reviewers praise most for their setting",
+    spaceTitle: "Best ambiance",
+    spaceSub: "Where reviewers love the atmosphere most",
     serviceTitle: "Best service",
     serviceSub: "The places reviewers praise most for looking after them",
     priceTitle: "Good and affordable",
@@ -671,6 +683,7 @@ const en: typeof vi = {
     locationSub: "Central, easy to find, easy to get to",
 
     cardOverall: "Overall score",
+    goodValueBadge: "Good value",
   },
 
   rightNow: {
@@ -823,6 +836,8 @@ const en: typeof vi = {
     hoursLabel: "Opening hours",
     ratingBreakdown: "Score breakdown",
     outOfTen: "out of 10",
+    adjustedNote: "Scores are adjusted for how many reviews they rest on, so a handful of perfect reviews does not outrank a long track record.",
+    rawScoreLabel: "Unadjusted average:",
     locationHeading: "Location & directions",
     showMap: "Show map",
     hideMap: "Hide map",
@@ -864,7 +879,7 @@ const en: typeof vi = {
     writeTitle: "Write your review",
     scoreLabel: "Your score:",
     scorePick: "Pick a score",
-    placeholder: "Tell us about the food, the room and the service...",
+    placeholder: "Tell us about the food, the atmosphere and the service...",
     submit: "Post review",
     submitting: "Posting...",
     thanks: "Thank you. Your review has been saved.",
@@ -884,7 +899,7 @@ const en: typeof vi = {
     filterMid: "6 to 8",
     filterLow: "Below 6",
     filterLabel: "Filter reviews",
-    diner: "A diner",
+    diner: "Diner on Foody",
     verified: "Verified",
     verifiedTitle: "Written from a signed-in account",
     scoreLevels: {
@@ -915,6 +930,7 @@ const en: typeof vi = {
     summaryNegative:
       "Negative reviews outnumber positive ones, so read a few before you go.",
     aspectsTitle: "AI breakdown by aspect",
+    aspectsLoading: "The AI is reading the reviews for this place...",
     aspectsPros: "What is good",
     aspectsCons: "What to know",
     aspectsPositiveShare: "positive",
@@ -1031,6 +1047,14 @@ const en: typeof vi = {
     duration: "Time",
     showSteps: "Show directions",
     hideSteps: "Hide directions",
+    needLocation: "Allow location access to see the route from where you are.",
+    locating: "Getting your location... Choose \"Allow\" if your browser asks.",
+    locationDenied: "Your browser is blocking location, so no route can be drawn. Re-enable it in the site settings, or open directions in Google Maps.",
+    allowLocation: "Allow location",
+    locationUnavailable: "Your location could not be found (the device did not answer in time).",
+    retry: "Try again",
+    routeFailed: "The routing server is busy, so no route could be drawn. You can open directions in Google Maps instead.",
+    openGoogle: "Open Google Maps",
   },
 
   errors: {

@@ -8,12 +8,16 @@ import TopLocationSection from "@/components/HomeSections/TopLocationSection";
 // Import component mới
 import CitySpotlightSection from "@/components/HomeSections/CitySpotlightSection";
 import RightNowSection from "@/components/HomeSections/RightNowSection";
+import { cuisineTags, parseTags, tagLabel } from "@/app/lib/restaurant";
+
+const firstDish = (tags?: string) => cuisineTags(parseTags(tags))[0];
 
 // 1. Định nghĩa kiểu dữ liệu trả về từ Backend (Khớp với Schema NestJS của bạn)
 interface BackendRestaurant {
   _id: string;
   tenQuan: string;
   diemTrungBinh: number;
+  diemTrungBinhAdj?: number;
   diaChi: string;
   avatarUrl: string;
   tags?: string; // Dùng tạm làm tên món ăn
@@ -42,11 +46,14 @@ async function getCityData(cityKey: string) {
     return data.map((item) => ({
       id: item._id,
       name: item.tenQuan,
-      rating: item.diemTrungBinh,
+      // Adjusted, like every other score on the site (see app/lib/api.ts).
+      rating: Math.round((item.diemTrungBinhAdj ?? item.diemTrungBinh) * 10) / 10,
       address: item.diaChi,
       image: item.avatarUrl || '/assets/image/pho.png',
-      dish: item.tags ? item.tags.split(',')[0] : 'Món ngon',
-      dishEn: 'Specialty',
+      // `tags` is a Python list's string form, "['Hà Nội', 'Quận 1', 'Phở']";
+      // splitting it on commas used to print "['Hà Nội'" as the dish.
+      dish: firstDish(item.tags) ?? 'Món ngon',
+      dishEn: firstDish(item.tags) ? tagLabel(firstDish(item.tags)!, 'en') : 'Local favourite',
     }));
   } catch (error) {
     console.error(`Error fetching ${cityKey}:`, error);

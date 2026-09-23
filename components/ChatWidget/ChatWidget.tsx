@@ -45,7 +45,7 @@ function BrandAvatar({ size = 40 }: { size?: number }) {
       style={{ width: size, height: size }}
     >
       <Image
-        src="/assets/image/logo.png"
+        src="/assets/image/logo-mark.png"
         alt=""
         width={size}
         height={size}

@@ -1,252 +1,417 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import React, { useEffect, useRef, useState } from "react";
+import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import { useTranslation } from "@/app/hooks/useTranslation";
+import type { GeoStatus } from "@/app/hooks/useGeolocation";
+import { directionsUrl } from "@/app/lib/restaurant";
 import "leaflet/dist/leaflet.css";
 import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 import "leaflet-routing-machine";
 import L from "leaflet";
+import "./RoutingMap.css";
 
-// --- 1. CONFIG ICONS ---
 const userIcon = L.divIcon({
-  className: 'custom-icon-user',
+  className: "custom-icon-user",
   html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#2979FF" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); width: 32px; height: 32px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`,
   iconSize: [32, 32],
   iconAnchor: [16, 16],
-  popupAnchor: [0, -20],
 });
 
 const restaurantIcon = L.divIcon({
-  className: 'custom-icon-res',
+  className: "custom-icon-res",
   html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFC107" stroke="#3E2723" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4)); width: 40px; height: 40px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`,
   iconSize: [40, 40],
   iconAnchor: [20, 38],
-  popupAnchor: [0, -34],
 });
 
-interface RoutingMapProps {
-  userLocation: { lat: number; lon: number } | null;
-  restaurantLocation: { lat: number; lon: number };
+/**
+ * Public OSRM servers, tried in order. The first is the project's demo server,
+ * which is rate-limited and occasionally down; the second is run by the
+ * OpenStreetMap community in Germany. Both are free and need no key.
+ */
+const ROUTERS = [
+  "https://router.project-osrm.org/route/v1",
+  "https://routing.openstreetmap.de/routed-car/route/v1",
+];
+
+/**
+ * Basemaps, tried in order. CARTO's dark tiles, used before, now draw
+ * "API KEY REQUIRED" across every tile for sites without a key — which is
+ * what the map showed on the deployed site. Esri's dark grey canvas is free
+ * with attribution and needs no key; OpenStreetMap's own tiles are the
+ * fallback if it stops answering.
+ */
+const TILE_SOURCES = [
+  {
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+    attribution: "Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors",
+    maxZoom: 16,
+  },
+  {
+    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19,
+  },
+];
+
+interface Point {
+  lat: number;
+  lon: number;
+}
+
+interface RouteStep {
+  text: string;
+  distance: number;
 }
 
 interface RouteInfo {
-    totalDistance: number;
-    totalTime: number;
-    steps: any[];
+  totalDistance: number;
+  totalTime: number;
+  steps: RouteStep[];
 }
 
-// --- 2. CONTROL COMPONENT ---
-const RoutingControl = ({ userLocation, restaurantLocation, onRouteFound }: any) => {
+interface RoutingMapProps {
+  userLocation: Point | null;
+  restaurantLocation: Point;
+  /** Where the location request stands, so the map can say what it waits for. */
+  locationStatus?: GeoStatus;
+  /** Ask the browser for the user's location. */
+  onRequestLocation?: () => void;
+}
+
+/**
+ * Draws the route between two points, falling back to the next server when one
+ * fails and reporting the outcome instead of spinning forever.
+ *
+ * The effect depends on the four numbers rather than on the two objects: the
+ * parent passes fresh `{lat, lon}` literals on every render, and depending on
+ * those tore the control down and re-requested the route each time the page
+ * re-rendered — enough traffic to be throttled by the demo server.
+ */
+function RoutingControl({
+  from,
+  to,
+  lang,
+  onFound,
+  onFailed,
+}: {
+  from: Point;
+  to: Point;
+  lang: "vi" | "en";
+  onFound: (info: RouteInfo) => void;
+  onFailed: () => void;
+}) {
   const map = useMap();
-  const routingControlRef = useRef<any>(null);
+  const found = useRef(onFound);
+  const failed = useRef(onFailed);
+  useEffect(() => {
+    found.current = onFound;
+    failed.current = onFailed;
+  });
 
   useEffect(() => {
-    if (!map || !userLocation) return;
-    const L_Any = L as any;
+    // leaflet-routing-machine attaches itself to L at runtime and ships no
+    // types for that, hence the loose handle.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const Routing = (L as any).Routing;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let control: any = null;
+    let cancelled = false;
 
-    const routingControl = L_Any.Routing.control({
-      waypoints: [
-        L.latLng(userLocation.lat, userLocation.lon),
-        L.latLng(restaurantLocation.lat, restaurantLocation.lon),
-      ],
-      routeWhileDragging: false,
-      showAlternatives: false,
-      fitSelectedRoutes: true,
-      show: false, // Ẩn UI mặc định xấu xí
-      collapsible: true,
-      router: L_Any.Routing.osrmv1({
-        serviceUrl: "https://router.project-osrm.org/route/v1",
-        profile: "driving",
-        language: 'vi',
-        requestParameters: {
-            overview: "simplified",
-            steps: true,
-            geometries: "polyline",
+    const attempt = (index: number) => {
+      if (cancelled) return;
+      if (control) {
+        try {
+          map.removeControl(control);
+        } catch {
+          /* already gone */
         }
-      }),
-      lineOptions: {
-        styles: [{ color: '#FFC107', opacity: 1, weight: 6 }] // Line màu vàng rực
-      },
-      createMarker: () => null 
-    });
+      }
+      control = Routing.control({
+        waypoints: [L.latLng(from.lat, from.lon), L.latLng(to.lat, to.lon)],
+        routeWhileDragging: false,
+        showAlternatives: false,
+        fitSelectedRoutes: true,
+        show: false,
+        addWaypoints: false,
+        router: Routing.osrmv1({
+          serviceUrl: ROUTERS[index],
+          profile: "driving",
+          language: lang,
+        }),
+        lineOptions: {
+          styles: [{ color: "#FFC107", opacity: 1, weight: 6 }],
+          extendToWaypoints: true,
+          missingRouteTolerance: 0,
+        },
+        createMarker: () => null,
+      });
 
-    // Bắt sự kiện tìm thấy đường
-    routingControl.on('routesfound', function(e: any) {
-        const r = e.routes[0];
-        if (r) {
-            console.log("Route found:", r); // Debug log
-            onRouteFound({
-                totalDistance: r.summary.totalDistance,
-                totalTime: r.summary.totalTime,
-                steps: r.instructions
-            });
-        }
-    });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      control.on("routesfound", (event: any) => {
+        const route = event.routes?.[0];
+        if (!route || cancelled) return;
+        found.current({
+          totalDistance: route.summary.totalDistance,
+          totalTime: route.summary.totalTime,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          steps: (route.instructions ?? []).map((step: any) => ({
+            text: String(step.text ?? ""),
+            distance: Number(step.distance ?? 0),
+          })),
+        });
+      });
+      control.on("routingerror", () => {
+        if (cancelled) return;
+        if (index + 1 < ROUTERS.length) attempt(index + 1);
+        else failed.current();
+      });
 
-    // Fix lỗi crash
-    const originalClearLines = routingControl._clearLines;
-    routingControl._clearLines = function() {
+      // The library clears its line on removal and crashes if the map has
+      // already been torn down (a fast close of the panel).
+      const clearLines = control._clearLines;
+      control._clearLines = function (...args: unknown[]) {
         if (!this._map) return;
-        return originalClearLines.apply(this, arguments);
-    };
+        return clearLines.apply(this, args);
+      };
 
-    try {
-        routingControl.addTo(map);
-        routingControlRef.current = routingControl;
-        const container = routingControl.getContainer();
-        if(container) container.style.display = 'none';
-    } catch(e) {}
-
-    return () => {
-      if (routingControlRef.current && map) {
-        try { map.removeControl(routingControlRef.current); } catch (e) {}
+      try {
+        control.addTo(map);
+        const container = control.getContainer?.();
+        if (container) container.style.display = "none";
+      } catch {
+        failed.current();
       }
     };
-  }, [map, userLocation, restaurantLocation]);
+
+    attempt(0);
+
+    return () => {
+      cancelled = true;
+      if (control) {
+        try {
+          map.removeControl(control);
+        } catch {
+          /* already gone */
+        }
+      }
+    };
+  }, [map, from.lat, from.lon, to.lat, to.lon, lang]);
 
   return null;
-};
+}
 
-// --- 3. MAIN COMPONENT ---
-export default function RoutingMap({ userLocation, restaurantLocation }: RoutingMapProps) {
-  const { t, lang } = useTranslation();
-  const [isReady, setIsReady] = useState(false);
-  const [routeInfo, setRouteInfo] = useState<RouteInfo | null>(null);
-  const [showSteps, setShowSteps] = useState(false); // State để bật tắt list chỉ dẫn
-
+/** Keep the view on the restaurant when there is no route to fit to. */
+function FocusOn({ point }: { point: Point }) {
+  const map = useMap();
   useEffect(() => {
-    const timer = setTimeout(() => setIsReady(true), 300);
-    return () => clearTimeout(timer);
-  }, []);
+    map.setView([point.lat, point.lon], 15);
+  }, [map, point.lat, point.lon]);
+  return null;
+}
 
-  const centerLat = userLocation ? (userLocation.lat + restaurantLocation.lat) / 2 : restaurantLocation.lat;
-  const centerLon = userLocation ? (userLocation.lon + restaurantLocation.lon) / 2 : restaurantLocation.lon;
-
-  const formatDist = (m: number) => m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`;
-  const formatTime = (s: number) => `${Math.round(s / 60)} ${t.common.minutes}`;
+export default function RoutingMap({
+  userLocation,
+  restaurantLocation,
+  locationStatus,
+  onRequestLocation,
+}: RoutingMapProps) {
+  const { t, lang } = useTranslation();
+  const [route, setRoute] = useState<RouteInfo | null>(null);
+  const [routeFailed, setRouteFailed] = useState(false);
+  const [showSteps, setShowSteps] = useState(false);
+  const [tileSource, setTileSource] = useState(0);
+  const tileErrors = useRef(0);
+  const asked = useRef(false);
 
   /**
-   * OSRM returns its turn instructions in English.
+   * Ask for the location as the map opens.
    *
-   * They are rewritten word by word for Vietnamese and left untouched for
-   * English, where they were previously mangled: the rule replacing "onto" with
-   * "vào" ran unconditionally, so an English reader was shown "Turn right vào
-   * Nguyễn Huệ".
+   * The site only reads a location silently when permission was given before,
+   * so a first-time visitor never had one — and the map waited on it forever
+   * behind a "finding a route" spinner. Opening the map is a clear enough
+   * request to ask, once.
+   */
+  useEffect(() => {
+    if (userLocation || asked.current || !onRequestLocation) return;
+    if (locationStatus === "denied" || locationStatus === "unavailable") return;
+    asked.current = true;
+    onRequestLocation();
+  }, [userLocation, locationStatus, onRequestLocation]);
+
+  const destination = restaurantLocation;
+  const googleUrl = directionsUrl(destination, userLocation);
+
+  const formatDist = (m: number) =>
+    m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`;
+  const formatTime = (s: number) => `${Math.max(1, Math.round(s / 60))} ${t.common.minutes}`;
+
+  /**
+   * OSRM's instructions come back in English whatever is asked for, so they
+   * are rewritten for Vietnamese and left alone for English.
    */
   const translateInstruction = (text: string) => {
     if (lang === "en") return text;
     return text
-      .replace(/Head/g, "Đi về hướng")
+      .replace(/^Head /, "Đi về hướng ")
+      .replace(/Turn slight left/g, "Chếch trái")
+      .replace(/Turn slight right/g, "Chếch phải")
+      .replace(/Turn sharp left/g, "Rẽ gắt trái")
+      .replace(/Turn sharp right/g, "Rẽ gắt phải")
       .replace(/Turn left/g, "Rẽ trái")
       .replace(/Turn right/g, "Rẽ phải")
+      .replace(/Keep left/g, "Đi bên trái")
+      .replace(/Keep right/g, "Đi bên phải")
       .replace(/Make a U-turn/g, "Quay đầu")
+      .replace(/Enter the traffic circle and take the (\w+) exit/g, "Vào vòng xuyến, ra lối thứ $1")
       .replace(/Continue/g, "Tiếp tục")
-      .replace(/onto/g, "vào")
+      .replace(/ onto /g, " vào ")
+      .replace(/ on /g, " trên ")
+      .replace(/\bnorth\b/g, "bắc")
+      .replace(/\bsouth\b/g, "nam")
+      .replace(/\beast\b/g, "đông")
+      .replace(/\bwest\b/g, "tây")
+      .replace(/You have arrived at your destination/g, "Bạn đã đến nơi")
       .replace(/Destination/g, "Điểm đến");
   };
 
-  if (!isReady || !restaurantLocation.lat) return <div style={{height: 350, background: '#111', color: '#666', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>{t.map.loading}</div>;
+  let overlay: React.ReactNode;
+  if (route) {
+    overlay = (
+      <div className="rmap-card">
+        <div className="rmap-card__row">
+          <div className="rmap-stats">
+            <div>
+              <div className="rmap-stat__label">{t.map.distance}</div>
+              <div className="rmap-stat__value rmap-stat__value--accent">
+                {formatDist(route.totalDistance)}
+              </div>
+            </div>
+            <div className="rmap-divider" />
+            <div>
+              <div className="rmap-stat__label">{t.map.duration}</div>
+              <div className="rmap-stat__value">{formatTime(route.totalTime)}</div>
+            </div>
+          </div>
+          <div className="rmap-actions">
+            <button type="button" className="rmap-btn" onClick={() => setShowSteps((v) => !v)}>
+              {showSteps ? `${t.map.hideSteps} ▲` : `${t.map.showSteps} ▼`}
+            </button>
+            <a className="rmap-btn rmap-btn--ghost" href={googleUrl} target="_blank" rel="noopener noreferrer">
+              {t.map.openGoogle} ↗
+            </a>
+          </div>
+        </div>
+        {showSteps && (
+          <ol className="rmap-steps">
+            {route.steps.map((step, index) => (
+              <li key={index}>
+                {translateInstruction(step.text)}
+                <span className="rmap-steps__dist">({formatDist(step.distance)})</span>
+              </li>
+            ))}
+          </ol>
+        )}
+      </div>
+    );
+  } else if (!userLocation) {
+    // Denied is a browser setting only the user can change; unavailable is a
+    // failed fix (no GPS, a timeout) and is worth another try.
+    const denied = locationStatus === "denied";
+    const failed = locationStatus === "unavailable";
+    overlay = (
+      <div className="rmap-card rmap-card--notice">
+        <p className="rmap-notice">
+          {locationStatus === "prompting"
+            ? t.map.locating
+            : denied
+              ? t.map.locationDenied
+              : failed
+                ? t.map.locationUnavailable
+                : t.map.needLocation}
+        </p>
+        <div className="rmap-actions">
+          {!denied && locationStatus !== "prompting" && onRequestLocation && (
+            <button type="button" className="rmap-btn rmap-btn--primary" onClick={onRequestLocation}>
+              {failed ? t.map.retry : t.map.allowLocation}
+            </button>
+          )}
+          <a className="rmap-btn rmap-btn--ghost" href={googleUrl} target="_blank" rel="noopener noreferrer">
+            {t.map.openGoogle} ↗
+          </a>
+        </div>
+      </div>
+    );
+  } else if (routeFailed) {
+    overlay = (
+      <div className="rmap-card rmap-card--notice">
+        <p className="rmap-notice">{t.map.routeFailed}</p>
+        <div className="rmap-actions">
+          <a className="rmap-btn rmap-btn--primary" href={googleUrl} target="_blank" rel="noopener noreferrer">
+            {t.map.openGoogle} ↗
+          </a>
+        </div>
+      </div>
+    );
+  } else {
+    overlay = (
+      <div className="rmap-pill" role="status">
+        <span className="rmap-spinner" aria-hidden="true" />
+        {t.map.routing}
+      </div>
+    );
+  }
+
+  if (!destination.lat || !destination.lon) {
+    return <div className="rmap-empty">{t.detail.mapMissing}</div>;
+  }
 
   return (
-    <div style={{ position: 'relative', width: "100%", height: "450px", borderRadius: "12px", overflow: "hidden", border: "1px solid #333" }}>
-        
-        {/* MAP */}
-        <MapContainer
-            center={[centerLat, centerLon]}
-            zoom={13}
-            style={{ height: "100%", width: "100%" }}
-            zoomControl={false}
-        >
-            <TileLayer attribution='&copy; CartoDB' url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"/>
-            
-            {userLocation && <Marker position={[userLocation.lat, userLocation.lon]} icon={userIcon} />}
-            <Marker position={[restaurantLocation.lat, restaurantLocation.lon]} icon={restaurantIcon} />
-            
-            {userLocation && (
-                <RoutingControl 
-                    userLocation={userLocation} 
-                    restaurantLocation={restaurantLocation} 
-                    onRouteFound={setRouteInfo} 
-                />
-            )}
-        </MapContainer>
-
-        {/* --- 4. FLOATING INFO CARD (Thẻ thông tin nổi - Đảm bảo luôn hiện) --- */}
-        {routeInfo ? (
-            <div style={{
-                position: 'absolute',
-                bottom: 20,
-                left: 20,
-                right: 20,
-                backgroundColor: 'rgba(20, 20, 20, 0.95)',
-                backdropFilter: 'blur(10px)',
-                padding: '15px',
-                borderRadius: '12px',
-                border: '1px solid #FFC107',
-                zIndex: 1000, // Đè lên map
-                color: 'white',
-                boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '10px'
-            }}>
-                {/* Dòng 1: Khoảng cách & Thời gian */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{display: 'flex', gap: '15px', alignItems: 'center'}}>
-                        <div style={{textAlign: 'center'}}>
-                            <div style={{fontSize: '11px', color: '#aaa', textTransform: 'uppercase'}}>{t.map.distance}</div>
-                            <div style={{fontSize: '20px', fontWeight: 'bold', color: '#FFC107'}}>{formatDist(routeInfo.totalDistance)}</div>
-                        </div>
-                        <div style={{width: 1, height: 30, background: '#444'}}></div>
-                        <div style={{textAlign: 'center'}}>
-                            <div style={{fontSize: '11px', color: '#aaa', textTransform: 'uppercase'}}>{t.map.duration}</div>
-                            <div style={{fontSize: '20px', fontWeight: 'bold', color: 'white'}}>{formatTime(routeInfo.totalTime)}</div>
-                        </div>
-                    </div>
-                    
-                    {/* Nút xem chi tiết */}
-                    <button 
-                        onClick={() => setShowSteps(!showSteps)}
-                        style={{
-                            background: '#333', border: '1px solid #555', color: 'white', 
-                            padding: '8px 15px', borderRadius: '20px', cursor: 'pointer', fontSize: '13px'
-                        }}
-                    >
-                        {showSteps ? `${t.map.hideSteps} ▲` : `${t.map.showSteps} ▼`}
-                    </button>
-                </div>
-
-                {/* Dòng 2: List chỉ dẫn (Hiện khi bấm nút) */}
-                {showSteps && (
-                    <div style={{
-                        marginTop: '10px', maxHeight: '150px', overflowY: 'auto', 
-                        borderTop: '1px solid #333', paddingTop: '10px'
-                    }}>
-                        {routeInfo.steps.map((step: any, i: number) => (
-                            <div key={i} style={{display: 'flex', gap: '10px', marginBottom: '8px', fontSize: '13px', color: '#ddd'}}>
-                                <span style={{color: '#FFC107', fontWeight: 'bold'}}>{i+1}.</span>
-                                <div>
-                                    {translateInstruction(step.text)} 
-                                    <span style={{color: '#888', marginLeft: '5px'}}>({formatDist(step.distance)})</span>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
-        ) : (
-            // Loading State (Khi đang tính toán)
-            <div style={{
-                position: 'absolute', bottom: 20, left: 20, zIndex: 1000,
-                background: 'rgba(0,0,0,0.8)', color: 'white', padding: '10px 20px', borderRadius: '20px',
-                display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid #444'
-            }}>
-                <div className="spinner" style={{width: 15, height: 15, border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite'}}></div>
-                <span style={{fontSize: '13px'}}>{t.map.routing}</span>
-                <style>{`@keyframes spin {to{transform: rotate(360deg)}}`}</style>
-            </div>
+    <div className="rmap">
+      <MapContainer
+        center={[destination.lat, destination.lon]}
+        zoom={15}
+        maxZoom={TILE_SOURCES[tileSource].maxZoom}
+        style={{ height: "100%", width: "100%" }}
+        zoomControl={false}
+      >
+        <TileLayer
+          key={tileSource}
+          url={TILE_SOURCES[tileSource].url}
+          attribution={TILE_SOURCES[tileSource].attribution}
+          maxZoom={TILE_SOURCES[tileSource].maxZoom}
+          eventHandlers={{
+            // A few failed tiles switch the whole layer to the next source.
+            tileerror: () => {
+              tileErrors.current += 1;
+              if (tileErrors.current >= 4 && tileSource + 1 < TILE_SOURCES.length) {
+                tileErrors.current = 0;
+                setTileSource(tileSource + 1);
+              }
+            },
+          }}
+        />
+        {userLocation && (
+          <Marker position={[userLocation.lat, userLocation.lon]} icon={userIcon} />
         )}
+        <Marker position={[destination.lat, destination.lon]} icon={restaurantIcon} />
+        {userLocation ? (
+          <RoutingControl
+            from={userLocation}
+            to={destination}
+            lang={lang}
+            onFound={(info) => {
+              setRouteFailed(false);
+              setRoute(info);
+            }}
+            onFailed={() => setRouteFailed(true)}
+          />
+        ) : (
+          <FocusOn point={destination} />
+        )}
+      </MapContainer>
+      {overlay}
     </div>
   );
 }

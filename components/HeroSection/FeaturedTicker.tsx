@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { getTopRestaurants, type Restaurant } from "@/app/lib/api";
 import { formatRating, formatReviewCount } from "@/app/lib/rating";
-import { cuisineTags, parseTags } from "@/app/lib/restaurant";
+import { cuisineTags, parseTags, placeLabel, tagLabel } from "@/app/lib/restaurant";
 import { useTranslation } from "@/app/hooks/useTranslation";
 import "./FeaturedTicker.css";
 
@@ -123,8 +123,9 @@ function Row({
 }) {
   const tags = parseTags(place.tags);
   // tags[0] is the city and tags[1] the district, by the crawler's convention.
-  const district = tags[1] ?? "";
-  const cuisine = cuisineTags(tags)[0] ?? "";
+  const district = tags[1] ? placeLabel(tags[1], lang) : "";
+  const dish = cuisineTags(tags)[0];
+  const cuisine = dish ? tagLabel(dish, lang) : "";
   const caption = [cuisine, district].filter(Boolean).join(" • ");
   const reviews = formatReviewCount(place.reviewCount, lang);
 

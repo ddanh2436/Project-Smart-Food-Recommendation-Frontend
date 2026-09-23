@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import type { ReviewInsights } from "@/app/lib/api";
+import type { Restaurant, ReviewInsights } from "@/app/lib/api";
 import { useTranslation } from "@/app/hooks/useTranslation";
 import "./ReviewAspects.css";
 
@@ -15,6 +15,54 @@ const VERDICT_ICON: Record<string, string> = {
   negative: "👎",
   mixed: "🤔",
 };
+
+const ASPECT_ICON: Record<string, string> = {
+  food: "🍜",
+  price: "💰",
+  service: "🧑‍🍳",
+  space: "🪑",
+  hygiene: "🧼",
+  parking: "🛵",
+};
+
+/**
+ * The card's data from the verdicts stored on the restaurant.
+ *
+ * The live digest reads every review through the sentiment model on a free
+ * CPU, which takes seconds when the service is warm and much longer when it
+ * is not; until it answered, the card was four grey bars that looked broken.
+ * The same verdicts are precomputed for most places, so the card can show
+ * them at once and let the live digest add its quotes when it arrives.
+ */
+export function insightsFromIndex(
+  restaurant: Restaurant | null,
+  labels: Record<string, string>,
+): ReviewInsights | null {
+  const stored = restaurant?.aspects;
+  if (!stored || Object.keys(stored).length === 0) return null;
+  const aspects = Object.entries(stored)
+    .map(([key, value]) => ({
+      key,
+      label: labels[key] ?? key,
+      icon: ASPECT_ICON[key] ?? "•",
+      mentions: value.mentions,
+      positive: 0,
+      neutral: 0,
+      negative: 0,
+      positive_ratio: value.positive_ratio,
+      verdict: value.verdict,
+      quotes: [],
+    }))
+    .sort((a, b) => b.mentions - a.mentions);
+  return {
+    available: true,
+    review_count: restaurant?.reviewCount ?? 0,
+    average_rating: null,
+    overall: { positive: 0, neutral: 0, negative: 0 },
+    aspects,
+    summary: null,
+  };
+}
 
 /** Shorten a verbatim quote to a clause that fits on one line of the summary. */
 function trimQuote(quote: string, max = 72): string {
@@ -43,6 +91,11 @@ const ReviewAspects: React.FC<Props> = ({ data, loading }) => {
         <div className="aspects-header">
           <h3>🧠 {t.reviews.aspectsTitle}</h3>
         </div>
+        {/* Words as well as bars, so the wait reads as work in progress
+            rather than an empty, broken card. */}
+        <p className="aspects-loading-text" role="status">
+          {t.reviews.aspectsLoading}
+        </p>
         <div className="aspects-skeleton">
           {[0, 1, 2].map((index) => (
             <div key={index} className="skeleton-row" />
