@@ -28,6 +28,8 @@ import { useGeolocation } from "@/app/hooks/useGeolocation";
 import { useTranslation } from "@/app/hooks/useTranslation";
 import { useAuth } from "@/app/contexts/AuthContext";
 import axios from "axios";
+import Link from "next/link";
+import { authHref } from "@/app/lib/returnTo";
 
 import ReviewOverview from "@/components/ReviewOverview/ReviewOverview";
 import ReviewAspects from "@/components/ReviewAspects/ReviewAspects";
@@ -87,7 +89,7 @@ export default function RestaurantDetailPage() {
   const { id } = useParams();
   const { coords } = useGeolocation();
   const { t, lang } = useTranslation();
-  const { user, isLoading: authLoading, openAuth } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
 
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -368,10 +370,10 @@ export default function RestaurantDetailPage() {
             <div className="write-review-box">
               <h3>{t.reviews.writeTitle}</h3>
               <p className="review-login-hint">{t.reviews.loginToReview}</p>
-              {/* A dialog, not a link to /auth: the review goes on this page. */}
-              <button type="button" className="btn-submit-review" onClick={() => openAuth()}>
+              {/* Comes back to this restaurant after signing in. */}
+              <Link href={authHref(`/restaurants/${id}`)} className="btn-submit-review">
                 {t.reviews.loginButton}
-              </button>
+              </Link>
             </div>
           ) : (
           <div className="write-review-box">

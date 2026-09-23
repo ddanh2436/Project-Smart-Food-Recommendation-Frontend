@@ -8,6 +8,7 @@ import { useAuth } from "@/app/contexts/AuthContext";
 import Image from "next/image";
 import Link from 'next/link';
 import { logout } from '@/app/lib/api';
+import { authHref } from '@/app/lib/returnTo';
 import { dictionaries } from '@/app/lib/i18n';
 
 // --- Icons (Giữ nguyên) ---
@@ -75,7 +76,7 @@ const navItems = [
 
 const Header: React.FC = () => {
   const router = useRouter();
-  const { user, setUser, isLoading, currentLang, setLang, T, openAuth } = useAuth();
+  const { user, setUser, isLoading, currentLang, setLang, T } = useAuth();
   
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false); 
@@ -135,9 +136,9 @@ const Header: React.FC = () => {
     router.push("/");
   };
 
-  // Opens the sign-in dialog over the current page rather than leaving it.
+  // The sign-in page sends the user back here afterwards.
   const handleLoginClick = () => {
-    openAuth();
+    router.push(authHref(window.location.pathname + window.location.search));
   };
 
   return (

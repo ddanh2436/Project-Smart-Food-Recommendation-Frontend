@@ -4,7 +4,6 @@ import { Be_Vietnam_Pro, EB_Garamond } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@/app/contexts/AuthContext";
-import AuthModal from "@/components/Auth/AuthModal";
 
 /**
  * Typefaces chosen for Vietnamese.
@@ -69,7 +68,6 @@ export default function RootLayout({
         <AuthProvider>
           <Toaster position="top-center" />
           {children}
-          <AuthModal />
         </AuthProvider>
       </body>
     </html>

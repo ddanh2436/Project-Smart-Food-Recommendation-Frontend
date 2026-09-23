@@ -1,4 +1,4 @@
-/* Shared by the sign-in dialog and the /auth page.
+/* The form half of the /auth page.
    Dark, to match the rest of the site; the accent is the same amber the
    header and buttons use everywhere else (#e9a004). */
 .auth-form {
@@ -17,40 +17,35 @@
   width: 100%;
 }
 
-.auth-form__brand {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-.auth-form__logo {
-  font-size: 1.6rem;
-}
-.auth-form__name {
-  font-family: var(--font-display);
-  font-size: 1.7rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-}
-.auth-form__tagline {
-  margin: 0.25rem 0 1.25rem;
-  text-align: center;
-  color: var(--af-muted);
-  font-size: 0.9rem;
-}
-
 /* Segmented control */
 .auth-form__tabs {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
   padding: 4px;
-  gap: 4px;
   background: var(--af-field);
   border: 1px solid var(--af-border);
   border-radius: 12px;
 }
+/* One pill that slides under whichever tab is active. */
+.auth-form__tab-indicator {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  border-radius: 9px;
+  background: linear-gradient(135deg, #f5b41f, #e9a004 55%, #d98a00);
+  box-shadow: 0 4px 14px rgba(233, 160, 4, 0.35);
+  transition: transform 0.45s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.auth-form[data-mode="register"] .auth-form__tab-indicator {
+  transform: translateX(100%);
+}
 .auth-form__tab {
-  padding: 0.6rem 0.5rem;
+  position: relative;
+  z-index: 1;
+  padding: 0.65rem 0.5rem;
   border: 0;
   border-radius: 9px;
   background: transparent;
@@ -58,15 +53,33 @@
   font: inherit;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: color 0.3s ease;
 }
 .auth-form__tab:hover {
   color: var(--af-text);
 }
 .auth-form__tab.is-active {
-  background: #26262c;
-  color: var(--af-text);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  color: #1a1204;
+}
+
+/* Everything in the panel rises in, one after another, when it appears. */
+.auth-form__panel > *,
+.auth-form__panel form > * {
+  animation: af-rise 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.auth-form__panel > :nth-child(1) { animation-delay: 0.05s; }
+.auth-form__panel > :nth-child(2) { animation-delay: 0.1s; }
+.auth-form__panel > :nth-child(3) { animation-delay: 0.15s; }
+.auth-form__panel form > :nth-child(1) { animation-delay: 0.2s; }
+.auth-form__panel form > :nth-child(2) { animation-delay: 0.25s; }
+.auth-form__panel form > :nth-child(3) { animation-delay: 0.3s; }
+.auth-form__panel form > :nth-child(4) { animation-delay: 0.35s; }
+.auth-form__panel form > :nth-child(5) { animation-delay: 0.4s; }
+.auth-form__panel > :nth-child(5) { animation-delay: 0.45s; }
+
+@keyframes af-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
 }
 
 .auth-form__lead {
@@ -239,21 +252,35 @@
 }
 
 .auth-form__submit {
+  position: relative;
+  overflow: hidden;
   width: 100%;
-  min-height: 48px;
+  min-height: 50px;
   border: 0;
   border-radius: 10px;
-  background: var(--af-accent);
+  background: linear-gradient(135deg, #f5b41f, #e9a004 55%, #d98a00);
   color: #1a1204;
   font: inherit;
   font-weight: 700;
   letter-spacing: 0.02em;
   cursor: pointer;
-  box-shadow: 0 6px 18px rgba(233, 160, 4, 0.25);
-  transition: background-color 0.15s ease, transform 0.1s ease;
+  box-shadow: 0 8px 22px rgba(233, 160, 4, 0.3);
+  transition: box-shadow 0.2s ease, transform 0.1s ease;
+}
+/* A band of light sweeps across on hover. */
+.auth-form__submit::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.45) 50%, transparent 70%);
+  transform: translateX(-120%);
+}
+.auth-form__submit:hover:not(:disabled)::after {
+  transition: transform 0.7s ease;
+  transform: translateX(120%);
 }
 .auth-form__submit:hover:not(:disabled) {
-  background: var(--af-accent-hover);
+  box-shadow: 0 10px 28px rgba(233, 160, 4, 0.45);
 }
 .auth-form__submit:active:not(:disabled) {
   transform: translateY(1px);
@@ -285,4 +312,15 @@
 .auth-form :focus-visible {
   outline: 2px solid var(--af-accent);
   outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-form__panel > *,
+  .auth-form__panel form > * {
+    animation: none;
+  }
+  .auth-form__tab-indicator,
+  .auth-form__submit::after {
+    transition: none;
+  }
 }

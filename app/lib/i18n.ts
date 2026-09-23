@@ -131,6 +131,20 @@ const vi = {
     errGoogleFailed: "Đăng nhập Google chưa hoàn tất. Vui lòng thử lại.",
     successLogin: "Đăng nhập thành công!",
     successRegister: "Tạo tài khoản thành công. Chào mừng bạn!",
+    backHome: "Về trang chủ",
+    showcaseLoginKicker: "Chào mừng trở lại",
+    showcaseLoginTitle: "Bữa ngon tiếp theo đang chờ bạn",
+    showcaseLoginText: "Quán đã lưu, đánh giá của bạn và trợ lý AI — tất cả ở đúng chỗ bạn để lại.",
+    showcaseRegisterKicker: "Bắt đầu hành trình",
+    showcaseRegisterTitle: "Ăn ngon hơn, chọn nhanh hơn",
+    showcaseRegisterText: "Một tài khoản để lưu quán ruột, chấm điểm món ăn và hỏi trợ lý AI bất cứ lúc nào.",
+    perks: [
+      "Gợi ý xếp theo đánh giá thật của thực khách",
+      "Lưu quán ruột, xem lại mọi lúc",
+      "Hỏi trợ lý AI bằng tiếng Việt tự nhiên",
+    ],
+    livePicks: "Đang được yêu thích",
+    reviewsWord: "đánh giá",
   },
 
   home: {
@@ -620,6 +634,20 @@ const en: typeof vi = {
     errGoogleFailed: "Google sign-in did not complete. Please try again.",
     successLogin: "Logged in successfully!",
     successRegister: "Account created. Welcome!",
+    backHome: "Back to home",
+    showcaseLoginKicker: "Welcome back",
+    showcaseLoginTitle: "Your next great meal is waiting",
+    showcaseLoginText: "Saved places, your reviews and the AI assistant — right where you left them.",
+    showcaseRegisterKicker: "Start your food trail",
+    showcaseRegisterTitle: "Eat better, decide faster",
+    showcaseRegisterText: "One account to save favourite spots, rate dishes and ask the AI assistant anytime.",
+    perks: [
+      "Suggestions ranked by real diners' reviews",
+      "Save favourite spots and come back anytime",
+      "Ask the AI assistant in plain language",
+    ],
+    livePicks: "Diner favourites right now",
+    reviewsWord: "reviews",
   },
 
   home: {
