@@ -259,3 +259,28 @@
     margin: 0 auto;
   }
 }
+@media (max-width: 600px) {
+  .city-spotlight-section {
+    padding: 48px 16px;
+  }
+  .spotlight-title {
+    font-size: 2.6rem;
+  }
+  .restaurant-cards {
+    max-width: 100%;
+    gap: 12px;
+  }
+  .res-card {
+    gap: 12px;
+    padding: 10px;
+    box-sizing: border-box;
+    width: 100%;
+  }
+  .res-img-wrapper {
+    width: 64px;
+    height: 64px;
+  }
+  .res-name {
+    font-size: 1rem;
+  }
+}

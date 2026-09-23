@@ -914,8 +914,11 @@
    (components/HomeSections/FeaturedStrip).
    ========================================================================== */
 .hero-section {
-  height: 88vh;
-  min-height: 620px;
+  /* Grows with its content: a fixed height let the copy spill under the
+     featured strip when the page narrowed (a phone, or the chat drawer). */
+  height: auto;
+  min-height: max(620px, 88vh);
+  padding: 30px 0 7rem;
 }
 .hero-overlay-gradient {
   /* Even on both sides now that the copy is centred. */
@@ -972,7 +975,7 @@
   .hero-main-wrapper { grid-template-columns: 1fr; }
 }
 @media (max-width: 768px) {
-  .hero-section { height: auto; min-height: 88vh; padding-bottom: 3rem; }
+  .hero-section { min-height: 0; padding: 0 0 4.5rem; }
   .hero-title { font-size: 2.6rem; }
 }
 @media (prefers-reduced-motion: reduce) {

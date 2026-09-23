@@ -265,14 +265,14 @@ function ChatbotContent() {
                       <li key={item._id}>
                         <Link
                           href={`/restaurants/${item._id}`}
-                          className="group flex h-[92px] overflow-hidden rounded-xl border border-stone-800 bg-stone-900/60 transition-colors hover:border-amber-500/40 hover:bg-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
+                          className="group flex min-h-[92px] overflow-hidden rounded-xl border border-stone-800 bg-stone-900/60 transition-colors hover:border-amber-500/40 hover:bg-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
                         >
-                          <div className="relative h-full w-[92px] shrink-0 overflow-hidden">
+                          <div className="relative min-h-[92px] w-[92px] shrink-0 self-stretch overflow-hidden">
                             <img
                               src={item.avatarUrl || "/assets/image/pho.png"}
                               alt=""
                               referrerPolicy="no-referrer"
-                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110 motion-reduce:transition-none"
+                              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110 motion-reduce:transition-none"
                               onError={(event) => {
                                 const target = event.target as HTMLImageElement;
                                 if (!target.src.includes("/assets/image/pho.png")) {
