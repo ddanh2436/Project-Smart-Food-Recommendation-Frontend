@@ -27,6 +27,11 @@ interface User {
   company?: string;
   designation?: string;
   bio?: string;
+  fullName?: string;
+  homeCity?: string;
+  favoriteTags?: string[];
+  provider?: string | null;
+  createdAt?: string;
 }
 
 type Lang = 'en' | 'vn';

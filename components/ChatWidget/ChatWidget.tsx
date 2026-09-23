@@ -17,6 +17,7 @@ import {
   FaExpand,
 } from "react-icons/fa";
 import { CHAT_OPEN_EVENT } from "@/app/lib/chatEvents";
+import { useAuth } from "@/app/contexts/AuthContext";
 import { chatSuggestions, useChatSession } from "@/app/hooks/useChatSession";
 import { formatReviewCount } from "@/app/lib/rating";
 import { ScoreBadge } from "@/components/Score/Score";
@@ -58,6 +59,7 @@ function BrandAvatar({ size = 40 }: { size?: number }) {
 }
 
 export default function ChatWidget() {
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [atBottom, setAtBottom] = useState(true);
@@ -478,7 +480,7 @@ export default function ChatWidget() {
             className="flex gap-2 overflow-x-auto px-3 pb-1 pt-2.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             aria-label={t.chat.suggestionsLabel}
           >
-            {chatSuggestions(t).map((text) => (
+            {chatSuggestions(t, user).map((text) => (
               <button
                 key={text}
                 onClick={() => send(text)}

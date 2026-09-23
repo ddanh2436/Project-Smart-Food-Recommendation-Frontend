@@ -15,14 +15,15 @@ export default function MainLayout({
   const pathname = usePathname();
 
   // 1. Xác định các trang cần ẩn giao diện chung
-  const isProfilePage = pathname.startsWith('/profile');
   const isChatbotPage = pathname.startsWith('/chatbot');
   
   // [MỚI] Xác định trang nhà hàng để ẩn riêng Footer
   const isRestaurantPage = pathname.startsWith('/restaurants');
 
   // 2. Gom điều kiện: Ẩn Header/Footer/Widget nếu là Profile HOẶC Chatbot
-  const shouldHideUI = isProfilePage || isChatbotPage;
+  // The profile page keeps the site header now: it used to be a separate
+  // screen with only a back arrow, cut off from the rest of the site.
+  const shouldHideUI = isChatbotPage;
 
   return (
     <div className="flex flex-col min-h-screen">

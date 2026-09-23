@@ -20,6 +20,7 @@ import { chatSuggestions, useChatSession } from "@/app/hooks/useChatSession";
 import { formatReviewCount } from "@/app/lib/rating";
 import { ScoreBadge } from "@/components/Score/Score";
 import ResultReasons from "@/components/ChatWidget/ResultReasons";
+import { useAuth } from "@/app/contexts/AuthContext";
 
 /** The brand mark, used instead of a generic robot glyph. */
 function BrandAvatar({ size = 36 }: { size?: number }) {
@@ -57,6 +58,7 @@ function RichText({ text }: { text: string }) {
 }
 
 function ChatbotContent() {
+  const { user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [input, setInput] = useState("");
@@ -385,7 +387,7 @@ function ChatbotContent() {
         <div className="mx-auto w-full max-w-3xl px-4 py-3 sm:px-8 sm:py-4">
           {showSuggestions && (
             <div className="mb-3 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" aria-label={t.chat.suggestionsLabel}>
-              {chatSuggestions(t).map((text) => (
+              {chatSuggestions(t, user).map((text) => (
                 <button
                   key={text}
                   onClick={() => send(text)}

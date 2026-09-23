@@ -737,6 +737,26 @@ export async function updateProfile(payload: Record<string, unknown>) {
   return response.data;
 }
 
+/** A review the signed-in user wrote, with its restaurant's id and photo. */
+export interface MyReview extends Review {
+  restaurantId: string | null;
+  restaurantImage: string | null;
+}
+
+export async function getMyReviews(): Promise<MyReview[]> {
+  const response = await api.get<MyReview[]>("/reviews/mine");
+  return response.data ?? [];
+}
+
+export async function deleteMyReview(id: string): Promise<void> {
+  await api.delete(`/reviews/${id}`);
+}
+
+export async function changePassword(currentPassword: string, newPassword: string) {
+  const response = await api.post("/auth/change-password", { currentPassword, newPassword });
+  return response.data;
+}
+
 /**
  * Human-readable message from an API error.
  *
