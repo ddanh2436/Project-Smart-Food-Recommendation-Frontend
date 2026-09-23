@@ -13,6 +13,8 @@ const nextConfig: NextConfig = {
      * add to the list rather than widening it back to a wildcard.
      */
     remotePatterns: [
+      // ShopeeFood's CDN: 5,504 of the 5,506 restaurant photos live here.
+      { protocol: "https", hostname: "**.susercontent.com" },
       { protocol: "https", hostname: "**.foody.vn" },
       { protocol: "https", hostname: "**.foodycdn.net" },
       { protocol: "https", hostname: "**.googleusercontent.com" },
