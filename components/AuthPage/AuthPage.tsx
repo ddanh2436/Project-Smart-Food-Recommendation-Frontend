@@ -63,6 +63,8 @@ const langData = {
         errAuthFailed: "Authentication failed. Please try again.",
         errUnknown: "An unknown error occurred.",
         errServer: "Cannot connect to server.",
+        errGooglePassword: "This email is registered with a password. Please sign in with your password instead of Google.",
+        errGoogleFailed: "Google sign-in did not complete. Please try again.",
         successRegister: "Registration successful! Please log in.",
         successLogin: "Login successful!",
         loading: "Signing in..."
@@ -95,6 +97,8 @@ const langData = {
         errAuthFailed: "Xác thực thất bại. Vui lòng thử lại.",
         errUnknown: "Đã xảy ra lỗi không xác định.",
         errServer: "Không thể kết nối tới máy chủ.",
+        errGooglePassword: "Email này đã được đăng ký bằng mật khẩu. Vui lòng đăng nhập bằng mật khẩu thay vì Google.",
+        errGoogleFailed: "Đăng nhập Google chưa hoàn tất. Vui lòng thử lại.",
         successRegister: "Đăng ký thành công! Vui lòng đăng nhập.",
         successLogin: "Đăng nhập thành công!",
         loading: "Đang đăng nhập..."
@@ -118,6 +122,30 @@ const AuthForm: React.FC = () => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  /**
+   * Errors handed back by the Google callback as `?error=...`.
+   *
+   * The backend has always redirected here with `error=google_signin_failed`,
+   * and nothing read it, so a failed Google sign-in just dropped the user back
+   * on this page without a word. `email_uses_password` is new: Google sign-in
+   * no longer joins a password account, and the user needs to be told why.
+   */
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('error');
+    if (!code) return;
+    toast.error(code === 'email_uses_password' ? T.errGooglePassword : T.errGoogleFailed, {
+      duration: 7000,
+    });
+    // Drop the parameter so a refresh does not repeat the message.
+    params.delete('error');
+    const rest = params.toString();
+    window.history.replaceState(null, '', window.location.pathname + (rest ? `?${rest}` : ''));
+    // Runs once on arrival; the language at that moment is the right one.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
