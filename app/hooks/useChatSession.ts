@@ -40,8 +40,23 @@ export interface ChatMessage {
  * transliterated rather than translated, because they are what the assistant
  * searches for.
  */
-export function chatSuggestions(t: Dict): string[] {
-  return t.chat.suggestions;
+/**
+ * Suggested questions, led by the user's own tastes when they set some on
+ * their profile: "Phở ngon ở Hà Nội" rather than the generic list. The
+ * favourite tags are real tags in the data, so these are questions the
+ * assistant can answer.
+ */
+export function chatSuggestions(
+  t: Dict,
+  prefs?: { favoriteTags?: string[]; homeCity?: string } | null,
+): string[] {
+  const tags = prefs?.favoriteTags ?? [];
+  if (tags.length === 0) return t.chat.suggestions;
+  const city = prefs?.homeCity ? t.profile.cities[prefs.homeCity] : undefined;
+  const personal = tags
+    .slice(0, 3)
+    .map((tag) => (city ? `${tag} ${t.chat.inCity} ${city}` : `${tag} ${t.chat.nearMe}`));
+  return [...personal, ...t.chat.suggestions].slice(0, 5);
 }
 
 function makeGreeting(t: Dict): ChatMessage[] {
