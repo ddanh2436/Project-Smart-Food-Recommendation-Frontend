@@ -171,3 +171,25 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .map-inline-spinner { animation-duration: 2.4s; }
 }
+
+/* --------------------------------------------------------------------------
+   Chat drawer: on a wide screen the page steps aside rather than sitting
+   under the 420px drawer. The header is absolutely positioned against the
+   viewport, so it is narrowed explicitly.
+   -------------------------------------------------------------------------- */
+@media (min-width: 1200px) {
+  body {
+    transition: padding-right 0.3s ease;
+  }
+  body.chat-drawer-open {
+    padding-right: 420px;
+  }
+  body.chat-drawer-open .header-container {
+    width: calc(100% - 420px);
+  }
+}
+@media (min-width: 1200px) and (prefers-reduced-motion: reduce) {
+  body {
+    transition: none;
+  }
+}
