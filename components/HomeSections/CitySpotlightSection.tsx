@@ -95,6 +95,9 @@ const CitySpotlightSection: React.FC<CitySpotlightProps> = ({
                             alt={res.name} 
                             width={120} height={120} 
                             className="res-img" 
+                            // Straight from the CDN, like every other listing:
+                            // through the optimiser this host was refused.
+                            unoptimized
                         />
                     </div>
                     <div className="res-details">

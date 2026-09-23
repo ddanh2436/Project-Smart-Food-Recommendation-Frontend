@@ -42,18 +42,45 @@ const ROUTERS = [
  * with attribution and needs no key; OpenStreetMap's own tiles are the
  * fallback if it stops answering.
  */
+/**
+ * Esri's dark canvas stops at zoom 16 (above that it serves blank "no data"
+ * tiles), which capped how far the map could zoom. Past 16 its street map
+ * takes over, darkened in CSS (.rmap-tiles-dark) to keep the same look.
+ */
+const ESRI_ATTRIBUTION =
+  "Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors";
 const TILE_SOURCES = [
   {
-    url: "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
-    attribution: "Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors",
-    maxZoom: 16,
+    layers: [
+      {
+        url: "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+        minZoom: 0,
+        maxZoom: 16,
+        className: "",
+      },
+      {
+        url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+        minZoom: 17,
+        maxZoom: 19,
+        className: "rmap-tiles-dark",
+      },
+    ],
+    attribution: ESRI_ATTRIBUTION,
   },
   {
-    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxZoom: 19,
+    layers: [
+      {
+        url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+        minZoom: 0,
+        maxZoom: 19,
+        className: "rmap-tiles-dark",
+      },
+    ],
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   },
 ];
+const MAX_ZOOM = 19;
 
 interface Point {
   lat: number;
@@ -372,26 +399,30 @@ export default function RoutingMap({
       <MapContainer
         center={[destination.lat, destination.lon]}
         zoom={15}
-        maxZoom={TILE_SOURCES[tileSource].maxZoom}
+        maxZoom={MAX_ZOOM}
         style={{ height: "100%", width: "100%" }}
         zoomControl={false}
       >
-        <TileLayer
-          key={tileSource}
-          url={TILE_SOURCES[tileSource].url}
-          attribution={TILE_SOURCES[tileSource].attribution}
-          maxZoom={TILE_SOURCES[tileSource].maxZoom}
-          eventHandlers={{
-            // A few failed tiles switch the whole layer to the next source.
-            tileerror: () => {
-              tileErrors.current += 1;
-              if (tileErrors.current >= 4 && tileSource + 1 < TILE_SOURCES.length) {
-                tileErrors.current = 0;
-                setTileSource(tileSource + 1);
-              }
-            },
-          }}
-        />
+        {TILE_SOURCES[tileSource].layers.map((layer) => (
+          <TileLayer
+            key={`${tileSource}-${layer.url}`}
+            url={layer.url}
+            attribution={TILE_SOURCES[tileSource].attribution}
+            minZoom={layer.minZoom}
+            maxZoom={layer.maxZoom}
+            className={layer.className}
+            eventHandlers={{
+              // A few failed tiles switch to the next source.
+              tileerror: () => {
+                tileErrors.current += 1;
+                if (tileErrors.current >= 4 && tileSource + 1 < TILE_SOURCES.length) {
+                  tileErrors.current = 0;
+                  setTileSource(tileSource + 1);
+                }
+              },
+            }}
+          />
+        ))}
         {userLocation && (
           <Marker position={[userLocation.lat, userLocation.lon]} icon={userIcon} />
         )}

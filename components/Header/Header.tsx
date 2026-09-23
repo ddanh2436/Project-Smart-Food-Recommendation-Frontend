@@ -248,7 +248,9 @@ const Header: React.FC = () => {
                       width={32} 
                       height={32}
                       className="user-avatar"
-                      unoptimized={user.picture?.includes('googleusercontent.com')}
+                      // Google URLs and uploaded (inline) pictures both skip
+                      // the optimiser, which accepts neither.
+                      unoptimized
                     />
                   ) : (
                     <div className="user-avatar-placeholder">

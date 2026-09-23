@@ -159,3 +159,8 @@
   .rmap { height: 380px; }
   .rmap-card { left: 10px; right: 10px; bottom: 10px; }
 }
+
+/* Light street tiles turned dark, so zooming past 16 keeps the look. */
+.rmap-tiles-dark {
+  filter: invert(1) hue-rotate(180deg) grayscale(0.35) brightness(0.9) contrast(0.9);
+}
