@@ -352,3 +352,132 @@
         transform: scale(1) translateY(0); 
     }
 }
+/* ==========================================================================
+   Phone menu
+   ========================================================================== */
+.header-auth-button .label-short {
+  display: none;
+}
+.header-menu-btn {
+  display: none;
+}
+@media (max-width: 768px) {
+  .header-right-side {
+    gap: 0.6rem;
+  }
+  .header-auth-button {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+  .header-auth-button .label-full {
+    display: none;
+  }
+  .header-auth-button .label-short {
+    display: inline;
+  }
+  .header-menu-btn {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 44px;
+    height: 44px;
+    padding: 0 11px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+  }
+  .header-menu-btn span {
+    display: block;
+    height: 2px;
+    border-radius: 2px;
+    background: #fff;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+  .header-menu-btn.is-open span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+  .header-menu-btn.is-open span:nth-child(2) {
+    opacity: 0;
+  }
+  .header-menu-btn.is-open span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+  .mobile-menu-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+  }
+  .mobile-menu {
+    position: absolute;
+    top: 80px;
+    left: 12px;
+    right: 12px;
+    padding: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    background: #141417;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    animation: mobile-menu-in 0.18s ease-out;
+  }
+  .mobile-menu ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .mobile-menu a {
+    display: block;
+    padding: 14px 16px;
+    border-radius: 10px;
+    color: #f4f4f5;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .mobile-menu a:hover,
+  .mobile-menu a.is-current {
+    background: rgba(233, 160, 4, 0.12);
+    color: #e9a004;
+  }
+  .mobile-menu__ai {
+    color: #facc15 !important;
+  }
+}
+@keyframes mobile-menu-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+/* Very narrow phones: the language picker gives up its chevron. */
+@media (max-width: 360px) {
+  .logo-image {
+    height: 42px;
+  }
+}
+
+/* Labels never wrap: with the chat drawer open the header is 420px narrower,
+   and "Trang chủ" broke onto two lines. Between tablet width and wide
+   desktop, and whenever the drawer is open, spacing tightens and the login
+   button uses its short label. */
+.header-nav a,
+.header-auth-button,
+.user-name {
+  white-space: nowrap;
+}
+@media (min-width: 769px) and (max-width: 1100px) {
+  .header-container { padding: 1.25rem 1.5rem; }
+  .header-right-side { gap: 1rem; }
+  .header-nav ul { gap: 1.1rem; }
+  .header-auth-button .label-full { display: none; }
+  .header-auth-button .label-short { display: inline; }
+}
+@media (min-width: 1200px) and (max-width: 1700px) {
+  body.chat-drawer-open .header-container { padding: 1.25rem 1.5rem; }
+  body.chat-drawer-open .header-right-side { gap: 1rem; }
+  body.chat-drawer-open .header-nav ul { gap: 1.1rem; }
+  body.chat-drawer-open .header-auth-button .label-full { display: none; }
+  body.chat-drawer-open .header-auth-button .label-short { display: inline; }
+}

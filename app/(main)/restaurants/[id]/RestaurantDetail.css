@@ -485,3 +485,28 @@ footer {
     position: static;
   }
 }
+/* Phones: the hero grows with its content. At a fixed 350px the name and
+   score were pushed off the top of the photo by the address and buttons. */
+@media (max-width: 768px) {
+  .detail-hero {
+    height: auto;
+    min-height: 320px;
+    margin-bottom: 2rem;
+    border-radius: 16px;
+  }
+  .detail-hero-img {
+    position: absolute;
+    inset: 0;
+  }
+  .hero-overlay {
+    position: relative;
+    height: auto;
+    min-height: 320px;
+    padding: 150px 18px 20px;
+    box-sizing: border-box;
+    background: linear-gradient(to top, #18181b 45%, rgba(24, 24, 27, 0.75) 75%, transparent);
+  }
+  .hero-content h1 {
+    font-size: 1.9rem;
+  }
+}

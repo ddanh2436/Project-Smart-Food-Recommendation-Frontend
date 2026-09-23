@@ -349,14 +349,14 @@ export default function ChatWidget() {
                         <li key={item._id}>
                           <Link
                             href={`/restaurants/${item._id}`}
-                            className="group flex h-[84px] overflow-hidden rounded-xl border border-stone-800 bg-stone-900/70 transition-colors hover:border-amber-500/40 hover:bg-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
+                            className="group flex min-h-[84px] overflow-hidden rounded-xl border border-stone-800 bg-stone-900/70 transition-colors hover:border-amber-500/40 hover:bg-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
                           >
-                            <div className="relative h-full w-[84px] shrink-0 overflow-hidden">
+                            <div className="relative min-h-[84px] w-[84px] shrink-0 self-stretch overflow-hidden">
                               <img
                                 src={item.avatarUrl || "/assets/image/pho.png"}
                                 alt=""
                                 referrerPolicy="no-referrer"
-                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110 motion-reduce:transition-none"
+                                className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110 motion-reduce:transition-none"
                                 onError={(event) => {
                                   const target =
                                     event.target as HTMLImageElement;

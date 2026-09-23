@@ -2,7 +2,7 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react"; 
 import "./Header.css";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { useAuth } from "@/app/contexts/AuthContext"; 
 import Image from "next/image";
@@ -80,6 +80,21 @@ const Header: React.FC = () => {
   const { user, setUser, isLoading, currentLang, setLang, T } = useAuth();
   
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+  // Phone menu. The nav links are hidden below 768px and there was nothing
+  // in their place, so on a phone the pages could not be reached from here.
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [pathname]);
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isMenuOpen]);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false); 
   const [showLogoutModal, setShowLogoutModal] = useState(false); 
 
@@ -279,12 +294,70 @@ const Header: React.FC = () => {
               </div>
             ) : (
               <button onClick={handleLoginClick} className="header-auth-button">
-                {T.nav.loginSignup}
+                <span className="label-full">{T.nav.loginSignup}</span>
+                <span className="label-short">{T.nav.loginShort}</span>
               </button>
             )}
           </div>
+
+          <button
+            type="button"
+            className={`header-menu-btn ${isMenuOpen ? "is-open" : ""}`}
+            aria-label={T.nav.menu}
+            aria-expanded={isMenuOpen}
+            aria-controls="mobile-menu"
+            onClick={() => setIsMenuOpen((open) => !open)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
         </div>
       </header>
+
+      {isMenuOpen && (
+        <div className="mobile-menu-backdrop" onClick={() => setIsMenuOpen(false)}>
+          <nav
+            id="mobile-menu"
+            className="mobile-menu"
+            aria-label={T.nav.menu}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <ul>
+              {navItems.map((item) => (
+                <li key={item.key}>
+                  <Link
+                    href={item.href}
+                    className={pathname === item.href ? "is-current" : ""}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {T.nav[item.key as keyof typeof T.nav]}
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <Link
+                  href="/chatbot"
+                  className="mobile-menu__ai"
+                  onClick={(event) => {
+                    setIsMenuOpen(false);
+                    if (requestChatDrawer()) event.preventDefault();
+                  }}
+                >
+                  🤖 {T.nav.chatbot}
+                </Link>
+              </li>
+              {user && (
+                <li>
+                  <Link href="/profile" onClick={() => setIsMenuOpen(false)}>
+                    {T.nav.profile}
+                  </Link>
+                </li>
+              )}
+            </ul>
+          </nav>
+        </div>
+      )}
 
       {showLogoutModal && (
           <LogoutModal 

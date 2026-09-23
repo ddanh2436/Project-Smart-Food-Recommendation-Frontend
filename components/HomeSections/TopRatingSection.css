@@ -540,3 +540,27 @@
     font-size: 1.8rem;
   }
 }
+
+/* Phones: title and "view all" share a row without squeezing the link into
+   two lines. */
+@media (max-width: 600px) {
+  .section-header-row {
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.5rem 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .section-header-row > div:first-child {
+    flex: 1 1 220px;
+  }
+  .link-view-all {
+    white-space: nowrap;
+  }
+  .section-title {
+    font-size: 1.8rem;
+    line-height: 1.15;
+  }
+  .section-subtitle {
+    font-size: 0.95rem;
+  }
+}
