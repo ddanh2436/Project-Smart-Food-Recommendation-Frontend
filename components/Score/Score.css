@@ -109,3 +109,20 @@
     height: 34px;
   }
 }
+
+/* Touch screens: ten 34px buttons in a row sat edge to edge, and 9 and 10
+   were easy to mistake for each other. Two rows of five, each at least the
+   44px a fingertip needs. */
+@media (max-width: 560px) {
+  .score-input-row {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(44px, 1fr));
+    gap: 8px;
+    width: 100%;
+  }
+  .score-step {
+    width: auto;
+    height: 44px;
+    font-size: 15px;
+  }
+}

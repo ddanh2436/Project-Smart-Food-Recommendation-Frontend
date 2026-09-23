@@ -26,6 +26,24 @@ const RoutingMap = dynamic(() => import("@/components/RoutingMap/RoutingMap"), {
 });
 
 // Các Icons (Giữ nguyên)
+/**
+ * Page numbers to show: the first, the last, and two either side of the
+ * current page, with gaps between. 1 … 4 5 [6] 7 8 … 173
+ */
+function pageWindow(current: number, total: number): (number | "gap")[] {
+  const pages = new Set([1, total]);
+  for (let page = current - 2; page <= current + 2; page += 1) {
+    if (page >= 1 && page <= total) pages.add(page);
+  }
+  const sorted = [...pages].sort((a, b) => a - b);
+  const out: (number | "gap")[] = [];
+  sorted.forEach((page, index) => {
+    if (index > 0 && page - sorted[index - 1] > 1) out.push("gap");
+    out.push(page);
+  });
+  return out;
+}
+
 /** Attributes offered as one-tap filters: the most common tags a diner picks by. */
 const QUICK_TAGS = [
   { tag: 'Máy lạnh', icon: '❄️' },
@@ -571,7 +589,48 @@ function RestaurantsContent() {
             {restaurants.length > 0 && totalPages > 1 && (
               <div className="pagination-wrapper">
                 <button className="page-btn prev" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>&larr; {t.prev}</button>
-                <div className="page-numbers"><span>{t.page} {currentPage} / {totalPages}</span></div>
+                {/* Numbered pages around the current one, plus a box to jump:
+                    with 170-odd pages, "Next" alone meant fifty clicks to
+                    reach page fifty. */}
+                <div className="page-numbers">
+                  {pageWindow(currentPage, totalPages).map((item, index) =>
+                    item === "gap" ? (
+                      <span key={`gap-${index}`} className="page-gap" aria-hidden="true">…</span>
+                    ) : (
+                      <button
+                        key={item}
+                        type="button"
+                        className={`page-num ${item === currentPage ? "is-current" : ""}`}
+                        aria-current={item === currentPage ? "page" : undefined}
+                        aria-label={`${t.page} ${item}`}
+                        onClick={() => handlePageChange(item)}
+                      >
+                        {item}
+                      </button>
+                    )
+                  )}
+                </div>
+                <form
+                  className="page-jump"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    const input = event.currentTarget.elements.namedItem("page") as HTMLInputElement;
+                    const target = Math.round(Number(input.value));
+                    if (target >= 1 && target <= totalPages) handlePageChange(target);
+                    input.value = "";
+                  }}
+                >
+                  <label htmlFor="page-jump-input">{t.goToPage}</label>
+                  <input
+                    id="page-jump-input"
+                    name="page"
+                    type="number"
+                    inputMode="numeric"
+                    min={1}
+                    max={totalPages}
+                    placeholder={`1–${totalPages}`}
+                  />
+                </form>
                 <button className="page-btn next" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>{t.next} &rarr;</button>
               </div>
             )}
@@ -584,12 +643,28 @@ function RestaurantsContent() {
             <div className="modal-panel" onClick={(e) => e.stopPropagation()}>
               <button className="modal-close-btn" onClick={closeModal}><XIcon /></button>
               <div className="modal-layout">
-                <div className="modal-image-col">
-                  <Image src={selectedRes.avatarUrl || "/assets/image/pho.png"} alt={selectedRes.tenQuan} width={900} height={700} className="modal-main-img" unoptimized={true} />
-                  <div className="modal-rating-overlay">
-                    <span className="big-score"><ScoreBadge score={selectedRes.diemTrungBinh} withScale /></span>
-                    <span className="score-label">{getRatingLabel(selectedRes.diemTrungBinh)}</span>
-                  </div>
+                {/* With the map on, it takes the photo's place in the large
+                    left column: squeezed into the narrow info column it was a
+                    small box that was hard to pan or read a route on. */}
+                <div className={`modal-image-col ${showMap && selectedRes.lat && selectedRes.lon ? 'has-map' : ''}`}>
+                  {showMap && selectedRes.lat && selectedRes.lon ? (
+                    <div className="modal-map-fill">
+                      <RoutingMap
+                        userLocation={userLocation}
+                        restaurantLocation={{ lat: selectedRes.lat, lon: selectedRes.lon }}
+                        locationStatus={geoStatus}
+                        onRequestLocation={requestLocation}
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <Image src={selectedRes.avatarUrl || "/assets/image/pho.png"} alt={selectedRes.tenQuan} width={900} height={700} className="modal-main-img" unoptimized={true} />
+                      <div className="modal-rating-overlay">
+                        <span className="big-score"><ScoreBadge score={selectedRes.diemTrungBinh} withScale /></span>
+                        <span className="score-label">{getRatingLabel(selectedRes.diemTrungBinh)}</span>
+                      </div>
+                    </>
+                  )}
                 </div>
                 
                 <div className="modal-info-col">
@@ -612,17 +687,6 @@ function RestaurantsContent() {
                         <MapPinIcon /> {showMap ? t.hideMap : t.showMap}
                      </button>
 
-                     {showMap && selectedRes.lat && selectedRes.lon && (
-                        <div style={{ width: '100%', marginTop: '15px' }}>
-                            <RoutingMap
-                                userLocation={userLocation}
-                                restaurantLocation={{ lat: selectedRes.lat, lon: selectedRes.lon }}
-                                locationStatus={geoStatus}
-                                onRequestLocation={requestLocation}
-                            />
-                        </div>
-                     )}
-                     
                      {showMap && (!selectedRes.lat || !selectedRes.lon) && (
                         <p style={{color: '#d32f2f', fontSize: '14px', marginTop: '10px', textAlign: 'center'}}>
                             {t.noMapData}

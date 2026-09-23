@@ -211,18 +211,29 @@ export function DistanceLine({
  * while the document carried a dozen usable attributes — air conditioning,
  * who the place suits, which meals it serves — that were never surfaced.
  */
+/** Chips shown per group before "+N"; the groups sit side by side. */
+const AMENITY_PREVIEW = 4;
+
 export function AmenityTags({ tags }: { tags: string[] }) {
   const { t, lang } = useTranslation();
+  const [expanded, setExpanded] = React.useState(false);
   const groups = groupAmenities(tags, t, lang);
   if (groups.length === 0) return null;
 
+  const hidden = groups.reduce(
+    (sum, group) => sum + Math.max(0, group.items.length - AMENITY_PREVIEW),
+    0,
+  );
+
+  // Side by side and capped, rather than three stacked full-width lists that
+  // pushed the reviews a screen further down.
   return (
     <div className="amenity-groups">
       {groups.map((group) => (
         <div key={group.key} className="amenity-group">
           <h4 className="amenity-label">{group.label}</h4>
           <ul className="amenity-list">
-            {group.items.map((item) => (
+            {(expanded ? group.items : group.items.slice(0, AMENITY_PREVIEW)).map((item) => (
               <li key={item.tag} className="amenity-chip">
                 <span aria-hidden="true">{item.icon}</span> {item.tag}
               </li>
@@ -230,6 +241,16 @@ export function AmenityTags({ tags }: { tags: string[] }) {
           </ul>
         </div>
       ))}
+      {hidden > 0 && (
+        <button
+          type="button"
+          className="amenity-more"
+          aria-expanded={expanded}
+          onClick={() => setExpanded((open) => !open)}
+        >
+          {expanded ? t.detail.showLess : `+${hidden} ${t.detail.showMore}`}
+        </button>
+      )}
     </div>
   );
 }
