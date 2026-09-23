@@ -26,6 +26,9 @@ import {
 import { cuisineTags, parseTags } from "@/app/lib/restaurant";
 import { useGeolocation } from "@/app/hooks/useGeolocation";
 import { useTranslation } from "@/app/hooks/useTranslation";
+import { useAuth } from "@/app/contexts/AuthContext";
+import Link from "next/link";
+import axios from "axios";
 
 import ReviewOverview from "@/components/ReviewOverview/ReviewOverview";
 import ReviewAspects from "@/components/ReviewAspects/ReviewAspects";
@@ -85,6 +88,7 @@ export default function RestaurantDetailPage() {
   const { id } = useParams();
   const { coords } = useGeolocation();
   const { t, lang } = useTranslation();
+  const { user, isLoading: authLoading } = useAuth();
 
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -171,7 +175,12 @@ export default function RestaurantDetailPage() {
       setScore(9);
       toast.success(t.reviews.thanks);
     } catch (error) {
-      toast.error(describeError(error));
+      // The server's own wording is English; these two cases are expected
+      // outcomes rather than faults, so they get the interface's language.
+      const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+      if (status === 409) toast.error(t.reviews.errAlreadyReviewed);
+      else if (status === 401) toast.error(t.reviews.loginToReview);
+      else toast.error(describeError(error));
     } finally {
       setSubmitting(false);
     }
@@ -353,6 +362,18 @@ export default function RestaurantDetailPage() {
             {t.reviews.heading} ({reviews.length})
           </h2>
 
+          {/* Reviews need an account now: each one moves the adjusted score
+              that orders the listings, so anonymous posting was a lever
+              anyone could pull. Signed-out readers get a way in instead. */}
+          {!authLoading && !user ? (
+            <div className="write-review-box">
+              <h3>{t.reviews.writeTitle}</h3>
+              <p className="review-login-hint">{t.reviews.loginToReview}</p>
+              <Link href="/auth" className="btn-submit-review">
+                {t.reviews.loginButton}
+              </Link>
+            </div>
+          ) : (
           <div className="write-review-box">
             <h3>{t.reviews.writeTitle}</h3>
             <div className="rating-select-row">
@@ -382,6 +403,7 @@ export default function RestaurantDetailPage() {
               </button>
             </div>
           </div>
+          )}
 
           <ReviewOverview reviews={reviews} />
           <ReviewAspects data={insights} loading={insightsLoading} />

@@ -752,3 +752,15 @@
   /* No hover to reveal it on a touch screen. */
   .similar-compare { opacity: 1; }
 }
+
+/* Shown in place of the review form to signed-out readers. */
+.review-login-hint {
+  margin: 4px 0 14px;
+  font-size: 0.92rem;
+  color: #a8a29e;
+}
+
+.write-review-box a.btn-submit-review {
+  display: inline-block;
+  text-decoration: none;
+}
