@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { getProfile, tokenStore } from "@/app/lib/api";
 import { useTranslation } from "@/app/hooks/useTranslation";
+import { takeReturnTo } from "@/app/lib/returnTo";
 
 /**
  * Landing page for the Google OAuth redirect.
@@ -55,7 +56,8 @@ export default function AuthCallbackPage() {
     getProfile()
       .then((profile) => {
         setUser(profile);
-        router.replace("/");
+        // Back to the page sign-in was started from, if it was the dialog.
+        router.replace(takeReturnTo());
       })
       .catch(() => {
         tokenStore.clear();

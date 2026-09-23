@@ -1,7 +1,7 @@
 // app/contexts/AuthContext.tsx
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useCallback, useContext, useState, useEffect, ReactNode } from "react";
 // [FIX] Import api từ lib thay vì dùng axios trực tiếp để đảm bảo BaseURL đúng (3001)
 import api from '@/app/lib/api'; 
 import { useRouter } from 'next/navigation';
@@ -31,6 +31,8 @@ interface User {
 
 type Lang = 'en' | 'vn';
 
+export type AuthMode = 'login' | 'register';
+
 // The storage key, the change event and the out-of-tree reader now live in
 // app/lib/i18n.ts, so `app/lib/api.ts` can read the language without importing
 // this module (which imports the API client, closing a cycle). Re-exported
@@ -44,6 +46,10 @@ interface AuthContextType {
   currentLang: Lang; 
   setLang: (lang: Lang) => void;
   T: Dict;
+  /** Which tab the sign-in dialog is open on, or null when it is closed. */
+  authModal: AuthMode | null;
+  openAuth: (mode?: AuthMode) => void;
+  closeAuth: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -52,6 +58,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentLang, setCurrentLang] = useState<Lang>('vn');
+  const [authModal, setAuthModal] = useState<AuthMode | null>(null);
+  // Stable identities: the dialog's effects depend on these, and a new
+  // function each render would re-run them and steal focus while typing.
+  const openAuth = useCallback((mode: AuthMode = 'login') => setAuthModal(mode), []);
+  const closeAuth = useCallback(() => setAuthModal(null), []);
   const router = useRouter();
 
   const loadUser = async () => {
@@ -141,7 +152,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       isLoading,
       currentLang, 
       setLang,     
-      T            
+      T,
+      authModal,
+      openAuth,
+      closeAuth,
     }}>
       {children}
     </AuthContext.Provider>
