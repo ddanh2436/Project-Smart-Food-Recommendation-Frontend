@@ -1,0 +1,288 @@
+/* Shared by the sign-in dialog and the /auth page.
+   Dark, to match the rest of the site; the accent is the same amber the
+   header and buttons use everywhere else (#e9a004). */
+.auth-form {
+  --af-surface: #18181b;
+  --af-field: #0f0f11;
+  --af-border: #2e2e36;
+  --af-border-strong: #45454f;
+  --af-text: #f4f4f5;
+  --af-muted: #a1a1aa;
+  --af-accent: #e9a004;
+  --af-accent-hover: #f5b41f;
+  --af-danger: #f87171;
+
+  color: var(--af-text);
+  font-family: var(--font-ui);
+  width: 100%;
+}
+
+.auth-form__brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.auth-form__logo {
+  font-size: 1.6rem;
+}
+.auth-form__name {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.auth-form__tagline {
+  margin: 0.25rem 0 1.25rem;
+  text-align: center;
+  color: var(--af-muted);
+  font-size: 0.9rem;
+}
+
+/* Segmented control */
+.auth-form__tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 4px;
+  gap: 4px;
+  background: var(--af-field);
+  border: 1px solid var(--af-border);
+  border-radius: 12px;
+}
+.auth-form__tab {
+  padding: 0.6rem 0.5rem;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--af-muted);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.auth-form__tab:hover {
+  color: var(--af-text);
+}
+.auth-form__tab.is-active {
+  background: #26262c;
+  color: var(--af-text);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.auth-form__lead {
+  margin: 1rem 0;
+  color: var(--af-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* Google's dark-theme button: #131314 fill, #8e918f outline, white label. */
+.auth-form__google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  width: 100%;
+  min-height: 46px;
+  padding: 0 1rem;
+  border: 1px solid #8e918f;
+  border-radius: 10px;
+  background: #131314;
+  color: #e3e3e3;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+.auth-form__google:hover {
+  background: #1f1f21;
+}
+.auth-form__google-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.auth-form__divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+  color: var(--af-muted);
+  font-size: 0.8rem;
+}
+.auth-form__divider::before,
+.auth-form__divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--af-border);
+}
+
+/* Fields */
+.auth-field {
+  margin-bottom: 1rem;
+}
+.auth-field label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.auth-field input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 46px;
+  padding: 0 0.9rem;
+  border: 1px solid var(--af-border-strong);
+  border-radius: 10px;
+  background: var(--af-field);
+  color: var(--af-text);
+  /* 16px keeps iOS Safari from zooming the page on focus. */
+  font: inherit;
+  font-size: 16px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.auth-field input::placeholder {
+  color: #63636e;
+}
+.auth-field input:focus {
+  outline: none;
+  border-color: var(--af-accent);
+  box-shadow: 0 0 0 3px rgba(233, 160, 4, 0.2);
+}
+.auth-field input[aria-invalid="true"] {
+  border-color: var(--af-danger);
+}
+.auth-field input[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.2);
+}
+.auth-field input:disabled {
+  opacity: 0.6;
+}
+.auth-field__hint,
+.auth-field__error {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+.auth-field__hint {
+  color: var(--af-muted);
+}
+.auth-field__error {
+  color: var(--af-danger);
+}
+
+.auth-field__password {
+  position: relative;
+}
+.auth-field__password input {
+  padding-right: 3rem;
+}
+.auth-field__reveal {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--af-muted);
+  cursor: pointer;
+  border-radius: 10px;
+}
+.auth-field__reveal:hover {
+  color: var(--af-text);
+}
+
+.auth-strength {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+.auth-strength__bars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  width: 96px;
+  flex-shrink: 0;
+}
+.auth-strength__bars span {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--af-border);
+}
+.auth-strength__bars span.is-on.level-1 {
+  background: #f87171;
+}
+.auth-strength__bars span.is-on.level-2 {
+  background: #fbbf24;
+}
+.auth-strength__bars span.is-on.level-3 {
+  background: #4ade80;
+}
+.auth-strength__label {
+  color: var(--af-muted);
+  font-size: 0.78rem;
+}
+
+.auth-form__api-error {
+  margin: 0 0 1rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  border-radius: 10px;
+  background: rgba(248, 113, 113, 0.1);
+  color: #fecaca;
+  font-size: 0.85rem;
+}
+
+.auth-form__submit {
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--af-accent);
+  color: #1a1204;
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(233, 160, 4, 0.25);
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+.auth-form__submit:hover:not(:disabled) {
+  background: var(--af-accent-hover);
+}
+.auth-form__submit:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.auth-form__submit:disabled {
+  opacity: 0.65;
+  cursor: progress;
+}
+
+.auth-form__switch {
+  margin: 1.25rem 0 0;
+  text-align: center;
+  color: var(--af-muted);
+  font-size: 0.88rem;
+}
+.auth-form__switch button {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--af-accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.auth-form__switch button:hover {
+  text-decoration: underline;
+}
+
+.auth-form :focus-visible {
+  outline: 2px solid var(--af-accent);
+  outline-offset: 2px;
+}

@@ -75,7 +75,7 @@ const navItems = [
 
 const Header: React.FC = () => {
   const router = useRouter();
-  const { user, setUser, isLoading, currentLang, setLang, T } = useAuth(); 
+  const { user, setUser, isLoading, currentLang, setLang, T, openAuth } = useAuth();
   
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false); 
@@ -135,8 +135,9 @@ const Header: React.FC = () => {
     router.push("/");
   };
 
+  // Opens the sign-in dialog over the current page rather than leaving it.
   const handleLoginClick = () => {
-    router.push("/auth");
+    openAuth();
   };
 
   return (

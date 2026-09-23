@@ -27,7 +27,6 @@ import { cuisineTags, parseTags } from "@/app/lib/restaurant";
 import { useGeolocation } from "@/app/hooks/useGeolocation";
 import { useTranslation } from "@/app/hooks/useTranslation";
 import { useAuth } from "@/app/contexts/AuthContext";
-import Link from "next/link";
 import axios from "axios";
 
 import ReviewOverview from "@/components/ReviewOverview/ReviewOverview";
@@ -88,7 +87,7 @@ export default function RestaurantDetailPage() {
   const { id } = useParams();
   const { coords } = useGeolocation();
   const { t, lang } = useTranslation();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, openAuth } = useAuth();
 
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -369,9 +368,10 @@ export default function RestaurantDetailPage() {
             <div className="write-review-box">
               <h3>{t.reviews.writeTitle}</h3>
               <p className="review-login-hint">{t.reviews.loginToReview}</p>
-              <Link href="/auth" className="btn-submit-review">
+              {/* A dialog, not a link to /auth: the review goes on this page. */}
+              <button type="button" className="btn-submit-review" onClick={() => openAuth()}>
                 {t.reviews.loginButton}
-              </Link>
+              </button>
             </div>
           ) : (
           <div className="write-review-box">
