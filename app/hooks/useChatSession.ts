@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
-import {
+import { useCallback, useEffect, useRef, useState } from "react";
+import api, {
   chatWithBot,
   searchRestaurantsByImage,
   type ChatChip,
@@ -128,6 +128,35 @@ function describeImageResult(
  * language systems drifted apart earlier in this codebase. One implementation
  * means a fix lands in both places.
  */
+/**
+ * A greeting on its own ("xin chào", "hi"). Answered in the browser: sending
+ * it meant a round trip through the API to the AI service, and when both were
+ * asleep on their free hosts a "hello" sat on the typing dots for a minute.
+ */
+function isGreeting(text: string): boolean {
+  const folded = text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/gi, "d")
+    .toLowerCase()
+    .replace(/[!.?,~\s]+$/g, "")
+    .trim();
+  return /^(xin chao|chao|chao ban|chao shop|hello|hi|hey|alo|he lo|good (morning|afternoon|evening))( (ban|nhe|nha|ad|admin|bot))?$/.test(folded);
+}
+
+/** Wake the API once per page load, so it is up by the time a question is sent. */
+let woken = false;
+export function wakeChatServer(): void {
+  if (woken) return;
+  woken = true;
+  api.get("/").catch(() => {
+    /* only a warm-up */
+  });
+}
+
+/** Seconds of waiting after which the wait is explained rather than dotted. */
+const SLOW_AFTER_MS = 6_000;
+
 export function useChatSession() {
   // The language is the app's, not a per-surface constant. Both chat surfaces
   // used to hardcode "vi", so the assistant answered in Vietnamese even with
@@ -136,8 +165,20 @@ export function useChatSession() {
   const { lang, t } = useTranslation();
   const [messages, setMessages] = useState<ChatMessage[]>(() => makeGreeting(t));
   const [loading, setLoading] = useState(false);
+  // True once an answer has taken longer than SLOW_AFTER_MS: the free hosts
+  // may be starting up, and saying so beats dots that look frozen.
+  const [slow, setSlow] = useState(false);
   const { coords, status: geoStatus, request: requestLocation } =
     useGeolocation();
+
+  useEffect(() => {
+    if (!loading) {
+      setSlow(false);
+      return;
+    }
+    const timer = setTimeout(() => setSlow(true), SLOW_AFTER_MS);
+    return () => clearTimeout(timer);
+  }, [loading]);
 
   // Read through a ref so `send` does not need `messages` as a dependency,
   // which would rebuild the callback on every single message.
@@ -154,6 +195,17 @@ export function useChatSession() {
       if (!text) return;
 
       append({ id: Date.now(), sender: "user", text });
+
+      if (isGreeting(text)) {
+        append({
+          id: Date.now() + 1,
+          sender: "bot",
+          text: t.chat.greetingReply,
+          kind: "greeting",
+        });
+        return;
+      }
+
       setLoading(true);
 
       // Only real conversational turns become history; image placeholders
@@ -255,6 +307,7 @@ export function useChatSession() {
     t,
     messages,
     loading,
+    slow,
     coords,
     geoStatus,
     send,

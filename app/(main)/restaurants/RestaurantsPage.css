@@ -1246,3 +1246,84 @@ filter-actions {
     flex-shrink: 0;
   }
 }
+
+/* Numbered pages and a jump box. */
+.pagination-wrapper {
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+}
+.page-numbers {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.page-num {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  background: transparent;
+  color: #e4e4e7;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.page-num:hover {
+  border-color: #e9a004;
+}
+.page-num.is-current {
+  border-color: #e9a004;
+  background: #e9a004;
+  color: #000;
+}
+.page-gap {
+  color: #71717a;
+  padding: 0 0.15rem;
+}
+.page-jump {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #a1a1aa;
+  font-size: 0.85rem;
+}
+.page-jump input {
+  width: 84px;
+  height: 40px;
+  padding: 0 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  background: #0f0f11;
+  color: #fff;
+  font: inherit;
+}
+.page-jump input:focus {
+  outline: none;
+  border-color: #e9a004;
+}
+@media (max-width: 640px) {
+  .page-btn {
+    padding: 8px 12px;
+  }
+  .page-num {
+    min-width: 36px;
+    height: 36px;
+  }
+}
+
+/* Map in the quick view: fills the large left column. */
+.modal-map-fill {
+  height: 100%;
+}
+.modal-map-fill .rmap {
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+}
+@media (max-width: 768px) {
+  .modal-image-col.has-map {
+    height: 440px;
+  }
+}

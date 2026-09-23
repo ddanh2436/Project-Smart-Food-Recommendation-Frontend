@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { FaDice, FaRedo } from "react-icons/fa";
+import { FaDice, FaRedo, FaTimes } from "react-icons/fa";
 import {
   getSuggestionsForNow,
   getSurprisePick,
@@ -37,6 +37,26 @@ export default function RightNowSection() {
   const [loading, setLoading] = useState(true);
   const [pick, setPick] = useState<SurprisePick | null>(null);
   const [picking, setPicking] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  // Which shortlisted place the "reel" shows while the pick is on its way.
+  const [reel, setReel] = useState(0);
+
+  /**
+   * The next pick, fetched before it is asked for.
+   *
+   * The draw itself takes a fraction of a second, but the free API host
+   * sleeps when idle and the first request after that waits for it to wake —
+   * ten seconds or more. Drawing ahead, as soon as the section has loaded
+   * and again after every reveal, means the button answers at once.
+   */
+  const nextPick = useRef<Promise<SurprisePick | null> | null>(null);
+  const prefetch = useCallback(() => {
+    nextPick.current = getSurprisePick(coords).catch(() => null);
+  }, [coords]);
+
+  useEffect(() => {
+    if (!loading && suggestions?.data.length) prefetch();
+  }, [loading, suggestions, prefetch]);
 
   // Re-runs when the position arrives, so the block starts city-wide and
   // tightens to what is actually near once permission is granted.
@@ -54,14 +74,48 @@ export default function RightNowSection() {
     };
   }, [coords]);
 
+  /**
+   * The pick opens in a dialog, spinning through the shortlist first.
+   *
+   * It used to be inserted above the shortlist, which pushed the whole list
+   * down the moment it arrived. In a dialog nothing on the page moves, and
+   * the short spin gives the draw a moment of suspense. The spin lasts at
+   * least ~1.2s but never longer than the request itself needs.
+   */
   const roll = async () => {
+    setDialogOpen(true);
     setPicking(true);
+    const places = suggestions?.data ?? [];
+    const reduced =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const timer =
+      places.length > 1 && !reduced
+        ? window.setInterval(() => setReel((n) => (n + 1) % places.length), 90)
+        : undefined;
     try {
-      setPick(await getSurprisePick(coords));
+      const pending = nextPick.current ?? getSurprisePick(coords);
+      nextPick.current = null;
+      const [result] = await Promise.all([
+        pending,
+        new Promise((resolve) => setTimeout(resolve, reduced ? 0 : 900)),
+      ]);
+      setPick(result);
     } finally {
+      if (timer) window.clearInterval(timer);
       setPicking(false);
+      prefetch();
     }
   };
+
+  useEffect(() => {
+    if (!dialogOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setDialogOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [dialogOpen]);
 
   // Nothing open and nothing to say: better no section than an empty one.
   if (!loading && (!suggestions || suggestions.data.length === 0)) return null;
@@ -83,19 +137,10 @@ export default function RightNowSection() {
           </div>
 
           <button type="button" className="rn-dice" onClick={roll} disabled={picking}>
-            {pick ? <FaRedo /> : <FaDice />}
-            {pick ? t.rightNow.again : t.rightNow.dice}
+            <FaDice />
+            {t.rightNow.dice}
           </button>
         </div>
-
-        {/* The single pick, when asked for. It sits above the shortlist rather
-            than replacing it, so the answer is a suggestion and not a wall. */}
-        {pick?.data && (
-          <PickCard pick={pick} t={t} />
-        )}
-        {pick && !pick.data && (
-          <p className="rn-empty">{t.rightNow.noPick}</p>
-        )}
 
         <ul className="rn-grid">
           {loading
@@ -107,7 +152,69 @@ export default function RightNowSection() {
               ))}
         </ul>
       </div>
+
+      {dialogOpen && (
+        <div
+          className="rn-dialog-backdrop"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setDialogOpen(false);
+          }}
+        >
+          <div className="rn-dialog" role="dialog" aria-modal="true" aria-label={t.rightNow.pickBadge}>
+            <button
+              type="button"
+              className="rn-dialog-close"
+              onClick={() => setDialogOpen(false)}
+              aria-label={t.common.closeLabel}
+            >
+              <FaTimes />
+            </button>
+
+            {picking ? (
+              <Reel place={suggestions?.data[reel]} t={t} />
+            ) : pick?.data ? (
+              <div className="rn-reveal">
+                <PickCard pick={pick} t={t} />
+              </div>
+            ) : (
+              <p className="rn-empty">{t.rightNow.noPick}</p>
+            )}
+
+            <div className="rn-dialog-actions">
+              <button type="button" className="rn-dice" onClick={roll} disabled={picking}>
+                <FaRedo /> {t.rightNow.again}
+              </button>
+              {!picking && pick?.data && (
+                <Link href={`/restaurants/${pick.data._id}`} className="rn-dialog-go">
+                  {t.rightNow.goThere} →
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </section>
+  );
+}
+
+/** One frame of the spin: whichever shortlisted place is under the needle. */
+function Reel({
+  place,
+  t,
+}: {
+  place?: Restaurant;
+  t: ReturnType<typeof useTranslation>["t"];
+}) {
+  return (
+    <div className="rn-reel" role="status" aria-label={t.rightNow.picking}>
+      <span className="rn-pick-badge">{t.rightNow.picking}</span>
+      {place && (
+        <div className="rn-reel-frame">
+          <img src={place.avatarUrl || "/assets/image/pho.png"} alt="" referrerPolicy="no-referrer" />
+          <span className="rn-reel-name">{place.tenQuan}</span>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -127,8 +234,10 @@ function PickCard({
   if (reasons?.distanceKm !== null && reasons?.distanceKm !== undefined) {
     parts.push(`${t.rightNow.becauseNear} ${reasons.distanceKm} km`);
   }
-  if (reasons?.rawScore) {
-    parts.push(`${t.rightNow.becauseScore} ${formatRating(reasons.rawScore)}/10`);
+  // The adjusted score, as shown everywhere else on the site.
+  const score = reasons?.score ?? reasons?.rawScore;
+  if (score) {
+    parts.push(`${t.rightNow.becauseScore} ${formatRating(score)}/10`);
   }
 
   return (

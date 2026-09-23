@@ -16,7 +16,7 @@ import {
   FaLocationArrow,
   FaRedo,
 } from "react-icons/fa";
-import { chatSuggestions, useChatSession } from "@/app/hooks/useChatSession";
+import { chatSuggestions, useChatSession, wakeChatServer } from "@/app/hooks/useChatSession";
 import { formatReviewCount } from "@/app/lib/rating";
 import { ScoreBadge } from "@/components/Score/Score";
 import ResultReasons from "@/components/ChatWidget/ResultReasons";
@@ -71,6 +71,7 @@ function ChatbotContent() {
     lang,
     messages,
     loading,
+    slow,
     coords,
     geoStatus,
     send: sendMessage,
@@ -78,6 +79,11 @@ function ChatbotContent() {
     enableLocationAndRetry,
     reset,
   } = useChatSession();
+
+  // Start the API waking as the page opens, before the first question.
+  useEffect(() => {
+    wakeChatServer();
+  }, []);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
@@ -362,6 +368,9 @@ function ChatbotContent() {
                     style={{ animationDelay: `${i * 0.15}s` }}
                   />
                 ))}
+                <span className="ml-2 text-xs text-stone-400">
+                  {slow ? t.chat.slowServer : t.chat.searching}
+                </span>
               </div>
             </div>
           )}

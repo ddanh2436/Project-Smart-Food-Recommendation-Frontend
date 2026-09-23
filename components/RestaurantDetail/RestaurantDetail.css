@@ -772,3 +772,69 @@
 .rating-adjusted-note strong {
   color: #e4e4e7;
 }
+
+/* "Ask about this place": answers shown in place. */
+.ask-ai-chip.is-on {
+  border-color: #e9a004;
+  background: #e9a004;
+  color: #1a1204;
+}
+.ask-ai-answer {
+  margin: 0.9rem 0 0;
+  padding: 0.85rem 1rem;
+  border-left: 3px solid #e9a004;
+  border-radius: 10px;
+  background: rgba(233, 160, 4, 0.08);
+  color: #f4f4f5;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  animation: ask-in 0.2s ease-out;
+}
+@keyframes ask-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+.ask-ai-more {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.ask-ai-more-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #a1a1aa;
+  font-size: 0.8rem;
+}
+.ask-ai-chip--search {
+  opacity: 0.85;
+}
+
+/* Amenity groups side by side, compact chips. */
+.amenity-groups {
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px 18px;
+}
+.amenity-chip {
+  padding: 3px 10px;
+  font-size: 0.8rem;
+}
+.amenity-more {
+  grid-column: 1 / -1;
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #e9a004;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.amenity-more:hover {
+  text-decoration: underline;
+}

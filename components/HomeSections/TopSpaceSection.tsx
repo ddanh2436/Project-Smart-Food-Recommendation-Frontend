@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link"; 
 import { getTopRestaurants, type Restaurant } from "@/app/lib/api";
-import { formatReviewCount, ratingLabel } from "@/app/lib/rating";
+import { formatRating, formatReviewCount, ratingLabel } from "@/app/lib/rating";
 import { ScoreBadge } from "@/components/Score/Score";
 import "./TopRatingSection.css"; // Tái sử dụng CSS của Top Rated
 import { useTranslation } from "@/app/hooks/useTranslation";
@@ -111,10 +111,10 @@ const TopSpaceSection = () => {
                   <div className="card-content">
                     <h3 className="restaurant-name">{res.tenQuan}</h3>
                       <p className="card-tag-row">
-                        <span className="card-category">{T.restaurantPage.labels.space}</span>
+                        <span className="card-category">{T.restaurantPage.labels.space} <strong>{formatRating(res.diemKhongGian)}</strong></span>
                         {formatReviewCount(res.reviewCount, lang) && (
                           <span className="card-review-count">
-                            {formatReviewCount(res.reviewCount, lang)}
+                            · {formatReviewCount(res.reviewCount, lang)}
                           </span>
                         )}
                       </p>

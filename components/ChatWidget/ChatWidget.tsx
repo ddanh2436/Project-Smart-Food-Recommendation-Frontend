@@ -18,7 +18,7 @@ import {
 } from "react-icons/fa";
 import { CHAT_OPEN_EVENT } from "@/app/lib/chatEvents";
 import { useAuth } from "@/app/contexts/AuthContext";
-import { chatSuggestions, useChatSession } from "@/app/hooks/useChatSession";
+import { chatSuggestions, useChatSession, wakeChatServer } from "@/app/hooks/useChatSession";
 import { formatReviewCount } from "@/app/lib/rating";
 import { ScoreBadge } from "@/components/Score/Score";
 import ResultReasons from "./ResultReasons";
@@ -72,6 +72,7 @@ export default function ChatWidget() {
     lang,
     messages,
     loading,
+    slow,
     coords,
     geoStatus,
     send: sendMessage,
@@ -136,6 +137,8 @@ export default function ChatWidget() {
 
   useEffect(() => {
     if (!isOpen) return;
+    // Start the API waking while the user is still typing.
+    wakeChatServer();
     const timer = setTimeout(() => inputRef.current?.focus(), 250);
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setIsOpen(false);
@@ -453,7 +456,9 @@ export default function ChatWidget() {
                 ))}
                 {/* Words beside the dots: a free-tier AI service can take
                     several seconds, and dots alone read as a stall. */}
-                <span className="ml-2 text-xs text-stone-400">{t.chat.searching}</span>
+                <span className="ml-2 text-xs text-stone-400">
+                  {slow ? t.chat.slowServer : t.chat.searching}
+                </span>
               </div>
             </div>
           )}
