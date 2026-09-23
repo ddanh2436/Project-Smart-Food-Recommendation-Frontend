@@ -10,10 +10,6 @@ import {
   FaTiktok,
   FaInstagram,
   FaYoutube,
-  FaCcVisa,
-  FaCcMastercard,
-  FaCcAmex,
-  FaCcPaypal,
 } from "react-icons/fa";
 import { useTranslation } from "@/app/hooks/useTranslation";
 import "./Footer.css";
@@ -61,7 +57,7 @@ const Footer = () => {
                 src="/assets/image/logo.png"
                 alt="VietNomNom"
                 width={160}
-                height={60}
+                height={111}
                 className="footer-logo-img"
               />
             </div>
@@ -90,7 +86,8 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Contact & payment */}
+          {/* Contact. No payment logos: nothing is sold or paid for here, and card
+              marks made the site read as a delivery shop. */}
           <div className="footer-col contact-col">
             <h3 className="footer-heading">{t.footer.contact}</h3>
             {/* Personal mobile and a gmail address made the site read as a
@@ -119,12 +116,6 @@ const Footer = () => {
                   <Icon />
                 </a>
               ))}
-            </div>
-            <div className="payment-methods">
-              <FaCcVisa />
-              <FaCcMastercard />
-              <FaCcAmex />
-              <FaCcPaypal />
             </div>
           </div>
         </div>

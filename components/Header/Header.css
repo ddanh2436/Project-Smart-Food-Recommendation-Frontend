@@ -23,10 +23,11 @@
 }
 
 .logo-image {
-  height: 50px;
+  /* The mark carries its own cream colour on a transparent ground, so no
+     filter: the old white-out filter would flatten it to a silhouette. */
+  height: 64px;
   width: auto;
   display: block;
-  filter: brightness(0) invert(1); 
   transition: opacity 0.2s ease;
 }
 
@@ -201,6 +202,9 @@
   .header-container {
     padding: 1rem;
     background: rgba(0,0,0,0.8);
+  }
+  .logo-image {
+    height: 48px;
   }
   .header-right-side {
     gap: 1rem;

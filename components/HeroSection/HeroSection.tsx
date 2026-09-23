@@ -6,7 +6,6 @@ import { useTranslation } from "@/app/hooks/useTranslation";
 import { useRouter } from "next/navigation";
 import { searchRestaurantsByImage } from "@/app/lib/api"; 
 import { ScoreBadge } from "@/components/Score/Score";
-import FeaturedTicker from "./FeaturedTicker";
 import toast from "react-hot-toast";
 import { FaMapMarkerAlt, FaStore, FaTimes, FaUtensils } from "react-icons/fa";
 
@@ -16,7 +15,7 @@ import { FaMapMarkerAlt, FaStore, FaTimes, FaUtensils } from "react-icons/fa";
 // The mock lists that used to live here (topFoods / topDrinks /
 // topRestaurants) are gone with the carousel that showed them: they were
 // invented names, present in no record, rendered with `cursor: pointer` and no
-// click handler. FeaturedTicker shows real restaurants instead.
+// click handler. FeaturedStrip, under the hero, shows real restaurants instead.
 const TRENDING_KEYWORDS = ["Phở", "Bún đậu", "Bún bò", "Hủ tiếu", "Bánh mì"];
 
 const DISCOVER_OPTIONS = {
@@ -345,9 +344,6 @@ const HeroSection: React.FC = () => {
           </div>
         </div>
 
-        <div className="hero-featured-right">
-          <FeaturedTicker />
-        </div>
 
       </div>
 

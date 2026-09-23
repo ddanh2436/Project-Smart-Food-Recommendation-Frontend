@@ -1,0 +1,187 @@
+.fstrip {
+  position: relative;
+  z-index: 3;
+  margin-top: -5rem;
+  padding: 0 0 2.5rem;
+  background: linear-gradient(to bottom, transparent 0, #050505 5rem);
+  font-family: var(--font-ui);
+  color: #f4f4f5;
+}
+.fstrip__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  max-width: 1400px;
+  margin: 0 auto 1.1rem;
+  padding: 0 3rem;
+}
+.fstrip__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  color: #e9a004;
+}
+.fstrip__sub {
+  margin: 0.25rem 0 0;
+  color: #a1a1aa;
+  font-size: 0.88rem;
+}
+.fstrip__all {
+  flex-shrink: 0;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+.fstrip__all:hover {
+  color: #e9a004;
+}
+
+.fstrip__viewport {
+  overflow: hidden;
+  /* Fade the strip into the page at both ends. */
+  mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
+}
+.fstrip__track {
+  display: flex;
+  width: max-content;
+  animation: fstrip-slide linear infinite;
+}
+.fstrip__viewport:hover .fstrip__track,
+.fstrip__viewport:focus-within .fstrip__track {
+  animation-play-state: paused;
+}
+@keyframes fstrip-slide {
+  to { transform: translateX(-50%); }
+}
+
+.fstrip__list {
+  display: flex;
+  gap: 1.1rem;
+  margin: 0;
+  padding: 0.5rem 1.1rem 0.5rem 0;
+  list-style: none;
+}
+.fstrip__skeleton {
+  width: 260px;
+  height: 250px;
+  border-radius: 16px;
+  background: linear-gradient(100deg, #18181b 30%, #232327 50%, #18181b 70%);
+  background-size: 200% 100%;
+  animation: fstrip-shimmer 1.3s linear infinite;
+}
+@keyframes fstrip-shimmer {
+  to { background-position: -200% 0; }
+}
+
+.fcard {
+  width: 260px;
+  flex-shrink: 0;
+}
+.fcard__link {
+  display: block;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: #141417;
+  color: inherit;
+  text-decoration: none;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.fcard__link:hover,
+.fcard__link:focus-visible {
+  transform: translateY(-4px);
+  border-color: rgba(233, 160, 4, 0.55);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+  outline: none;
+}
+.fcard__media {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: #1f1f23;
+}
+.fcard__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+.fcard__link:hover .fcard__media img {
+  transform: scale(1.06);
+}
+.fcard__score {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 0.2rem 0.55rem;
+  border-radius: 8px;
+  background: rgba(10, 10, 11, 0.85);
+  color: #f5b41f;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+.fcard__body {
+  padding: 0.8rem 0.95rem 0.95rem;
+}
+.fcard__name {
+  margin: 0;
+  overflow: hidden;
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.35;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.fcard__caption {
+  margin: 0.3rem 0 0;
+  overflow: hidden;
+  color: #a1a1aa;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.fcard__reviews {
+  margin: 0.45rem 0 0;
+  color: #71717a;
+  font-size: 0.75rem;
+}
+
+/* Touch screens: a swipeable row, no drifting. */
+@media (hover: none), (max-width: 768px) {
+  .fstrip {
+    margin-top: 0;
+  }
+  .fstrip__head {
+    padding: 0 1rem;
+  }
+  .fstrip__viewport {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    mask-image: none;
+    padding-left: 1rem;
+  }
+  .fstrip__track {
+    animation: none;
+  }
+  /* The second copy only exists to make the loop seamless. */
+  .fstrip__track > .fstrip__list:nth-child(2) {
+    display: none;
+  }
+  .fcard {
+    width: 220px;
+    scroll-snap-align: start;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fstrip__viewport {
+    overflow-x: auto;
+  }
+  .fstrip__track {
+    animation: none;
+  }
+  .fstrip__track > .fstrip__list:nth-child(2) {
+    display: none;
+  }
+}

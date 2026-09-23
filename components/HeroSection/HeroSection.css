@@ -906,3 +906,75 @@
 .res-info p { margin: 0; font-size: 0.85rem; color: #666; }
 
 @keyframes zoomIn { from {opacity: 0; transform: translate(-50%, -45%) scale(0.9);} to {opacity: 1; transform: translate(-50%, -50%) scale(1);} }
+/* ==========================================================================
+   Centred hero.
+   The search bar is the page's primary action, so the hero holds only the
+   headline and the search, centred. The featured list that used to share the
+   row split the first screen in two; it now runs as a strip below the hero
+   (components/HomeSections/FeaturedStrip).
+   ========================================================================== */
+.hero-section {
+  height: 88vh;
+  min-height: 620px;
+}
+.hero-overlay-gradient {
+  /* Even on both sides now that the copy is centred. */
+  background:
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 25%, rgba(0, 0, 0, 0) 70%, rgba(5, 5, 5, 1) 100%),
+    radial-gradient(ellipse 70% 60% at 50% 55%, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.82));
+}
+.hero-main-wrapper {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  max-width: 920px;
+  gap: 0;
+  text-align: center;
+}
+.hero-content-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-self: center;
+  animation: heroRise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.hero-subtitle {
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.hero-search-wrapper {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+}
+.hero-search-container {
+  max-width: 680px;
+  padding: 8px 10px;
+}
+.search-input-group input {
+  font-size: 1.05rem;
+  padding: 12px 0;
+}
+.hero-trending {
+  justify-content: center;
+  max-width: 680px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.hero-actions {
+  justify-content: center;
+}
+@keyframes heroRise {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
+}
+@media (max-width: 1024px) {
+  .hero-main-wrapper { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+  .hero-section { height: auto; min-height: 88vh; padding-bottom: 3rem; }
+  .hero-title { font-size: 2.6rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-content-left { animation: none; }
+}

@@ -184,7 +184,7 @@ const TopSpaceSection = () => {
                     className="btn-go-detail"
                     onClick={(e) => { e.stopPropagation(); document.body.style.overflow = 'unset'; }}
                   >
-                    Xem chi tiết đầy đủ
+                    {T.restaurants.viewDetail}
                   </Link>
                 </div>
               </div>

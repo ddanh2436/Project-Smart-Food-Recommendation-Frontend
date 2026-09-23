@@ -95,7 +95,8 @@ const AuthPage: React.FC = () => {
         <aside className="auth-showcase">
           <div className="auth-showcase__inner">
             <Link href="/" className="auth-showcase__brand">
-              <span aria-hidden="true">🍜</span> VietNomNom
+              <img src="/assets/image/logo-mark.png" alt="" width={34} height={34} />
+              VietNomNom
             </Link>
 
             {/* Keyed so the copy fades in afresh when the mode changes. */}

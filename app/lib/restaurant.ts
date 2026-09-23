@@ -25,6 +25,7 @@ export function parseTags(raw: unknown): string[] {
 }
 
 import type { Dict, Lang } from "@/app/lib/i18n";
+import { DISH_EN, placeEn } from "@/app/lib/dishesEn";
 
 export interface AmenityGroup {
   key: string;
@@ -119,7 +120,12 @@ const TAG_EN: Record<string, string> = {
 
 /** A tag in the requested language, unchanged when there is no translation. */
 export function tagLabel(tag: string, lang: Lang): string {
-  return lang === "en" ? TAG_EN[tag] ?? tag : tag;
+  return lang === "en" ? TAG_EN[tag] ?? DISH_EN[tag] ?? tag : tag;
+}
+
+/** A city or district name in the requested language. */
+export function placeLabel(name: string, lang: Lang): string {
+  return lang === "en" ? placeEn(name) : name;
 }
 
 /**

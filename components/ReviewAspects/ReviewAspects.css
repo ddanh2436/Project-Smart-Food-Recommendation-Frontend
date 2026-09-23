@@ -244,3 +244,9 @@
   .aspects-card { padding: 18px 16px; }
   .aspects-grid { grid-template-columns: 1fr; }
 }
+
+.aspects-loading-text {
+  margin: 0 0 0.75rem;
+  color: #a1a1aa;
+  font-size: 0.85rem;
+}

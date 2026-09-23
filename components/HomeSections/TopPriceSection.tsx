@@ -94,7 +94,7 @@ const XIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" 
                           background: 'rgba(0, 184, 148, 0.9)', color: 'white', 
                           padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold'
                       }}>
-                          Giá tốt
+                          {T.home.goodValueBadge}
                       </div>
                     </div>
                     <div className="card-content">

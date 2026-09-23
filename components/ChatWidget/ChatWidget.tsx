@@ -14,7 +14,9 @@ import {
   FaLocationArrow,
   FaRedo,
   FaTrash,
+  FaExpand,
 } from "react-icons/fa";
+import { CHAT_OPEN_EVENT } from "@/app/lib/chatEvents";
 import { chatSuggestions, useChatSession } from "@/app/hooks/useChatSession";
 import { formatReviewCount } from "@/app/lib/rating";
 import { ScoreBadge } from "@/components/Score/Score";
@@ -45,7 +47,7 @@ function BrandAvatar({ size = 40 }: { size?: number }) {
       style={{ width: size, height: size }}
     >
       <Image
-        src="/assets/image/logo.png"
+        src="/assets/image/logo-mark.png"
         alt=""
         width={size}
         height={size}
@@ -113,6 +115,23 @@ export default function ChatWidget() {
   };
 
   // --- open / close ------------------------------------------------------
+  // The header's assistant link opens this drawer rather than a second chat.
+  useEffect(() => {
+    const onOpen = (event: Event) => {
+      event.preventDefault();
+      setIsOpen(true);
+    };
+    window.addEventListener(CHAT_OPEN_EVENT, onOpen);
+    return () => window.removeEventListener(CHAT_OPEN_EVENT, onOpen);
+  }, []);
+
+  // On a wide screen the page makes room for the drawer instead of sitting
+  // under it (see .chat-drawer-open in globals.css).
+  useEffect(() => {
+    document.body.classList.toggle("chat-drawer-open", isOpen);
+    return () => document.body.classList.remove("chat-drawer-open");
+  }, [isOpen]);
+
   useEffect(() => {
     if (!isOpen) return;
     const timer = setTimeout(() => inputRef.current?.focus(), 250);
@@ -182,11 +201,11 @@ export default function ChatWidget() {
       )}
 
       {/* ---------------------------------------------------------------- */}
-      {/* Panel                                                             */}
+      {/* Drawer                                                            */}
       {/*                                                                   */}
-      {/* Anchored 24px from the bottom-right corner and capped so it can   */}
-      {/* never reach the navbar: it used to float up the right-hand side   */}
-      {/* and cover the hero.                                               */}
+      {/* A full-height panel on the right. As a floating window it sat     */}
+      {/* over the lists it was recommending from; as a drawer the page     */}
+      {/* moves aside on wide screens, and on a phone it is a full sheet.   */}
       {/* ---------------------------------------------------------------- */}
       <div
         role="dialog"
@@ -194,11 +213,11 @@ export default function ChatWidget() {
         aria-label={t.chat.ariaWindow}
         className={`fixed z-[9999] flex flex-col overflow-hidden border border-stone-800 bg-stone-950 shadow-2xl shadow-black/70 transition-all duration-300 ease-out motion-reduce:transition-none
           inset-x-0 bottom-0 top-0 rounded-none
-          sm:inset-auto sm:bottom-6 sm:right-6 sm:top-auto sm:h-[min(600px,calc(100vh-10rem))] sm:w-[396px] sm:rounded-2xl
+          sm:left-auto sm:right-0 sm:w-[420px] sm:border-y-0 sm:border-r-0
           ${
             isOpen
-              ? "pointer-events-auto translate-y-0 opacity-100 sm:scale-100"
-              : "pointer-events-none translate-y-6 opacity-0 sm:scale-95"
+              ? "pointer-events-auto translate-y-0 opacity-100 sm:translate-x-0"
+              : "pointer-events-none translate-y-6 opacity-0 sm:translate-x-full sm:translate-y-0"
           }`}
       >
         {/* -------- Header -------- */}
@@ -222,6 +241,15 @@ export default function ChatWidget() {
           </div>
 
           <div className="relative z-10 flex items-center gap-1">
+            <Link
+              href="/chatbot"
+              onClick={() => setIsOpen(false)}
+              aria-label={t.chat.expandLabel}
+              title={t.chat.expandLabel}
+              className="rounded-full p-2 text-stone-400 transition-colors hover:bg-white/5 hover:text-amber-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
+            >
+              <FaExpand size={13} />
+            </Link>
             <button
               onClick={clearChat}
               aria-label={t.chat.resetLabel}
@@ -421,6 +449,9 @@ export default function ChatWidget() {
                     style={{ animationDelay: `${i * 0.15}s` }}
                   />
                 ))}
+                {/* Words beside the dots: a free-tier AI service can take
+                    several seconds, and dots alone read as a stall. */}
+                <span className="ml-2 text-xs text-stone-400">{t.chat.searching}</span>
               </div>
             </div>
           )}

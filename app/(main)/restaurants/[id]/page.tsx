@@ -23,7 +23,7 @@ import {
   formatReviewCount,
   ratingPercent,
 } from "@/app/lib/rating";
-import { cuisineTags, parseTags } from "@/app/lib/restaurant";
+import { cuisineTags, parseTags, tagLabel } from "@/app/lib/restaurant";
 import { useGeolocation } from "@/app/hooks/useGeolocation";
 import { useTranslation } from "@/app/hooks/useTranslation";
 import { useAuth } from "@/app/contexts/AuthContext";
@@ -32,7 +32,7 @@ import Link from "next/link";
 import { authHref } from "@/app/lib/returnTo";
 
 import ReviewOverview from "@/components/ReviewOverview/ReviewOverview";
-import ReviewAspects from "@/components/ReviewAspects/ReviewAspects";
+import ReviewAspects, { insightsFromIndex } from "@/components/ReviewAspects/ReviewAspects";
 import ReviewList from "@/components/RestaurantDetail/ReviewList";
 import SimilarPlaces from "@/components/RestaurantDetail/SimilarPlaces";
 import AskAboutPlace from "@/components/RestaurantDetail/AskAboutPlace";
@@ -87,7 +87,7 @@ function RatingBar({ label, score }: { label: string; score?: number }) {
 
 export default function RestaurantDetailPage() {
   const { id } = useParams();
-  const { coords } = useGeolocation();
+  const { coords, status: geoStatus, request: requestLocation } = useGeolocation();
   const { t, lang } = useTranslation();
   const { user, isLoading: authLoading } = useAuth();
 
@@ -197,6 +197,14 @@ export default function RestaurantDetailPage() {
   const tags = parseTags(restaurant.tags);
   const dishes = cuisineTags(tags);
 
+  // The live digest when it worked (it adds quotes); otherwise the verdicts
+  // precomputed onto the restaurant, which are there from the first paint.
+  const indexed = insightsFromIndex(restaurant, t.reviews.aspectLabels);
+  const shownInsights =
+    insights && insights.available !== false && insights.aspects?.length
+      ? insights
+      : indexed ?? insights;
+
   return (
     <div className="detail-page-wrapper">
       <div className="container">
@@ -214,7 +222,9 @@ export default function RestaurantDetailPage() {
           <div className="hero-overlay">
             <div className="hero-content">
               {dishes.length > 0 && (
-                <p className="hero-kicker">{dishes.slice(0, 3).join(" · ")}</p>
+                <p className="hero-kicker">
+                  {dishes.slice(0, 3).map((dish) => tagLabel(dish, lang)).join(" · ")}
+                </p>
               )}
               <h1>{restaurant.tenQuan}</h1>
 
@@ -308,6 +318,18 @@ export default function RestaurantDetailPage() {
                   score={restaurant[key] as number | undefined}
                 />
               ))}
+              {/* Say what the numbers are: adjusted for how many reviews they
+                  rest on, with the source's own figure beside it. */}
+              {restaurant.rawScores?.diemTrungBinh !== undefined && (
+                <p className="rating-adjusted-note">
+                  {t.detail.adjustedNote}{" "}
+                  {t.detail.rawScoreLabel}{" "}
+                  <strong>{formatRating(restaurant.rawScores.diemTrungBinh)}</strong>
+                  {restaurant.reviewCount
+                    ? ` · ${formatReviewCount(restaurant.reviewCount, lang)}`
+                    : ""}
+                </p>
+              )}
             </div>
           </aside>
         </div>
@@ -330,6 +352,8 @@ export default function RestaurantDetailPage() {
               <div className="map-frame">
                 <RoutingMap
                   userLocation={coords}
+                  locationStatus={geoStatus}
+                  onRequestLocation={requestLocation}
                   restaurantLocation={{
                     lat: restaurant.lat,
                     lon: restaurant.lon,
@@ -408,7 +432,10 @@ export default function RestaurantDetailPage() {
           )}
 
           <ReviewOverview reviews={reviews} />
-          <ReviewAspects data={insights} loading={insightsLoading} />
+          <ReviewAspects
+            data={shownInsights}
+            loading={insightsLoading && !shownInsights}
+          />
           <ReviewList reviews={reviews} />
         </section>
 

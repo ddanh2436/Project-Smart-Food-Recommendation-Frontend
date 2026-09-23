@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getRestaurants, type Restaurant as ApiRestaurant } from "@/app/lib/api";
 import { formatReviewCount } from "@/app/lib/rating";
+import { tagLabel } from "@/app/lib/restaurant";
 import { ScoreBadge } from "@/components/Score/Score";
 import { useGeolocation } from "@/app/hooks/useGeolocation";
 import { useTranslation } from "@/app/hooks/useTranslation";
@@ -25,6 +26,17 @@ const RoutingMap = dynamic(() => import("@/components/RoutingMap/RoutingMap"), {
 });
 
 // Các Icons (Giữ nguyên)
+/** Attributes offered as one-tap filters: the most common tags a diner picks by. */
+const QUICK_TAGS = [
+  { tag: 'Máy lạnh', icon: '❄️' },
+  { tag: 'Hẹn hò', icon: '💕' },
+  { tag: 'Gia đình', icon: '👨‍👩‍👧' },
+  { tag: 'Bình dân', icon: '💸' },
+  { tag: 'Ăn đêm', icon: '🌙' },
+  { tag: 'Nhậu', icon: '🍻' },
+  { tag: 'Sạch sẽ', icon: '✨' },
+];
+
 const FilterIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>;
 const CheckIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>;
 const ChevronDownIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="chevron-icon"><path d="M6 9l6 6 6-6"/></svg>;
@@ -96,6 +108,7 @@ function RestaurantsContent() {
   
   // --- State cho City ---
   const [activeCity, setActiveCity] = useState<string>('');
+  const [activeTag, setActiveTag] = useState<string>('');
 
   const [selectedRes, setSelectedRes] = useState<Restaurant | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -112,7 +125,7 @@ function RestaurantsContent() {
    * the browser actually grants a position, and the UI hides distances until
    * then rather than inventing them.
    */
-  const { coords: userLocation, request: requestLocation } = useGeolocation();
+  const { coords: userLocation, status: geoStatus, request: requestLocation } = useGeolocation();
 
   // --- DEFINITIONS INSIDE COMPONENT TO USE LANGUAGE ---
   const SORT_OPTIONS = useMemo(() => [
@@ -200,6 +213,7 @@ function RestaurantsContent() {
     const open = searchParams.get('openNow') === 'true'; 
     const search = searchParams.get('search') || ''; 
     const city = searchParams.get('city') || ''; 
+    const tag = searchParams.get('tag') || '';
 
     if (!order) {
       if (sort === 'distance' || sort === 'price') order = 'asc';
@@ -212,6 +226,7 @@ function RestaurantsContent() {
     setActiveOrder(order);
     setActiveOpenNow(open);
     setActiveCity(city); 
+    setActiveTag(tag);
     
     setSelectedSort(sort);
     setSelectedRating(rating);
@@ -246,6 +261,7 @@ function RestaurantsContent() {
           userLon: userLocation?.lon,
           search,
           city,
+          tag,
         });
 
         setRestaurants((response.data as Restaurant[]) || []);
@@ -382,6 +398,42 @@ function RestaurantsContent() {
           )}
         </div>
 
+        {/* One-tap filters for the common questions, so they do not sit two
+            clicks deep in the panel. Each is a real filter on the API. */}
+        <div className="quick-chips" role="group" aria-label={t.quickFilters}>
+          <button
+            type="button"
+            className={`quick-chip ${activeOpenNow ? 'is-on' : ''}`}
+            aria-pressed={activeOpenNow}
+            onClick={() => updateURL({ page: '1', openNow: String(!activeOpenNow) })}
+          >
+            🕒 {t.openNow}
+          </button>
+          <button
+            type="button"
+            className={`quick-chip ${activeSort === 'distance' ? 'is-on' : ''}`}
+            aria-pressed={activeSort === 'distance'}
+            onClick={() => {
+              const on = activeSort === 'distance';
+              if (!on && !userLocation) requestLocation();
+              updateURL({ page: '1', sort: on ? '' : 'distance', order: on ? '' : 'asc' });
+            }}
+          >
+            📍 {t.l_distance}
+          </button>
+          {QUICK_TAGS.map(({ tag, icon }) => (
+            <button
+              key={tag}
+              type="button"
+              className={`quick-chip ${activeTag === tag ? 'is-on' : ''}`}
+              aria-pressed={activeTag === tag}
+              onClick={() => updateURL({ page: '1', tag: activeTag === tag ? '' : tag })}
+            >
+              {icon} {tagLabel(tag, lang)}
+            </button>
+          ))}
+        </div>
+
         {/* Toggle Button */}
         <button 
           className={`filter-toggle-btn ${isFilterOpen ? 'active' : ''}`}
@@ -393,7 +445,7 @@ function RestaurantsContent() {
         </button>
 
         {/* Active Indicators */}
-        {(activeSort !== 'default' || activeRating !== 'all' || activeOrder !== 'desc' || activeOpenNow) && (
+        {(activeSort !== 'default' || activeRating !== 'all' || activeOrder !== 'desc' || activeOpenNow || activeTag) && (
           <div className="active-filters-bar">
             <span className="active-filters-label">{t.filteringBy}</span>
             
@@ -401,6 +453,7 @@ function RestaurantsContent() {
             {activeOrder !== 'desc' && <div className="active-tag">{t.orderBy}: {getOrderLabelText(activeOrder)}</div>}
             {activeRating !== 'all' && <div className="active-tag">{t.rating}: {getRatingLabelText(activeRating)}</div>}
             {activeOpenNow && <div className="active-tag"><ClockIcon /> {t.openNow}</div>}
+            {activeTag && <div className="active-tag">{tagLabel(activeTag, lang)}</div>}
 
             <button className="btn-clear-all" onClick={handleResetFilter}>{t.clearFilter}</button>
           </div>
@@ -560,10 +613,12 @@ function RestaurantsContent() {
                      </button>
 
                      {showMap && selectedRes.lat && selectedRes.lon && (
-                        <div style={{ height: '350px', width: '100%', marginTop: '15px', borderRadius: '10px', overflow: 'hidden', border: '1px solid #ddd' }}>
-                            <RoutingMap 
-                                userLocation={userLocation} 
-                                restaurantLocation={{ lat: selectedRes.lat, lon: selectedRes.lon }} 
+                        <div style={{ width: '100%', marginTop: '15px' }}>
+                            <RoutingMap
+                                userLocation={userLocation}
+                                restaurantLocation={{ lat: selectedRes.lat, lon: selectedRes.lon }}
+                                locationStatus={geoStatus}
+                                onRequestLocation={requestLocation}
                             />
                         </div>
                      )}

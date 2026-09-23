@@ -9,6 +9,7 @@ import Image from "next/image";
 import Link from 'next/link';
 import { logout } from '@/app/lib/api';
 import { authHref } from '@/app/lib/returnTo';
+import { requestChatDrawer } from '@/app/lib/chatEvents';
 import { dictionaries } from '@/app/lib/i18n';
 
 // --- Icons (Giữ nguyên) ---
@@ -151,8 +152,8 @@ const Header: React.FC = () => {
               src="/assets/image/logo.png"
               alt="Logo" 
               className="logo-image"
-              width={131}
-              height={46}
+              width={93}
+              height={64}
             />
           </Link>
         </div>
@@ -173,8 +174,15 @@ const Header: React.FC = () => {
               
               {/* Nút Chatbot AI */}
               <li>
+                {/* Opens the chat drawer on this page; only navigates to the
+                    full-page chat where there is no drawer, or on a
+                    modified click (new tab). */}
                 <Link 
                   href="/chatbot" 
+                  onClick={(event) => {
+                    if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+                    if (requestChatDrawer()) event.preventDefault();
+                  }}
                   style={{ 
                     display: 'flex', 
                     alignItems: 'center', 
