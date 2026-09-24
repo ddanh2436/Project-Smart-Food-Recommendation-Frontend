@@ -343,6 +343,8 @@ export interface ReviewInsights {
 export interface ChatTurn {
   role: "user" | "bot";
   text: string;
+  /** For a bot turn: the places it showed, so "quán thứ hai" can be resolved. */
+  ids?: string[];
 }
 
 /** A quick reply under a chat answer: `label` is shown, `query` is sent. */

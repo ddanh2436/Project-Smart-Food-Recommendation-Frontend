@@ -212,7 +212,12 @@ export function useChatSession() {
       // would just be noise to the assistant.
       const history: ChatTurn[] = messagesRef.current
         .filter((m) => m.text && !m.imageUrl)
-        .map((m) => ({ role: m.sender, text: m.text }));
+        .map((m) => {
+          const ids = (m.results ?? []).map((r) => r._id).filter(Boolean).slice(0, 10);
+          return ids.length
+            ? { role: m.sender, text: m.text, ids }
+            : { role: m.sender, text: m.text };
+        });
 
       const reply = await chatWithBot(text, {
         history,
