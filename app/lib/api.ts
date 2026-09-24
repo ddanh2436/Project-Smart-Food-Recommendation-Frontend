@@ -164,7 +164,38 @@ function withAdjustedScores(value: unknown, depth = 0): unknown {
   if (Array.isArray(value)) return value.map((item) => withAdjustedScores(item, depth + 1));
 
   const record = value as Record<string, unknown>;
-  if (typeof record.tenQuan === "string" && typeof record.diemTrungBinhAdj === "number") {
+  if (typeof record.tenQuan === "string") {
+    return withCheckedPhoto(withAdjusted(record));
+  }
+
+  const next: Record<string, unknown> = {};
+  for (const [key, child] of Object.entries(record)) {
+    next[key] = withAdjustedScores(child, depth + 1);
+  }
+  return next;
+}
+
+/**
+ * Cover photos that are not food.
+ *
+ * Every cover photo was checked offline with SigLIP2 (AI/kaggle_photo_index.py)
+ * and tagged with what it shows. About one in fifty is a delivery app's logo
+ * banner, a stock photo of people or a shopfront -- shared by dozens of
+ * restaurants, and saying nothing about any of them. Those are swapped for a
+ * neutral placeholder here, once, so every card on every page agrees.
+ */
+export const NO_PHOTO = "/assets/image/no-photo.jpg";
+
+function withCheckedPhoto(record: Record<string, unknown>): Record<string, unknown> {
+  const photo = record.photo as { kind?: string } | undefined;
+  if (photo?.kind && photo.kind !== "food" && record.avatarUrl) {
+    return { ...record, avatarUrl: NO_PHOTO };
+  }
+  return record;
+}
+
+function withAdjusted(record: Record<string, unknown>): Record<string, unknown> {
+  if (typeof record.diemTrungBinhAdj === "number") {
     const rawScores: Record<string, number> = {};
     const next: Record<string, unknown> = { ...record };
     for (const key of SCORE_KEYS) {
@@ -177,12 +208,7 @@ function withAdjustedScores(value: unknown, depth = 0): unknown {
     next.rawScores = rawScores;
     return next;
   }
-
-  const next: Record<string, unknown> = {};
-  for (const [key, child] of Object.entries(record)) {
-    next[key] = withAdjustedScores(child, depth + 1);
-  }
-  return next;
+  return record;
 }
 
 api.interceptors.response.use((response) => {
@@ -290,6 +316,8 @@ export interface Restaurant {
     string,
     { positive_ratio: number; mentions: number; verdict: "positive" | "negative" | "mixed" }
   >;
+  /** What the cover photo shows, from the offline SigLIP2 check. */
+  photo?: { kind?: string; dishGuess?: { tag: string; score: number }[] };
   /** The unadjusted scores, when the shown ones were replaced by adjusted. */
   rawScores?: Partial<Record<"diemTrungBinh" | "diemKhongGian" | "diemViTri" | "diemChatLuong" | "diemPhucVu" | "diemGiaCa", number>>;
 }

@@ -19,6 +19,7 @@ interface BackendRestaurant {
   tenQuan: string;
   diemTrungBinh: number;
   diemTrungBinhAdj?: number;
+  photo?: { kind?: string };
   diaChi: string;
   avatarUrl: string;
   tags?: string; // Dùng tạm làm tên món ăn
@@ -50,7 +51,11 @@ async function getCityData(cityKey: string) {
       // Adjusted, like every other score on the site (see app/lib/api.ts).
       rating: Math.round((item.diemTrungBinhAdj ?? item.diemTrungBinh) * 10) / 10,
       address: item.diaChi,
-      image: item.avatarUrl || '/assets/image/pho.png',
+      // Not through the API client, so the photo check is applied here too.
+      image:
+        item.photo?.kind && item.photo.kind !== 'food'
+          ? '/assets/image/no-photo.jpg'
+          : item.avatarUrl || '/assets/image/pho.png',
       // `tags` is a Python list's string form, "['Hà Nội', 'Quận 1', 'Phở']";
       // splitting it on commas used to print "['Hà Nội'" as the dish.
       dish: firstDish(item.tags) ?? 'Món ngon',
