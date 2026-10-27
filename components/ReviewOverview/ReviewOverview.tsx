@@ -12,6 +12,12 @@ interface Props {
   reviews: Review[];
 }
 
+const PRAISED_PERCENT = 70;
+const CRITICISED_PERCENT = 30;
+// Below this, the reviews that are not praise are mostly neutral rather than
+// complaints: 60% positive and 40% neutral is not "split down the middle".
+const FEW_COMPLAINTS_PERCENT = 20;
+
 const ReviewOverview: React.FC<Props> = ({ reviews }) => {
   const { t } = useTranslation();
 
@@ -42,16 +48,26 @@ const ReviewOverview: React.FC<Props> = ({ reviews }) => {
   let dominantClass = "neu";
   let summaryText = t.reviews.summaryNeutral;
 
-  if (posPercent >= neuPercent && posPercent >= negPercent) {
+  /*
+    The same bar as the per-aspect verdicts (review_insights.verdict in the AI
+    service). The badge used to go to whichever share was largest, ties to
+    positive, so five positive and five negative reviews read "😍 Rất hài lòng"
+    over "Phần lớn đánh giá nghiêng về hướng tích cực".
+  */
+  if (posPercent >= PRAISED_PERCENT) {
     dominantEmoji = "😍";
     dominantText = t.reviews.dominantPositive;
     dominantClass = "pos";
     summaryText = t.reviews.summaryPositive;
-  } else if (negPercent >= posPercent && negPercent >= neuPercent) {
+  } else if (posPercent <= CRITICISED_PERCENT && negCount > posCount) {
     dominantEmoji = "😤";
     dominantText = t.reviews.dominantNegative;
     dominantClass = "neg";
     summaryText = t.reviews.summaryNegative;
+  } else if (negPercent < FEW_COMPLAINTS_PERCENT) {
+    dominantEmoji = "🙂";
+    dominantText = t.reviews.dominantFewComplaints;
+    summaryText = t.reviews.summaryFewComplaints;
   }
 
   const radius = 36;

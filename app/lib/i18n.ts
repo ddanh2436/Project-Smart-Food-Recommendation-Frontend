@@ -513,11 +513,13 @@ const vi = {
     overviewSatisfied: "Hài lòng",
     dominantPositive: "Rất hài lòng",
     dominantNeutral: "Bình thường",
+    dominantFewComplaints: "Khá ổn",
     dominantNegative: "Không hài lòng",
     // Rewritten: these used to be rendered inside quotation marks, which made a
     // sentence the site had generated look like something a diner had said.
     summaryPositive: "Phần lớn đánh giá nghiêng về hướng tích cực.",
     summaryNeutral: "Ý kiến chia đều hai chiều, tuỳ khẩu vị từng người.",
+    summaryFewComplaints: "Ít lời chê; ngoài các lời khen, phần lớn đánh giá ở mức trung tính.",
     summaryNegative: "Đánh giá tiêu cực nhiều hơn tích cực, nên đọc kỹ trước khi đi.",
     aspectsTitle: "AI phân tích chi tiết",
     aspectsLoading: "AI đang đọc các đánh giá của quán này...",
@@ -1116,9 +1118,11 @@ const en: typeof vi = {
     overviewSatisfied: "Positive",
     dominantPositive: "Well liked",
     dominantNeutral: "Mixed",
+    dominantFewComplaints: "Mostly fine",
     dominantNegative: "Poorly received",
     summaryPositive: "Most reviews lean positive.",
     summaryNeutral: "Opinions are split down the middle; it depends on your taste.",
+    summaryFewComplaints: "Few complaints; besides the praise, most reviews are neutral.",
     summaryNegative:
       "Negative reviews outnumber positive ones, so read a few before you go.",
     aspectsTitle: "AI breakdown by aspect",
