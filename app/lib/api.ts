@@ -464,7 +464,7 @@ export async function getRestaurantById(id: string): Promise<Restaurant> {
 
 /** "What should I eat right now" — one meal-aware block on the home page. */
 export interface NowSuggestions {
-  meal: "breakfast" | "lunch" | "dinner" | "latenight";
+  meal: "breakfast" | "lunch" | "afternoon" | "dinner" | "latenight";
   mealTag: string;
   data: Restaurant[];
   total: number;

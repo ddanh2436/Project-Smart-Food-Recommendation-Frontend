@@ -243,6 +243,7 @@ const vi = {
     meals: {
       breakfast: "Đang là bữa sáng",
       lunch: "Đang là bữa trưa",
+      afternoon: "Đang là buổi chiều",
       dinner: "Đang là bữa tối",
       latenight: "Đang là bữa khuya",
     } as Record<string, string>,
@@ -855,6 +856,7 @@ const en: typeof vi = {
     meals: {
       breakfast: "It is breakfast time",
       lunch: "It is lunchtime",
+      afternoon: "It is the afternoon",
       dinner: "It is dinner time",
       latenight: "It is late-night time",
     } as Record<string, string>,
