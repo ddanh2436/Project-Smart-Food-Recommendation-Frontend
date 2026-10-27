@@ -1,10 +1,6 @@
 import HeroSection from "@/components/HeroSection/HeroSection";
 import TopRatingSection from "@/components/HomeSections/TopRatingSection";
-import TopSpaceSection from "@/components/HomeSections/TopSpaceSection";
-import TopQualitySection from "@/components/HomeSections/TopQualitySection";
-import TopServiceSection from "@/components/HomeSections/TopServiceSection";
-import TopPriceSection from "@/components/HomeSections/TopPriceSection";
-import TopLocationSection from "@/components/HomeSections/TopLocationSection";
+import TopScoreSection from "@/components/HomeSections/TopScoreSection";
 // Import component mới
 import CitySpotlightSection from "@/components/HomeSections/CitySpotlightSection";
 import RightNowSection from "@/components/HomeSections/RightNowSection";
@@ -117,11 +113,11 @@ export default async function Home() {
       {/* --- Section Mới: Spotlight TP.HCM --- */}
       {hcmRestaurants.length > 0 && <CitySpotlightSection {...hcmProps} />}
 
-      <TopSpaceSection />
-      <TopQualitySection />
-      <TopServiceSection />
-      <TopPriceSection />
-      <TopLocationSection />
+      <TopScoreSection criterion="space" />
+      <TopScoreSection criterion="quality" />
+      <TopScoreSection criterion="service" />
+      <TopScoreSection criterion="price" />
+      <TopScoreSection criterion="location" />
     </main>
   );
 }
