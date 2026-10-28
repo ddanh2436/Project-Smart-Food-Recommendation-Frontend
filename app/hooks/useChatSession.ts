@@ -59,13 +59,15 @@ export function chatSuggestions(
   return [...personal, ...t.chat.suggestions].slice(0, 5);
 }
 
-function makeGreeting(t: Dict): ChatMessage[] {
+// The first render is server-rendered too, so it must not be random: a
+// different pick on each side was hydration error #418 on every page.
+function makeGreeting(t: Dict, random = false): ChatMessage[] {
   const greetings = t.chat.greetings;
   return [
     {
       id: 1,
       sender: "bot",
-      text: greetings[Math.floor(Math.random() * greetings.length)],
+      text: greetings[random ? Math.floor(Math.random() * greetings.length) : 0],
       kind: "greeting",
     },
   ];
@@ -305,7 +307,7 @@ export function useChatSession() {
     );
   }, [requestLocation, send]);
 
-  const reset = useCallback(() => setMessages(makeGreeting(t)), [t]);
+  const reset = useCallback(() => setMessages(makeGreeting(t, true)), [t]);
 
   return {
     lang,
