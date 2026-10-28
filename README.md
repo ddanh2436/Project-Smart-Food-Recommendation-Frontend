@@ -1,130 +1,75 @@
 # VietNomNom — Frontend
 
-Next.js 16 (App Router) UI for the VietNomNom food recommendation app.
+Giao diện Next.js của VietNomNom, web gợi ý quán ăn dựa trên đánh giá thật: tìm quán bằng câu nói tự nhiên, chatbot,
+hỏi đáp về từng quán, tóm tắt review theo khía cạnh, tìm bằng ảnh món ăn, chỉ đường, lưu và so sánh quán.
 
-Deployment: see [DEPLOY.md](./DEPLOY.md).
+- Chạy thật: <https://project-smart-food-recommendation-f.vercel.app> (Vercel)
+- Backend: [Project-Smart-Food-Recommendation-Backend](https://github.com/ddanh2436/Project-Smart-Food-Recommendation-Backend)
+- AI service: [Project-Smart-Food-Recommendation-AI](https://github.com/ddanh2436/Project-Smart-Food-Recommendation-AI)
+- Triển khai: [DEPLOY.md](./DEPLOY.md)
 
-## Stack
+## Công nghệ
 
-- Next.js 16 + React 19, App Router
-- TypeScript (strict — `ignoreBuildErrors` is **off**, see below)
-- Plain CSS per component, plus Tailwind v4 for the chat surfaces
-- Leaflet + leaflet-routing-machine for directions
-- axios via a single configured client in `app/lib/api.ts`
+- Next.js 16 (App Router) + React 19, TypeScript strict
+- CSS riêng cho từng component; Tailwind v4 cho phần chat
+- Leaflet + leaflet-routing-machine để chỉ đường (bản đồ OpenStreetMap / ArcGIS, định tuyến OSRM)
+- axios, gom vào một client duy nhất trong `app/lib/api.ts`
 
-## Layout
+## Cấu trúc
 
-```
+```text
 app/
-  (main)/            header + footer shell
-    page.tsx         home: hero, city spotlights, six "Top ..." sections
-    restaurants/     listing with filters, map modal, detail pages
-    chatbot/         full-page AI assistant
-    about-us/        cuisine encyclopaedia
-    profile/         account settings
-  (user)/auth/       sign in / sign up, Google callback
-  contexts/          AuthContext — session *and* language
-  hooks/             useGeolocation
-  lib/api.ts         the single API client
+  (main)/                có header + footer
+    page.tsx             trang chủ: hero, "ăn gì bây giờ", điểm đến Hà Nội / TP.HCM, các mục top theo tiêu chí
+    restaurants/         danh sách + bộ lọc, trang chi tiết quán, so sánh quán
+    chatbot/             chatbot toàn trang
+    about-us/            giới thiệu và bách khoa món ăn
+    profile/             tài khoản, khẩu vị, review đã viết
+  (user)/auth/           đăng nhập / đăng ký, callback Google
+  not-found.tsx          trang 404
+  contexts/AuthContext   phiên đăng nhập và ngôn ngữ
+  hooks/                 useChatSession, useGeolocation, useTranslation
+  lib/                   api.ts (client API), i18n.ts (chuỗi vi/en), rating.ts, restaurant.ts (giờ mở cửa, tag)
 components/
-  ReviewAspects/     NEW — per-aspect AI review breakdown
-  ChatWidget/        floating assistant
-  ...
+  HomeSections/          các mục trang chủ (TopScoreSection dùng chung cho 5 tiêu chí)
+  RestaurantDetail/      hỏi đáp về quán, review, quán tương tự
+  ReviewAspects/         tóm tắt review theo 6 khía cạnh
+  ChatWidget/            chatbot nổi ở mọi trang
+  RoutingMap/            bản đồ chỉ đường
 ```
 
-## Configuration
+## Cấu hình
 
 ```bash
 cp .env.example .env.local
 ```
 
-| Variable | Purpose |
-|---|---|
-| `NEXT_PUBLIC_API_URL` | backend base URL, no trailing slash |
-| `NEXT_PUBLIC_SITE_URL` | own URL, for SEO metadata |
+| Biến | Mục đích |
+| --- | --- |
+| `NEXT_PUBLIC_API_URL` | địa chỉ Backend, không có `/` ở cuối |
+| `NEXT_PUBLIC_SITE_URL` | địa chỉ của chính web, dùng cho metadata SEO |
 
-Everything prefixed `NEXT_PUBLIC_` is embedded in the browser bundle — never put
-a secret in one.
+Mọi biến bắt đầu bằng `NEXT_PUBLIC_` đều nằm trong bundle gửi xuống trình duyệt, nên không bao giờ đặt secret vào đó.
 
-## The API client
+## Những điểm cần biết
 
-`app/lib/api.ts` is the only place that talks to the backend. It handles:
+- **Một client API.** `app/lib/api.ts` là nơi duy nhất gọi Backend. Gặp 401 thì client đổi refresh token một lần rồi
+  gửi lại request; nhiều request 401 cùng lúc dùng chung một lần refresh.
+- **Một nguồn điểm.** Interceptor trong `api.ts` thay mọi điểm bằng điểm đã hiệu chỉnh (`...Adj`) và giữ điểm gốc ở
+  `rawScores`. Nhờ vậy thẻ quán, trang chi tiết và chatbot hiện cùng một con số.
+- **Trang chủ không lặp quán.** `getHomeRails()` tải mỗi loại điểm một lần rồi chia quán theo thứ tự các mục trên
+  trang, bỏ quán đã hiện ở mục trước. Khi biết vị trí thì lọc theo thành phố gần nhất (`nearestCity`).
+- **Vị trí thật.** `useGeolocation` chỉ tự lấy vị trí khi người dùng đã cho phép từ trước; còn lại thì chờ người dùng
+  bấm nút. Chưa có vị trí thì giao diện ẩn khoảng cách, không đoán.
+- **Song ngữ.** Mọi chuỗi nằm trong `app/lib/i18n.ts` và được đọc qua `useTranslation()`. Ngôn ngữ lưu ở
+  `localStorage` (`vnn:lang`).
+- **Hydration.** Component render ở server không được dùng `Math.random()`, `Date.now()` hay `localStorage` trong lần
+  render đầu, nếu không sẽ gặp lỗi React #418. Đọc những giá trị này trong `useEffect`.
+- **Header bảo mật** (`next.config.ts`): Content-Security-Policy (script chỉ từ chính web, chỉ được gọi tới API và
+  dịch vụ định tuyến, ảnh chỉ từ host ảnh quán và bản đồ), `X-Frame-Options`, `nosniff`, `Referrer-Policy`,
+  `Permissions-Policy`. Thêm host ảnh mới thì sửa cả `images.remotePatterns` lẫn `imageHosts` của CSP.
 
-- **Token refresh.** On a 401 it exchanges the refresh token once and replays the
-  original request. Concurrent 401s share a single in-flight refresh, because
-  each rotation invalidates the previous token and parallel refreshes would race
-  and lose.
-- **Safe storage.** Every `localStorage` access is guarded for SSR and wrapped in
-  try/catch, so private mode or blocked site data cannot throw.
-- **Readable errors.** `describeError` unwraps Nest's validation-message array,
-  which otherwise rendered as `[object Object]`.
-
-## What was fixed
-
-**Session handling**
-
-- There was **no token refresh at all**. The access token lives 15 minutes, so
-  users were silently signed out mid-session.
-- Logout only cleared `localStorage` and never called `POST /auth/logout`, so the
-  refresh token stayed valid server-side for its full 7 days — a token captured
-  from a shared machine kept working long after signing out.
-- The interceptor read `localStorage` unguarded, which throws during SSR.
-
-**Two competing i18n systems.** `AuthContext` stored `'vn'|'en'` under `appLang`;
-`Header` wrote `'vi'|'en'` under `app-language` and broadcast its own
-`language-change` event that only some pages listened for. Switching language
-updated the header but not the restaurants page, and after a reload the two
-disagreed. There is now one key, one event, and one source of truth, with a
-migration for the old value.
-
-**Invented locations.** Several pages seeded their location state with a
-hardcoded District 1 coordinate, and the chat components sent
-`"10.7769", "106.7009"` on every request. So "distance from you" was measured
-from an arbitrary street — and stayed wrong forever if the user denied
-permission. `useGeolocation` returns `null` until a real position is granted, and
-the UI omits distances rather than inventing them.
-
-**`typescript.ignoreBuildErrors: true`** meant every type error shipped to
-production. Turning it off surfaced real ones: six components each redeclared the
-`Restaurant` interface with fields marked required that the API can legitimately
-omit, so `score.toFixed()` could run on `undefined`. There is now one shared type.
-
-**Other**
-
-- `images.remotePatterns` was `hostname: "**"` — an open image proxy that also
-  let a third party burn the Vercel image quota. Now an explicit host list.
-- Modal scroll lock was set imperatively with no cleanup, so navigating away with
-  a modal open left `overflow: hidden` on `<body>` and the next page could not
-  scroll. Now driven by an effect, and Escape closes the dialog.
-- The sign-up form validated a 6-character password while the API required 8, and
-  did not check the username format at all, so both failed server-side with raw
-  validation errors.
-- The greeting message was set via `setState` inside an effect, causing a
-  cascading render on every chat mount.
-- Six near-identical `getTopXRestaurants` functions collapsed into one
-  `getTopRestaurants(sortBy, limit)`; `getAllRestaurants`'s ten positional
-  parameters became a single options object.
-
-## New features
-
-- **AI review breakdown** (`components/ReviewAspects`). The existing overview
-  answers "is this place good?"; this answers "good at *what*?" — food, price,
-  service, ambience, hygiene and parking each get a verdict and a verbatim quote
-  pulled from real reviews.
-- **Conversational follow-ups.** The chat now sends its history, so "rẻ hơn đi"
-  and "còn gì khác" refine the previous search instead of starting a new one.
-- **Real geolocation**, cached per session, only prompting when it is needed.
-- **Security headers** via `next.config.ts` (`nosniff`, frame options,
-  referrer policy, a `Permissions-Policy` that allows only geolocation).
-
-## Known remaining lint warnings
-
-`npm run lint` still reports pre-existing `no-explicit-any` and
-`no-unescaped-entities` findings in `RoutingMap`, `about-us` and
-`ReviewOverview`. They are cosmetic, do not affect the build, and were left alone
-to keep this change reviewable.
-
-## Development
+## Phát triển
 
 ```bash
 npm install
