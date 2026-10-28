@@ -32,11 +32,14 @@ const LogoutIcon = () => (
   </svg>
 );
 
+// Eager, and sized to a flag's 3:2: lazy loading left the language button
+// empty while the page settled, and a 20x20 box squashed both flags.
+const FLAG_STYLE = { width: 24, height: 16, objectFit: "cover" as const, borderRadius: 2 };
 const USFlag = () => (
-    <Image src="/assets/image/flags/us.png" alt="US Flag" width={20} height={20} className="flag-icon" />
+    <Image src="/assets/image/flags/us.png" alt="English" width={24} height={16} loading="eager" style={FLAG_STYLE} />
 );
 const VNFlag = () => (
-    <Image src="/assets/image/flags/vn.png" alt="VN Flag" width={20} height={20} className="flag-icon" />
+    <Image src="/assets/image/flags/vn.png" alt="Tiếng Việt" width={24} height={16} loading="eager" style={FLAG_STYLE} />
 );
 
 const LogoutModalIcon = () => (

@@ -1327,3 +1327,17 @@ filter-actions {
     height: 440px;
   }
 }
+
+.card-skeleton {
+  height: 340px;
+  border-radius: 16px;
+  background: linear-gradient(100deg, #18181b 30%, #232327 50%, #18181b 70%);
+  background-size: 200% 100%;
+  animation: card-shimmer 1.3s linear infinite;
+}
+@keyframes card-shimmer {
+  to { background-position: -200% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-skeleton { animation: none; }
+}

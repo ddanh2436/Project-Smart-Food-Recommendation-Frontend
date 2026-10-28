@@ -2,13 +2,13 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { getTopRestaurants, type Restaurant } from "@/app/lib/api";
+import { getHomeRails, type Restaurant } from "@/app/lib/api";
+import { nearestCity, useGeolocation } from "@/app/hooks/useGeolocation";
 import { formatRating, formatReviewCount } from "@/app/lib/rating";
 import { cuisineTags, parseTags, placeLabel, tagLabel } from "@/app/lib/restaurant";
 import { useTranslation } from "@/app/hooks/useTranslation";
 import "./FeaturedStrip.css";
 
-const COUNT = 12;
 /** Seconds per card, so a longer list does not scroll faster. */
 const SECONDS_PER_CARD = 4;
 const FALLBACK_IMAGE = "/assets/image/pho.png";
@@ -28,12 +28,13 @@ export default function FeaturedStrip() {
   const { t, lang } = useTranslation();
   const [places, setPlaces] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
+  const city = nearestCity(useGeolocation().coords);
 
   useEffect(() => {
     let cancelled = false;
-    getTopRestaurants("diemTrungBinh", COUNT)
-      .then((data) => {
-        if (!cancelled) setPlaces(data);
+    getHomeRails(city)
+      .then((rails) => {
+        if (!cancelled) setPlaces(rails.featured);
       })
       .catch(() => {
         /* the page works without it */
@@ -44,7 +45,7 @@ export default function FeaturedStrip() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [city]);
 
   if (!loading && places.length === 0) return null;
 

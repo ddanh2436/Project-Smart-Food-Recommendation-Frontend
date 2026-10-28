@@ -226,13 +226,13 @@ const vi = {
     spaceSub: "Những quán được khen nhiều nhất về không gian",
     serviceTitle: "Phục vụ chu đáo",
     serviceSub: "Những quán được khen nhiều nhất về cách phục vụ",
-    priceTitle: "Ngon mà vừa ví",
+    priceTitle: "Đáng đồng tiền",
     priceSub: "Điểm giá cả cao nhất theo cảm nhận của thực khách",
     locationTitle: "Vị trí thuận tiện",
     locationSub: "Dễ tìm, dễ đến, gần trung tâm",
 
     cardOverall: "Đánh giá tổng hợp",
-    goodValueBadge: "Giá tốt",
+    goodValueBadge: "Đáng tiền",
   },
 
   /** The "what should I eat right now" block on the home page. */
@@ -314,6 +314,8 @@ const vi = {
   restaurants: {
     pageTitle: "Khám phá nhà hàng",
     pageSubtitle: "Bộ sưu tập những địa điểm ẩm thực tốt nhất",
+    resultsFor: "Kết quả cho “{query}” · {count} quán",
+    useLocationHint: "Bật vị trí để ưu tiên quán gần bạn",
     hanoiTitle: "Ẩm thực Hà Nội",
     hanoiSubtitle: "Đang hiển thị các địa điểm nổi bật tại Hà Nội",
     hcmcTitle: "Ẩm thực TP.HCM",
@@ -399,7 +401,8 @@ const vi = {
     ratingBreakdown: "Chi tiết đánh giá",
     outOfTen: "trên thang 10",
     adjustedNote: "Điểm đã được hiệu chỉnh theo số lượt đánh giá, để vài đánh giá tuyệt đối không vượt mặt cả một lịch sử dài.",
-    rawScoreLabel: "Điểm trung bình gốc:",
+    rawScoreLabel: "Điểm gốc trên Foody (tính trên mọi đánh giá ở Foody, không chỉ các đánh giá bên dưới):",
+    reviewsHere: "hiển thị trên VietNomNom",
     locationHeading: "Vị trí & chỉ đường",
     showMap: "Hiện bản đồ",
     hideMap: "Ẩn bản đồ",
@@ -625,7 +628,6 @@ const vi = {
     brandDesc:
       "Điểm số trên VietNomNom được tính từ đánh giá thật của thực khách, không phải từ quảng cáo.",
     explore: "Khám phá",
-    blog: "Góc ẩm thực",
     contact: "Liên hệ",
     policy: "Chính sách",
     terms: "Điều khoản sử dụng",
@@ -840,13 +842,13 @@ const en: typeof vi = {
     spaceSub: "Where reviewers love the atmosphere most",
     serviceTitle: "Best service",
     serviceSub: "The places reviewers praise most for looking after them",
-    priceTitle: "Good and affordable",
+    priceTitle: "Worth the money",
     priceSub: "The highest value-for-money scores from diners",
     locationTitle: "Easy to reach",
     locationSub: "Central, easy to find, easy to get to",
 
     cardOverall: "Overall score",
-    goodValueBadge: "Good value",
+    goodValueBadge: "Worth it",
   },
 
   rightNow: {
@@ -922,6 +924,8 @@ const en: typeof vi = {
   restaurants: {
     pageTitle: "Discover restaurants",
     pageSubtitle: "A collection of the best places to eat",
+    resultsFor: "Results for “{query}” · {count} places",
+    useLocationHint: "Turn on location to see places near you first",
     hanoiTitle: "Hanoi",
     hanoiSubtitle: "Showing standout places in Hanoi",
     hcmcTitle: "Ho Chi Minh City",
@@ -1005,7 +1009,8 @@ const en: typeof vi = {
     ratingBreakdown: "Score breakdown",
     outOfTen: "out of 10",
     adjustedNote: "Scores are adjusted for how many reviews they rest on, so a handful of perfect reviews does not outrank a long track record.",
-    rawScoreLabel: "Unadjusted average:",
+    rawScoreLabel: "Foody's own average (over all its reviews, not only the ones below):",
+    reviewsHere: "shown on VietNomNom",
     locationHeading: "Location & directions",
     showMap: "Show map",
     hideMap: "Hide map",
@@ -1231,7 +1236,6 @@ const en: typeof vi = {
     brandDesc:
       "Scores on VietNomNom come from real diner reviews, not from advertising.",
     explore: "Explore",
-    blog: "Food journal",
     contact: "Contact",
     policy: "Policies",
     terms: "Terms of use",

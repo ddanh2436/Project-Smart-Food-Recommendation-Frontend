@@ -131,6 +131,7 @@ function RestaurantsContent() {
   const [selectedRes, setSelectedRes] = useState<Restaurant | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [showMap, setShowMap] = useState(false); 
 
@@ -284,6 +285,7 @@ function RestaurantsContent() {
 
         setRestaurants((response.data as Restaurant[]) || []);
         setTotalPages(response.totalPages || 1);
+        setTotal(response.total || 0);
       } catch (error) {
         console.error("Failed to fetch restaurants:", error);
       } finally {
@@ -384,6 +386,14 @@ function RestaurantsContent() {
     pageTitle = t.hcmcTitle;
     pageSubtitle = t.hcmcSubtitle;
   }
+  // Say what was searched and how much came back, so a list is never
+  // mistaken for the default listing.
+  const searchText = searchParams.get('search')?.trim() ?? '';
+  if (searchText && !loading) {
+    pageSubtitle = t.resultsFor
+      .replace('{query}', searchText)
+      .replace('{count}', String(total));
+  }
   // ----------------------------------
 
   return (
@@ -395,6 +405,13 @@ function RestaurantsContent() {
         <div className="page-header">
           <h1 className="page-title">{pageTitle}</h1>
           <p className="page-subtitle">{pageSubtitle}</p>
+          {/* The chatbot asks for the location; the search box never did, so
+              the same "lẩu" was local in one and nationwide in the other. */}
+          {searchText && !userLocation && geoStatus !== 'denied' && geoStatus !== 'unavailable' && (
+            <button type="button" className="quick-chip" style={{ marginTop: '10px' }} onClick={requestLocation}>
+              📍 {t.useLocationHint}
+            </button>
+          )}
           
           {activeCity && (
              <div style={{ marginTop: '10px' }}>
@@ -532,7 +549,11 @@ function RestaurantsContent() {
 
         {/* Grid Content */}
         {loading ? (
-          <div className="loading-container"><div className="spinner"></div> {t.loading} {currentPage}...</div>
+          // Card-shaped placeholders: a search takes a few seconds on the free
+          // hosts, and a lone spinner gave no sense of what was coming.
+          <div className="restaurants-grid" role="status" aria-busy="true" aria-label={t.loading}>
+            {Array.from({ length: 8 }, (_, i) => <div key={i} className="card-skeleton" />)}
+          </div>
         ) : (
           <>
             <div className="restaurants-grid">

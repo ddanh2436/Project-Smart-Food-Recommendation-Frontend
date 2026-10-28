@@ -70,8 +70,6 @@ const Footer = () => {
             <ul className="footer-links">
               <li><Link href="/about-us">{t.nav.aboutUs}</Link></li>
               <li><Link href="/restaurants">{t.nav.restaurants}</Link></li>
-              <li><Link href="/blog">{t.footer.blog}</Link></li>
-              <li><Link href="/contact">{t.footer.contact}</Link></li>
             </ul>
           </div>
 

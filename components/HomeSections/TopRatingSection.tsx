@@ -4,7 +4,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { getTopRestaurants, type Restaurant } from "@/app/lib/api";
+import { getHomeRails, type Restaurant } from "@/app/lib/api";
+import { nearestCity, useGeolocation } from "@/app/hooks/useGeolocation";
 import { formatRating, formatReviewCount, ratingLabel } from "@/app/lib/rating";
 import { ScoreBadge } from "@/components/Score/Score";
 import "./TopRatingSection.css";
@@ -117,6 +118,7 @@ const TopRatingSection = () => {
   const startX = useRef(0);
   const scrollLeft = useRef(0);
   const isDragging = useRef(false);
+  const city = nearestCity(useGeolocation().coords);
 
   useEffect(() => {
     return () => {
@@ -127,7 +129,7 @@ const TopRatingSection = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getTopRestaurants("diemTrungBinh", 10);
+        const data = (await getHomeRails(city)).rating;
         setRestaurants(data);
       } catch (error) {
         console.error("Failed to fetch top rating:", error);
@@ -136,7 +138,7 @@ const TopRatingSection = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [city]);
 
   // === HÀM XỬ LÝ NHÃN ĐIỂM SỐ BẰNG TỪ ĐIỂN ===
   

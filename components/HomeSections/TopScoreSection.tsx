@@ -3,7 +3,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { getTopRestaurants, type Restaurant } from "@/app/lib/api";
+import { getHomeRails, type Restaurant } from "@/app/lib/api";
+import { nearestCity, useGeolocation } from "@/app/hooks/useGeolocation";
 import { formatRating, formatReviewCount, ratingLabel } from "@/app/lib/rating";
 import { ScoreBadge } from "@/components/Score/Score";
 import "./TopRatingSection.css";
@@ -40,6 +41,7 @@ const TopScoreSection = ({ criterion }: { criterion: Criterion }) => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRes, setSelectedRes] = useState<Restaurant | null>(null);
+  const city = nearestCity(useGeolocation().coords);
 
   const sliderRef = useRef<HTMLDivElement>(null);
   const isDown = useRef(false);
@@ -52,7 +54,7 @@ const TopScoreSection = ({ criterion }: { criterion: Criterion }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setRestaurants(await getTopRestaurants(field, 10));
+        setRestaurants((await getHomeRails(city))[criterion]);
       } catch (error) {
         console.error(`Failed to fetch top ${criterion}:`, error);
       } finally {
@@ -60,7 +62,7 @@ const TopScoreSection = ({ criterion }: { criterion: Criterion }) => {
       }
     };
     fetchData();
-  }, [field, criterion]);
+  }, [criterion, city]);
 
   const handleScrollButton = (direction: 'left' | 'right') => {
     sliderRef.current?.scrollBy({ left: direction === 'left' ? -340 : 340, behavior: 'smooth' });
