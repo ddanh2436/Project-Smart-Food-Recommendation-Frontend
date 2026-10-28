@@ -2,6 +2,37 @@ import type { NextConfig } from "next";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
+/**
+ * Content-Security-Policy. The tokens live in localStorage, so the question is
+ * what injected script could do with them: here it can neither load code from
+ * elsewhere nor send anything anywhere but the API (connect-src), and images,
+ * a classic exfiltration channel, only come from the photo and map hosts.
+ *
+ * ponytail: 'unsafe-inline' scripts, which Next's inline bootstrap needs
+ * without nonces; move to a nonce from middleware to drop it.
+ */
+const imageHosts = [
+  "https://*.susercontent.com", "https://*.foody.vn", "https://*.foodycdn.net",
+  "https://*.googleusercontent.com", "https://*.cloudinary.com", "https://*.fbcdn.net",
+  "https://*.pinimg.com", "https://*.unsplash.com",
+  "https://server.arcgisonline.com", "https://tile.openstreetmap.org",
+  // The only two restaurant photos (of 5,506) outside the ShopeeFood CDN.
+  "https://encrypted-tbn0.gstatic.com", "https://nhahanghuonglua.com",
+];
+const csp = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""}`,
+  "style-src 'self' 'unsafe-inline'",
+  `img-src 'self' data: blob: ${imageHosts.join(" ")}`,
+  "font-src 'self' data:",
+  `connect-src 'self' ${apiUrl} https://router.project-osrm.org https://routing.openstreetmap.de`,
+  "frame-src 'none'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'self'",
+].join("; ");
+
 const nextConfig: NextConfig = {
   images: {
     /**
@@ -46,6 +77,7 @@ const nextConfig: NextConfig = {
       {
         source: "/:path*",
         headers: [
+          { key: "Content-Security-Policy", value: csp },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },

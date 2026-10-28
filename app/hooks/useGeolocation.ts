@@ -16,6 +16,24 @@ export type GeoStatus =
 
 const STORAGE_KEY = "vnn:last-known-location";
 
+// The cities the API can filter by (CITY_PATTERNS in the backend).
+const CITY_CENTRES: Record<string, Coords> = {
+  hanoi: { lat: 21.028, lon: 105.854 },
+  hcmc: { lat: 10.776, lon: 106.7 },
+  danang: { lat: 16.054, lon: 108.202 },
+};
+
+/** The supported city within ~80 km of these coordinates, or "". */
+export function nearestCity(coords: Coords | null): string {
+  if (!coords) return "";
+  for (const [city, c] of Object.entries(CITY_CENTRES)) {
+    // ~111 km per degree; longitude shrinks by cos(lat), ~0.95 this far south.
+    const km = Math.hypot(coords.lat - c.lat, (coords.lon - c.lon) * 0.95) * 111;
+    if (km < 80) return city;
+  }
+  return "";
+}
+
 /**
  * The user's location, asked for once and remembered.
  *

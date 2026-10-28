@@ -457,6 +457,45 @@ export async function getTopRestaurants(
   return page.data;
 }
 
+/**
+ * The home page's rails, in page order, fetched once per city and dealt out so
+ * no restaurant appears twice. Each rail used to ask for its own top ten, and
+ * one well-reviewed place headed all seven of them.
+ */
+const HOME_RAILS = [
+  ["featured", "diemTrungBinh", 12],
+  ["rating", "diemTrungBinh", 10],
+  ["space", "diemKhongGian", 10],
+  ["quality", "diemChatLuong", 10],
+  ["service", "diemPhucVu", 10],
+  ["price", "diemGiaCa", 10],
+  ["location", "diemViTri", 10],
+] as const;
+export type HomeRail = (typeof HOME_RAILS)[number][0];
+const homeRails = new Map<string, Promise<Record<HomeRail, Restaurant[]>>>();
+
+export function getHomeRails(city = ""): Promise<Record<HomeRail, Restaurant[]>> {
+  const cached = homeRails.get(city);
+  if (cached) return cached;
+  const fields = [...new Set(HOME_RAILS.map(([, field]) => field))];
+  const pending = Promise.all(
+    fields.map((field) => getTopRestaurants(field, 100, city || undefined))
+  ).then((lists) => {
+    const seen = new Set<string>();
+    const rails = {} as Record<HomeRail, Restaurant[]>;
+    for (const [rail, field, count] of HOME_RAILS) {
+      rails[rail] = lists[fields.indexOf(field)]
+        .filter((r) => !seen.has(r._id))
+        .slice(0, count);
+      rails[rail].forEach((r) => seen.add(r._id));
+    }
+    return rails;
+  });
+  pending.catch(() => homeRails.delete(city)); // let a later render retry
+  homeRails.set(city, pending);
+  return pending;
+}
+
 export async function getRestaurantById(id: string): Promise<Restaurant> {
   const response = await api.get<Restaurant>(`/restaurants/${id}`);
   return response.data;

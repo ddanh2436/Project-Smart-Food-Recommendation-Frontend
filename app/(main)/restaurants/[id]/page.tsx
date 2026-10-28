@@ -326,7 +326,7 @@ export default function RestaurantDetailPage() {
                   {t.detail.rawScoreLabel}{" "}
                   <strong>{formatRating(restaurant.rawScores.diemTrungBinh)}</strong>
                   {restaurant.reviewCount
-                    ? ` · ${formatReviewCount(restaurant.reviewCount, lang)}`
+                    ? ` · ${formatReviewCount(restaurant.reviewCount, lang)} ${t.detail.reviewsHere}`
                     : ""}
                 </p>
               )}

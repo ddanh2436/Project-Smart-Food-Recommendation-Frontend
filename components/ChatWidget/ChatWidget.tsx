@@ -15,6 +15,7 @@ import {
   FaRedo,
   FaTrash,
   FaExpand,
+  FaRegClock,
 } from "react-icons/fa";
 import { CHAT_OPEN_EVENT } from "@/app/lib/chatEvents";
 import { useAuth } from "@/app/contexts/AuthContext";
@@ -385,6 +386,13 @@ export default function ChatWidget() {
                                   />
                                   <span className="truncate">{item.diaChi}</span>
                                 </p>
+                                {/* "Tối nay" is asked here; whether it is open then is the answer. */}
+                                {item.gioMoCua && (
+                                  <p className="mt-0.5 flex items-center gap-1 truncate text-[10px] text-stone-400">
+                                    <FaRegClock size={9} className="shrink-0 text-stone-500" />
+                                    <span className="truncate">{item.gioMoCua}</span>
+                                  </p>
+                                )}
                               </div>
 
                               <div className="flex items-center gap-1.5 text-[10px]">
