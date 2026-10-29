@@ -436,6 +436,11 @@
   color: #f87171;
   border-color: rgba(239, 68, 68, 0.35);
 }
+.review-sentiment.mix {
+  background: rgba(167, 139, 250, 0.16);
+  color: #a78bfa;
+  border-color: rgba(167, 139, 250, 0.35);
+}
 .review-sentiment.neu {
   background: rgba(255, 255, 255, 0.07);
   color: #a8a29e;

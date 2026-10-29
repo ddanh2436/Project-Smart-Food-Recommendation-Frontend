@@ -55,6 +55,8 @@ const FILTERS: { key: FilterKey; label: (t: Dict) => string }[] = [
 
 const POSITIVE = new Set(["POS", "LABEL_2"]);
 const NEGATIVE = new Set(["NEG", "LABEL_0"]);
+// Praise and complaint in one review ("ngon nhưng giá chát"); 4-label model only.
+const MIXED = "MIX";
 
 const PREVIEW_LENGTH = 260;
 
@@ -69,7 +71,9 @@ function ReviewItem({ review }: { review: Review }) {
     ? { label: t.reviews.sentiment.positive, className: "pos" }
     : NEGATIVE.has(review.aiSentimentLabel ?? "")
       ? { label: t.reviews.sentiment.negative, className: "neg" }
-      : { label: t.reviews.sentiment.neutral, className: "neu" };
+      : review.aiSentimentLabel === MIXED
+        ? { label: t.reviews.sentiment.mixed, className: "mix" }
+        : { label: t.reviews.sentiment.neutral, className: "neu" };
 
   return (
     <li className="review-row">

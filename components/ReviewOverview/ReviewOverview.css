@@ -209,6 +209,7 @@
 .b-label { color: #94a3b8; }
 .b-val.pos { color: #34d399; }
 .b-val.neu { color: #fbbf24; }
+.b-val.mix { color: #a78bfa; }
 .b-val.neg { color: #f87171; }
 
 .track {
@@ -229,6 +230,7 @@
 
 .fill.pos { background: linear-gradient(90deg, #059669, #34d399); }
 .fill.neu { background: linear-gradient(90deg, #d97706, #fbbf24); }
+.fill.mix { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
 .fill.neg { background: linear-gradient(90deg, #b91c1c, #ef4444); }
 
 /* [MỚI] Hiệu ứng Shimmer (Lấp lánh) */

@@ -33,10 +33,12 @@ const ReviewOverview: React.FC<Props> = ({ reviews }) => {
   const neuCount = reviews.filter(
     (r) => r.aiSentimentLabel === "LABEL_1" || r.aiSentimentLabel === "NEU"
   ).length;
+  const mixCount = reviews.filter((r) => r.aiSentimentLabel === "MIX").length;
 
   const posPercent = Math.round((posCount / total) * 100);
   const negPercent = Math.round((negCount / total) * 100);
   const neuPercent = Math.round((neuCount / total) * 100);
+  const mixPercent = Math.round((mixCount / total) * 100);
 
   /*
     The summary sentence used to be wrapped in quotation marks, which made a
@@ -76,6 +78,7 @@ const ReviewOverview: React.FC<Props> = ({ reviews }) => {
 
   const bars = [
     { emoji: "😊", label: t.reviews.sentiment.positive, count: posCount, percent: posPercent, cls: "pos" },
+    { emoji: "⚖️", label: t.reviews.sentiment.mixed, count: mixCount, percent: mixPercent, cls: "mix" },
     { emoji: "😐", label: t.reviews.sentiment.neutral, count: neuCount, percent: neuPercent, cls: "neu" },
     { emoji: "😡", label: t.reviews.sentiment.negative, count: negCount, percent: negPercent, cls: "neg" },
   ];
